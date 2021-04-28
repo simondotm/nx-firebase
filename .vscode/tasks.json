@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "type": "npm",
+            "script": "build -- nxfirebase",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "Build Nx firebase plugin",
+            "detail": "nx build nxfirebase"
+        },
+        {
+            "type": "npm",
+            "script": "test -- nxfirebase",
+            "group": "test",
+            "problemMatcher": [],
+            "label": "Test Nx firebase plugin",
+            "detail": "nx test nxfirebase"
+        },
+        {
+            "type": "npm",
+            "script": "e2e -- nxfirebase-e2e",
+            "group": "test",
+            "problemMatcher": [],
+            "label": "Test e2e Nx firebase plugin",
+            "detail": "nx e2e nxfirebase-e2e"
+        }
+    ]
+}
