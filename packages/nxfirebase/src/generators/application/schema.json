@@ -2,8 +2,14 @@
   "$schema": "http://json-schema.org/schema",
   "cli": "nx",
   "id": "Nxfirebase",
-  "title": "",
+  "title": "Create a Firebase Application for Nx",
   "type": "object",
+  "examples": [
+    {
+      "command": "g lib myfirebaseapp --directory=myapp",
+      "description": "Generate a firebase application in apps/myfirebaseapp/myapp"
+    }
+  ],  
   "properties": {
     "name": {
       "type": "string",

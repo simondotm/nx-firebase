@@ -10,7 +10,7 @@ describe('nxfirebase e2e', () => {
     const plugin = uniq('nxfirebase');
     ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
     await runNxCommandAsync(
-      `generate @simondotm/nxfirebase:nxfirebase ${plugin}`
+      `generate @simondotm/nxfirebase:application ${plugin}`
     );
 
     const result = await runNxCommandAsync(`build ${plugin}`);
@@ -24,10 +24,10 @@ describe('nxfirebase e2e', () => {
       const plugin = uniq('nxfirebase');
       ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
       await runNxCommandAsync(
-        `generate @simondotm/nxfirebase:nxfirebase ${plugin} --directory subdir`
+        `generate @simondotm/nxfirebase:application ${plugin} --directory subdir`
       );
       expect(() =>
-        checkFilesExist(`libs/subdir/${plugin}/src/index.ts`)
+        checkFilesExist(`libs/subdir/${plugin}/src/index.ts`, `libs/subdir/${plugin}/.gitkeep`),
       ).not.toThrow();
       done();
     });
@@ -38,7 +38,7 @@ describe('nxfirebase e2e', () => {
       const plugin = uniq('nxfirebase');
       ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
       await runNxCommandAsync(
-        `generate @simondotm/nxfirebase:nxfirebase ${plugin} --tags e2etag,e2ePackage`
+        `generate @simondotm/nxfirebase:application ${plugin} --tags e2etag,e2ePackage`
       );
       const nxJson = readJson('nx.json');
       expect(nxJson.projects[plugin].tags).toEqual(['e2etag', 'e2ePackage']);
