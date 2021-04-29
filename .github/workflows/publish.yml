@@ -33,14 +33,13 @@ jobs:
           node-version: 14.x
 
       - name: Build plugin
-        run: npm run build nxfirebase
+      - run: npm run build nxfirebase
 
       - name: Create package
+      - run: npm pack
         working-directory: ./dist/packages/nxfirebase
-        run: npm pack
 
       - name: Setup .npmrc file to publish to GitHub Packages
-        working-directory: ./dist/packages/nxfirebase
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -48,7 +47,7 @@ jobs:
           #scope: '@simondotm'
       #- run: npm run addscope
       - name: Publish to GitHub Packages
+      - run: npm publish
         working-directory: ./dist/packages/nxfirebase
-        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
