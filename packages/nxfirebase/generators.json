@@ -3,6 +3,13 @@
   "name": "nxfirebase",
   "version": "0.0.1",
   "generators": {
+    "init": {
+      "factory": "./src/generators/init/init",
+      "schema": "./src/generators/init/schema.json",
+      "description": "Initialize the @simondotm/nxfirebase plugin",
+      "aliases": ["ng-add"],
+      "hidden": true
+    },
     "application": {
       "factory": "./src/generators/application/generator",
       "schema": "./src/generators/application/schema.json",

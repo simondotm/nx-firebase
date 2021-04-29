@@ -20,6 +20,17 @@ describe('nxfirebase e2e', () => {
     });
 
 
+    // test init generator
+    describe('nxfirebase init generator', () => {
+        it('should init nxfirebase plugin', async (done) => {
+            await runNxCommandAsync(
+                `generate @simondotm/nxfirebase:init`
+            );
+
+            done();
+        });
+    });
+
     // test application generator
     describe('nxfirebase application generator', () => {
         it('should create & build nxfirebase:application', async (done) => {
@@ -82,7 +93,7 @@ describe('nxfirebase e2e', () => {
             it('should build nxfirebase:functions', async (done) => {
 
                 const result = await runNxCommandAsync(`build ${plugin}`);
-                expect(result.stdout).toContain('Executor ran');
+                expect(result.stdout).toContain('Done compiling TypeScript files for library');
 
                 done();
             });
