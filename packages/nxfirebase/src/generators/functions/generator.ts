@@ -7,6 +7,8 @@ import {
   offsetFromRoot,
   Tree,
 } from '@nrwl/devkit';
+import { addDepsToPackageJson } from '@nrwl/workspace';
+import { chain, noop, Rule } from '@angular-devkit/schematics';
 import * as path from 'path';
 import { NxfirebaseGeneratorSchema } from './schema';
 
@@ -55,6 +57,19 @@ function addFiles(host: Tree, options: NormalizedSchema) {
   );
 }
 
+
+
+function addDependencies(): Rule {
+    console.log("adding deps")
+  return addDepsToPackageJson(
+    {
+        "firebase-admin": "^9.2.0",
+        "firebase-functions": "^3.11.0"
+    },
+    {}
+  );
+}
+
 export default async function (host: Tree, options: NxfirebaseGeneratorSchema) {
   const normalizedOptions = normalizeOptions(host, options);
 
@@ -82,4 +97,12 @@ export default async function (host: Tree, options: NxfirebaseGeneratorSchema) {
   });
   addFiles(host, normalizedOptions);
   await formatFiles(host);
+
+
+
+    return chain([
+        addDependencies(),
+    ])
+
+
 }
