@@ -1,0 +1,54 @@
+name: Release & Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Build plugin
+        run: npm run build nxfirebase
+
+      - name: Create package
+        working-directory: ./dist/packages/nxfirebase
+        run: npm pack
+
+      - name: Setup .npmrc file to publish to GitHub Packages
+        working-directory: ./dist/packages/nxfirebase
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          registry-url: 'https://npm.pkg.github.com/simondotm'
+          #scope: '@simondotm'
+      #- run: npm run addscope
+      - name: Publish to GitHub Packages
+        working-directory: ./dist/packages/nxfirebase
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
