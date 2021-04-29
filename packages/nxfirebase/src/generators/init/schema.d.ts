@@ -1,5 +1,3 @@
-export interface InitSchema {
-  unitTestRunner?: 'jest' | 'none';
-  e2eTestRunner?: 'cypress' | 'none';
+export interface NxFirebaseInitGeneratorSchema {
   skipFormat?: boolean;
 }

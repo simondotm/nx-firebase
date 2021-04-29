@@ -1,13 +1,11 @@
 import { readJson, readWorkspaceConfiguration, Tree } from '@nrwl/devkit';
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 import nxfirebaseInitGenerator from './init';
-import { InitSchema } from './schema';
+import { NxFirebaseInitGeneratorSchema } from './schema';
 
 describe('init', () => {
   let tree: Tree;
-  const schema: InitSchema = {
-    unitTestRunner: 'jest',
-    e2eTestRunner: 'cypress',
+  const schema: NxFirebaseInitGeneratorSchema = {
     skipFormat: false,
   };
 

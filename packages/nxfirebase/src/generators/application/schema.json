@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
   "cli": "nx",
-  "id": "Nxfirebase",
+  "id": "NxFirebaseApplication",
   "title": "Create a Firebase Application for Nx",
   "type": "object",
   "examples": [

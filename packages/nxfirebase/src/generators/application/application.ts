@@ -10,9 +10,9 @@ import {
 import { addDepsToPackageJson } from '@nrwl/workspace';
 import { chain, noop, Rule } from '@angular-devkit/schematics';
 import * as path from 'path';
-import { NxfirebaseGeneratorSchema } from './schema';
+import { NxFirebaseAppGeneratorSchema } from './schema';
 
-interface NormalizedSchema extends NxfirebaseGeneratorSchema {
+interface NormalizedSchema extends NxFirebaseAppGeneratorSchema {
   projectName: string;
   projectRoot: string;
   projectDirectory: string;
@@ -21,7 +21,7 @@ interface NormalizedSchema extends NxfirebaseGeneratorSchema {
 
 function normalizeOptions(
   host: Tree,
-  options: NxfirebaseGeneratorSchema
+  options: NxFirebaseAppGeneratorSchema
 ): NormalizedSchema {
   const name = names(options.name).fileName;
   const projectDirectory = options.directory
@@ -59,50 +59,29 @@ function addFiles(host: Tree, options: NormalizedSchema) {
 
 
 
-function addDependencies(): Rule {
-    console.log("adding deps")
-  return addDepsToPackageJson(
-    {
-        "firebase-admin": "^9.2.0",
-        "firebase-functions": "^3.11.0"
-    },
-    {}
-  );
-}
-
-export default async function (host: Tree, options: NxfirebaseGeneratorSchema) {
+export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema) {
   const normalizedOptions = normalizeOptions(host, options);
-
-  //const project = readProjectConfiguration(host, options.name);
-  const { appsDir } = getWorkspaceLayout(host);
-
   addProjectConfiguration(host, normalizedOptions.projectName, {
     root: normalizedOptions.projectRoot,
     projectType: 'application',
-    sourceRoot: `${normalizedOptions.projectRoot}/src`,
+    sourceRoot: `${normalizedOptions.projectRoot}`,
     targets: {
       build: {
-        executor: '@nrwl/node:package',
-        outputs: ['{options.outputPath}'],
-        options: {
-            outputPath: `dist/${appsDir}/${normalizedOptions.projectDirectory}`,
-            tsConfig: `${normalizedOptions.projectRoot}/tsconfig.json`,
-            packageJson: `${normalizedOptions.projectRoot}/package.json`,
-            main: `${normalizedOptions.projectRoot}/src/index.ts`,
-            assets: [`${normalizedOptions.projectRoot}/*.md`],
-        },
+        executor: '@simondotm/nxfirebase:build',
       },
     },
     tags: normalizedOptions.parsedTags,
   });
   addFiles(host, normalizedOptions);
+/*
+    addDepsToPackageJson(
+        {
+            "firebase": "^8.2.9"
+        },
+        {}
+    );   
+    */ 
   await formatFiles(host);
-
-
-
-    return chain([
-        addDependencies(),
-    ])
-
-
 }
+
+

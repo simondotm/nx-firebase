@@ -11,13 +11,13 @@
       "hidden": true
     },
     "application": {
-      "factory": "./src/generators/application/generator",
+      "factory": "./src/generators/application/application",
       "schema": "./src/generators/application/schema.json",
       "description": "nxfirebase application generator",
       "aliases": ["app"]
     },
     "functions": {
-      "factory": "./src/generators/functions/generator",
+      "factory": "./src/generators/functions/functions",
       "schema": "./src/generators/functions/schema.json",
       "description": "nxfirebase functions generator"
     }

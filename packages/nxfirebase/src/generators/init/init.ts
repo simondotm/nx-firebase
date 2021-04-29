@@ -1,4 +1,4 @@
-import { InitSchema } from './schema';
+import { NxFirebaseInitGeneratorSchema } from './schema';
 import {
   addDependenciesToPackageJson,
 //  convertNxGenerator,
@@ -63,7 +63,7 @@ function updateDependencies(host: Tree) {
   );
 }
 
-export async function nxfirebaseInitGenerator(host: Tree, schema: InitSchema) {
+export async function nxfirebaseInitGenerator(host: Tree, schema: NxFirebaseInitGeneratorSchema) {
   const tasks: GeneratorCallback[] = [];
 
   console.log("called firebase init generator")
