@@ -24,7 +24,8 @@
     "workspace-generator": "nx workspace-generator",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "release": "npm version patch --prefix packages/nxfirebase --git-tag-version"
+    "release": "npm version patch --prefix packages/nxfirebase --no-git-tag-version",
+    "release:help": "echo Bump patch version & commit. Using Github Desktop doesn't push tags it didn't make, so they have to be manually added & pushed to create the release on Github"
   },
   "private": true,
   "dependencies": {
