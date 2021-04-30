@@ -24,7 +24,7 @@
     "workspace-generator": "nx workspace-generator",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "release": "npm version --prefix packages/nxfirebase patch"
+    "release": "npm version patch --prefix packages/nxfirebase --git-tag-version"
   },
   "private": true,
   "dependencies": {
