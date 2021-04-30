@@ -20,7 +20,7 @@ jobs:
       #- run: npm run addscope
 
       - name: Build plugin
-        run: npm run build nxfirebase
+        run: npx nx build nxfirebase
 
       - name: Create package
         run: npm pack
