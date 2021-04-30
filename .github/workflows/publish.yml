@@ -15,23 +15,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-
-      - name: Build plugin
-      - run: npm run build nxfirebase
-
-      - name: Create package
-      - run: npm pack
-        working-directory: ./dist/packages/nxfirebase
-
-      - name: Setup .npmrc file to publish to GitHub Packages
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
       #- run: npm run addscope
+
+      - name: Build plugin
+        run: npm run build nxfirebase
+
+      - name: Create package
+        run: npm pack
+        working-directory: ./dist/packages/nxfirebase
+
       - name: Publish to GitHub Packages
-      - run: npm publish
+        run: npm publish
         working-directory: ./dist/packages/nxfirebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
