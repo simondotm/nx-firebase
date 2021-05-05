@@ -55,10 +55,32 @@ function addFiles(host: Tree, options: NormalizedSchema) {
     offsetFromRoot: offsetFromRoot(options.projectRoot),
     template: '',
   };
+  // generate the firebase app specific files
+  // we put the functions package & template typescript source files in here
+  // it has no side effects if the user isn't using functions, and is easier to just assume.
+  // user can delete if not wanted, and update their firebase config accordingly
+  // 
+
+  // we also put any additional rules files in the application folder;
+  // 1. so that they dont clutter up the root workspace
+  // 2. so that they are more meaningfully associated with and located as assets within the nx firebase application project they relate to
   generateFiles(
     host,
     path.join(__dirname, 'files'),
     options.projectRoot,
+    templateOptions
+  );
+  // we put the template firebase.json config file in the root of the workspace, named after the 
+  // app project, so that it can be easily located with the cli command, and also enables nx workspaces
+  // to contain multiple firebase projects
+  // *.firebase.json files have to go in the root of the workspace, because firebase function deployment only allows
+  //  the deployed package for functions to exist in a sub directory from where the firebase.json config is located
+  // In principle for users that are not using the firebase functions feature, they could put this firebase.json config
+  // inside their app folder, but it feels more 
+  generateFiles(
+    host,
+    path.join(__dirname, 'files_workspace'),
+    '',
     templateOptions
   );
 

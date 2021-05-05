@@ -1,8 +1,0 @@
-{
-  "functions": {
-    "predeploy": [
-      "nx run <%= projectName %>:build"
-    ],
-    "source": "<%= offsetFromRoot %>dist/apps/<%= projectName %>"
-  }
-}
