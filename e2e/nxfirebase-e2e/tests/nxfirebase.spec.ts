@@ -4,9 +4,14 @@ import {
   readJson,
   runNxCommandAsync,
   uniq,
+  updateFile,
+  readFile
+  
 } from '@nrwl/nx-plugin/testing';
 
+// default 5000 is not long enough for some of our tests.
 jest.setTimeout(30000)
+
 
 function expectedProjectFiles(root:string) {
     return [
@@ -52,16 +57,16 @@ describe('nxfirebase e2e', () => {
     });
 
     // test application generator
+    const appProject = 'nxfirebase-root-app' //uniq('nxfirebase-root-app');
     describe('nxfirebase application generator', () => {
 
         describe('firebase app', () => {
 
-            const plugin = 'nxfirebase-root-app' //uniq('nxfirebase-root-app');
 
             it('should create nxfirebase:application', async (done) => {
                 //ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
                 await runNxCommandAsync(
-                    `generate @simondotm/nxfirebase:application ${plugin}`
+                    `generate @simondotm/nxfirebase:application ${appProject}`
                 );
                 done();
             });
@@ -69,7 +74,7 @@ describe('nxfirebase e2e', () => {
 
             it('should create files in the specified application directory', async (done) => {
                 expect(() =>
-                    checkFilesExist(...expectedProjectFiles(`apps/${plugin}`)),
+                    checkFilesExist(...expectedProjectFiles(`apps/${appProject}`)),
                 ).not.toThrow();
                 done();
             });
@@ -77,7 +82,7 @@ describe('nxfirebase e2e', () => {
             it('should create a project firebase config in the workspace root directory', async (done) => {
                 expect(() =>
                     checkFilesExist(
-                        `${plugin}.firebase.json`,
+                        `${appProject}.firebase.json`,
                     ),
                 ).not.toThrow();
                 done();
@@ -85,14 +90,14 @@ describe('nxfirebase e2e', () => {
 
 
             it('should build nxfirebase:app', async (done) => {
-                const result = await runNxCommandAsync(`build ${plugin}`);
+                const result = await runNxCommandAsync(`build ${appProject}`);
                 expect(result.stdout).toContain('Done compiling TypeScript files');
                 done();
             });
 
             it('should compile files to the specified dist directory', async (done) => {
                 expect(() =>
-                    checkFilesExist(...expectedTargetFiles(`dist/apps/${plugin}`)),
+                    checkFilesExist(...expectedTargetFiles(`dist/apps/${appProject}`)),
                 ).not.toThrow();
                 done();
             });
@@ -126,6 +131,51 @@ describe('nxfirebase e2e', () => {
             });
         });
     })
+
+    // test we can import a library in the workspace
+    describe('nxfirebase generate nodelibrary', () => {
+
+
+        const libProject = 'nodelib' //uniq('nxfirebase-functions-app');
+        it('should create nodelib', async (done) => {
+            await runNxCommandAsync(
+                `generate @nrwl/node:lib ${libProject} --buildable`
+            );
+
+            done();
+        });
+
+        // add our new nodelib as an imported dependency
+        it('should add nodelib as an index.ts dependency', async (done) => {
+            const indexTs = `apps/${appProject}/src/index.ts`
+            const importMatch = `import * as functions from 'firebase-functions';`
+            const importAddition = `import * as c from '@proj/${libProject}'`
+            const inFile = readFile(indexTs)
+            expect(inFile).toContain(importMatch);
+
+            updateFile(indexTs, (content:string) => {
+                const replaced = content.replace(
+                    importMatch, 
+                    `${importMatch}\n${importAddition}`);
+                return replaced
+
+            });
+
+            const outFile = readFile(indexTs)
+            expect(outFile).toContain(importAddition);
+            done();
+        });
+
+
+        // rebuild app with deps
+        it('should build nxfirebase:app', async (done) => {
+            const result = await runNxCommandAsync(`build ${appProject} --with-deps`);
+            expect(result.stdout).toContain('Done compiling TypeScript files');
+            done();
+        });
+
+    });
+
 
 
     // test functions generator

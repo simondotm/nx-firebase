@@ -114,7 +114,7 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
   addProjectConfiguration(host, normalizedOptions.projectName, {
     root: normalizedOptions.projectRoot,
     projectType: 'application',
-    sourceRoot: `${normalizedOptions.projectRoot}/functions/src`,
+    sourceRoot: `${normalizedOptions.projectRoot}/src`,
     targets: {
       compile: {
         executor: '@nrwl/node:package',
