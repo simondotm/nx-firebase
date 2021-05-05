@@ -7,7 +7,7 @@ import {
   offsetFromRoot,
   Tree,
 } from '@nrwl/devkit';
-import { addDepsToPackageJson } from '@nrwl/workspace';
+import { addDepsToPackageJson, runCommandsGenerator } from '@nrwl/workspace';
 import { chain, noop, Rule } from '@angular-devkit/schematics';
 import * as path from 'path';
 import { NxFirebaseAppGeneratorSchema } from './schema';
@@ -23,6 +23,8 @@ function normalizeOptions(
   host: Tree,
   options: NxFirebaseAppGeneratorSchema
 ): NormalizedSchema {
+  const { npmScope } = getWorkspaceLayout(host);    
+  const defaultPrefix = npmScope;
   const name = names(options.name).fileName;
   const projectDirectory = options.directory
     ? `${names(options.directory).fileName}/${name}`
@@ -33,12 +35,16 @@ function normalizeOptions(
     ? options.tags.split(',').map((s) => s.trim())
     : [];
 
+  const importPath =
+    options.importPath || `@${defaultPrefix}/${projectDirectory}`;
+
   return {
     ...options,
     projectName,
     projectRoot,
     projectDirectory,
     parsedTags,
+    importPath
   };
 }
 
@@ -55,24 +61,62 @@ function addFiles(host: Tree, options: NormalizedSchema) {
     options.projectRoot,
     templateOptions
   );
+
 }
 
 
 
+function addDependencies(): Rule {
+    console.log("adding deps")
+  return addDepsToPackageJson(
+    {
+        'firebase-admin': 'latest', //"^9.2.0",
+        'firebase-functions': 'latest' //"^3.11.0"
+    },
+    {}
+  );
+}
+
 export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema) {
   const normalizedOptions = normalizeOptions(host, options);
+
+  //const project = readProjectConfiguration(host, options.name);
+  const { appsDir } = getWorkspaceLayout(host);
+
+  //add files before we add project config
+  // so that functions folder exists
+  addFiles(host, normalizedOptions);
+
+  // now add the project config, based on a node:package builder
+  // no webpack required or desired for firebase functions
   addProjectConfiguration(host, normalizedOptions.projectName, {
     root: normalizedOptions.projectRoot,
     projectType: 'application',
-    sourceRoot: `${normalizedOptions.projectRoot}`,
+    sourceRoot: `${normalizedOptions.projectRoot}/functions/src`,
     targets: {
+      build: {
+        executor: '@nrwl/node:package',
+        outputs: ['{options.outputPath}'],
+        options: {
+            outputPath: `dist/${appsDir}/${normalizedOptions.projectDirectory}`,
+            tsConfig: `${normalizedOptions.projectRoot}/tsconfig.app.json`,
+            packageJson: `${normalizedOptions.projectRoot}/package.json`,
+            main: `${normalizedOptions.projectRoot}/src/index.ts`,
+            assets: [
+                `${normalizedOptions.projectRoot}/*.md`,
+                `${normalizedOptions.projectRoot}/firebase.json`,
+            ],
+        },
+      },
+
+/*        
       build: {
         executor: '@simondotm/nxfirebase:build',
       },
+*/
     },
     tags: normalizedOptions.parsedTags,
   });
-  addFiles(host, normalizedOptions);
 /*
     addDepsToPackageJson(
         {
@@ -82,6 +126,13 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
     );   
     */ 
   await formatFiles(host);
+
+
+
+    return chain([
+        addDependencies(),
+    ])
+
 }
 
 

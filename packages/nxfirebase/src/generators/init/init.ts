@@ -51,12 +51,13 @@ function updateDependencies(host: Tree) {
     }
     return json;
   });
-
+  // we install the latest versions of firebase for convenience
+  // users can uninstall or install at a preferred version if they like.
   return addDependenciesToPackageJson(
     host,
     {
-        "firebase-admin": "^9.2.0",
-        "firebase-functions": "^3.11.0"
+        'firebase-admin': 'latest', //"^9.2.0",
+        'firebase-functions': 'latest' //"^3.11.0"
     },
     {
     }

@@ -6,6 +6,19 @@ This project was generated using the Nx plugin workspace generator.
 
 > **Note**: This project is the work of a couple of days, and I'm not at all yet fluent with the inner workings of Nx plugins so its pretty hacky/basic just now. It does what I needed it to do, and so maybe it will be useful to others also.
 
+
+## To build the plugin
+
+`nx run nxfirebase:build`
+
+## To test the plugin
+
+`nx run nxfirebase-e2e:e2e`
+
+Creates a temporary workspace in `/tmp/nx-e2e/`
+
+After the e2e test has completed, the plugin can be tested in this workspace.
+
 ## Purpose
 
 Nx provides a great way to manage monorepo workflows, however if you have a development setup where your Nx workspace contains _multiple_ Firebase projects that use different combinations and configurations of Firebase features such as _hosting_, _storage_, _database rules/indexes_, and _functions_, then some extra tooling is necessary in order to maintain a familiar Firebase workflow within your monorepo.

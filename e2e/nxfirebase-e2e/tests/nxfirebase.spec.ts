@@ -33,17 +33,52 @@ describe('nxfirebase e2e', () => {
 
     // test application generator
     describe('nxfirebase application generator', () => {
-        it('should create & build nxfirebase:application', async (done) => {
+
+        describe('firebase app', () => {
+
             const plugin = uniq('nxfirebase-root-app');
-            //ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
-            await runNxCommandAsync(
-                `generate @simondotm/nxfirebase:application ${plugin}`
-            );
 
-            const result = await runNxCommandAsync(`build ${plugin}`);
-            expect(result.stdout).toContain('Executor ran');
+            it('should create nxfirebase:application', async (done) => {
+                //ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
+                await runNxCommandAsync(
+                    `generate @simondotm/nxfirebase:application ${plugin}`
+                );
+                done();
+            });
 
-            done();
+
+            it('should create files in the specified application directory', async (done) => {
+                expect(() =>
+                    checkFilesExist(
+                        `apps/${plugin}/src/index.ts`,
+                        `apps/${plugin}/package.json`,
+                        `apps/${plugin}/tsconfig.app.json`,
+                        `apps/${plugin}/tsconfig.json`,
+                        `apps/${plugin}/readme.md`,
+                        `apps/${plugin}/firebase.json`,
+                    ),
+                ).not.toThrow();
+                done();
+            });
+
+            it('should build nxfirebase:app', async (done) => {
+                const result = await runNxCommandAsync(`build ${plugin}`);
+                expect(result.stdout).toContain('Done compiling TypeScript files');
+                done();
+            });
+
+            it('should compile files to the specified dist directory', async (done) => {
+                expect(() =>
+                    checkFilesExist(
+                        `dist/apps/${plugin}/src/index.js`,
+                        `dist/apps/${plugin}/package.json`,
+                        `dist/apps/${plugin}/readme.md`,
+                        `dist/apps/${plugin}/firebase.json`,
+                    ),
+                ).not.toThrow();
+                done();
+            });
+
         });
 
         describe('--directory', () => {
@@ -76,6 +111,7 @@ describe('nxfirebase e2e', () => {
 
 
     // test functions generator
+    /*
     describe('nxfirebase functions generator', () => {
 
         describe('functions schema', () => {
@@ -127,6 +163,6 @@ describe('nxfirebase e2e', () => {
         });
 
     });
-
+    */
 
 });
