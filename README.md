@@ -17,7 +17,7 @@ This project was generated using the Nx plugin workspace generator.
 
 Creates a temporary workspace in `/tmp/nx-e2e/`
 
-After the e2e test has completed, the plugin can be tested in this workspace.
+After the e2e test has completed, the plugin can be further manually tested in this temporary workspace.
 
 ## Purpose
 
