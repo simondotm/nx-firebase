@@ -94,7 +94,7 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
     projectType: 'application',
     sourceRoot: `${normalizedOptions.projectRoot}/functions/src`,
     targets: {
-      build: {
+      compile: {
         executor: '@nrwl/node:package',
         outputs: ['{options.outputPath}'],
         options: {
@@ -103,11 +103,40 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
             packageJson: `${normalizedOptions.projectRoot}/package.json`,
             main: `${normalizedOptions.projectRoot}/src/index.ts`,
             assets: [
-                `${normalizedOptions.projectRoot}/*.md`,
-                `${normalizedOptions.projectRoot}/firebase.json`,
+                `${normalizedOptions.projectRoot}/*.md`
             ],
         },
       },
+      functions: {
+        executor: '@simondotm/nxfirebase:functions',
+        outputs: ['{options.outputPath}'],
+        options: {
+            outputPath: `dist/${appsDir}/${normalizedOptions.projectDirectory}`,
+            tsConfig: `${normalizedOptions.projectRoot}/tsconfig.app.json`,
+            packageJson: `${normalizedOptions.projectRoot}/package.json`,
+            main: `${normalizedOptions.projectRoot}/src/index.ts`,
+            assets: [
+                `${normalizedOptions.projectRoot}/*.md`
+            ],
+        },
+      },
+      build: {
+        executor: "@nrwl/workspace:run-commands",
+        options: {
+            "commands": [
+                {
+                    "command": `nx run ${normalizedOptions.projectName}:compile --with-deps`
+                },
+                {
+                    "command": `nx run ${normalizedOptions.projectName}:functions`
+                },
+                {
+                    "command": "echo all done"
+                }
+            ],
+            "parallel": false
+        },
+      }
 
 /*        
       build: {
