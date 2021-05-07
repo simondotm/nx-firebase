@@ -6,6 +6,9 @@ This project was generated using the Nx plugin workspace generator.
 
 > **Note**: This project is the work of a couple of days, and I'm not at all yet fluent with the inner workings of Nx plugins so its pretty hacky/basic just now. It does what I needed it to do, and so maybe it will be useful to others also.
 
+## To create the plugin workspace
+
+`npx create-nx-plugin simondotm --pluginName nxfirebase`
 
 ## To build the plugin
 
