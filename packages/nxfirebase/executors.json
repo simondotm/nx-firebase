@@ -10,6 +10,11 @@
       "implementation": "./src/executors/functions/functions",
       "schema": "./src/executors/functions/schema.json",
       "description": "functions executor"
-    }
+    },
+    "firebase": {
+      "implementation": "./src/executors/firebase/firebase",
+      "schema": "./src/executors/firebase/schema.json",
+      "description": "firebase executor"
+    }    
   }
 }

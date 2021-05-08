@@ -42,6 +42,11 @@
                 "output": "./src"
               },
               {
+                "input": "./packages/nxfirebase/src",
+                "glob": "**/.!(ts)",
+                "output": "./src"
+              },
+              {
                 "input": "./packages/nxfirebase",
                 "glob": "generators.json",
                 "output": "."

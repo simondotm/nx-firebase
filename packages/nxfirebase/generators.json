@@ -7,7 +7,6 @@
       "factory": "./src/generators/init/init",
       "schema": "./src/generators/init/schema.json",
       "description": "Initialize the @simondotm/nxfirebase plugin",
-      "aliases": ["ng-add"],
       "hidden": true
     },
     "application": {

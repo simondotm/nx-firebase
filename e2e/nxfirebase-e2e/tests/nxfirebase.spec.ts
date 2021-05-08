@@ -10,7 +10,7 @@ import {
 } from '@nrwl/nx-plugin/testing';
 
 // default 5000 is not long enough for some of our tests.
-jest.setTimeout(30000)
+jest.setTimeout(60000)
 
 
 function expectedProjectFiles(root:string) {
@@ -82,7 +82,9 @@ describe('nxfirebase e2e', () => {
             it('should create a project firebase config in the workspace root directory', async (done) => {
                 expect(() =>
                     checkFilesExist(
-                        `${appProject}.firebase.json`,
+                        `firebase.${appProject}.json`,
+                        `.firebaserc`,
+                        `firebase.json`,
                     ),
                 ).not.toThrow();
                 done();
@@ -108,25 +110,39 @@ describe('nxfirebase e2e', () => {
             it('should create files in the specified application directory', async (done) => {
                 const plugin = 'nxfirebase-subdir-app' //uniq('nxfirebase-subdir-app');
                 //ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
-                await runNxCommandAsync(
+                const result = await runNxCommandAsync(
                     `generate @simondotm/nxfirebase:application ${plugin} --directory subdir`
                 );
                 expect(() =>
                     checkFilesExist(...expectedProjectFiles(`apps/subdir/${plugin}`)),
                 ).not.toThrow();
+
+                // creating the second firebase app should not overwrite the existing .firebaserc and firebase.json files
+                expect(result.stdout).toContain('firebase.json already exists in this workspace');
+                expect(result.stdout).toContain('.firebaserc already exists in this workspace');
+
                 done();
             });
+
+
+
+
         });
 
         describe('--tags', () => {
             it('should add tags to nx.json', async (done) => {
                 const plugin = 'nxfirebase-root-app-tags' //uniq('nxfirebase-root-app-tags');
                 //ensureNxProject('@simondotm/nxfirebase', 'dist/packages/nxfirebase');
-                await runNxCommandAsync(
+                const result = await runNxCommandAsync(
                     `generate @simondotm/nxfirebase:application ${plugin} --tags e2etag,e2ePackage`
                 );
                 const nxJson = readJson('nx.json');
                 expect(nxJson.projects[plugin].tags).toEqual(['e2etag', 'e2ePackage']);
+
+                // creating the third firebase app should also not overwrite the existing .firebaserc and firebase.json files
+                expect(result.stdout).toContain('firebase.json already exists in this workspace');
+                expect(result.stdout).toContain('.firebaserc already exists in this workspace');
+
                 done();
             });
         });
