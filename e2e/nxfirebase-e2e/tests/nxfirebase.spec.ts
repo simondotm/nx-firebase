@@ -165,7 +165,7 @@ describe('nxfirebase e2e', () => {
         it('should add nodelib as an index.ts dependency', async (done) => {
             const indexTs = `apps/${appProject}/src/index.ts`
             const importMatch = `import * as functions from 'firebase-functions';`
-            const importAddition = `import * as c from '@proj/${libProject}'`
+            const importAddition = `import * as c from '@proj/${libProject}'\nconsole.log(c.nodelib())\n`
             const inFile = readFile(indexTs)
             expect(inFile).toContain(importMatch);
 
