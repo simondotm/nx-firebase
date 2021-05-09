@@ -26,6 +26,7 @@ import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
 /**
  * Custom Firebase Functions "Application" nx build exector
+ * Based on @nrwl/node:package executor
  * @param options 
  * @param context 
  * @returns build success/failure outcome
@@ -159,7 +160,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
       const srcDir = join(workspaceRoot, dep.outputs[0])
       const outDir = join(workspaceRoot, normalizedOptions.outputPath, depLibsDir, localLibraryName);
       // we also copy libraries to node_modules in dist, because the Firebase CLI also runs the entry point script during a deploy to determine the exported functions
-      // however, firebase does NOT upload node_modules to GCP 
+      // however, firebase does NOT upload node_modules to GCP, so we have to make two copies of each dependent local library package
       // see: https://firebase.google.com/docs/functions/handle-dependencies
       const nodeModulesDir = join(workspaceRoot, normalizedOptions.outputPath, 'node_modules', localPackageName);
         try {
