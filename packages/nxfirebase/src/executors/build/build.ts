@@ -43,11 +43,14 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   //  firebase CLI can reference these libraries locally from within the dist folder when they are deployed.
   const appRoot = context.workspace.projects[context.projectName].root;
   const normalizedOptions = normalizeOptions(options, context, appRoot);
+  //SM: note that the dependency search matches only buildable nodes in the tree
+  // also, it matches candidate deps by targetName, so if your executor is called something other than "build" it wont find
+  // any dependencies. Took me a few hours to figure that one out.
   const { target, dependencies } = calculateProjectDependencies(
     projGraph,
     context.root,
     context.projectName,
-    context.targetName,
+    context.targetName, 
     context.configurationName
   );
 
@@ -112,7 +115,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     updateBuildableProjectPackageJsonDependencies(
       context.root,
       context.projectName,
-      context.targetName,
+      context.targetName, 
       context.configurationName,
       target,
       dependencies,
