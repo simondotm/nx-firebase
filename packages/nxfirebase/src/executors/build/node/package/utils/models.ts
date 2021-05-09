@@ -3,8 +3,7 @@ import {
   FileInputOutput,
 } from '@nrwl/workspace/src/utilities/assets';
 
-
-export interface FirebaseBuildExecutorSchema {
+export interface NodePackageBuilderOptions {
   main: string;
   tsConfig: string;
   outputPath: string;
@@ -17,8 +16,7 @@ export interface FirebaseBuildExecutorSchema {
   srcRootForCompilationRoot?: string;
   deleteOutputPath: boolean;
   cli?: boolean;
-} // eslint-disable-line
-
+}
 
 export interface NormalizedBuilderOptions extends NodePackageBuilderOptions {
   files: Array<FileInputOutput>;

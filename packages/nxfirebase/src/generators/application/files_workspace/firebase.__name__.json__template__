@@ -1,0 +1,28 @@
+{
+  "database": {
+    "rules": "<%= projectRoot %>/database.rules.json"
+  },
+  "firestore": {
+    "rules": "<%= projectRoot %>/firestore.rules",
+    "indexes": "<%= projectRoot %>/firestore.indexes.json"
+  },    
+  "hosting": [],
+  "storage": [],
+  "functions": {
+    "predeploy": [
+      "nx run <%= projectName %>:build"
+    ],
+    "source": "dist/<%= projectRoot %>"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "hosting": {
+      "port": 5000
+    }
+  }
+}
