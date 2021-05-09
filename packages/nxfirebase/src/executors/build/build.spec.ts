@@ -1,7 +1,7 @@
-import { BuildExecutorSchema } from './schema';
+import { FirebaseBuildExecutorSchema } from './schema';
 import executor from './build';
 
-const options: BuildExecutorSchema = {};
+const options: FirebaseBuildExecutorSchema = {};
 
 describe('Build Executor', () => {
   it('can run', async () => {

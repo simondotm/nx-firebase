@@ -150,8 +150,9 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
     projectType: 'application',
     sourceRoot: `${normalizedOptions.projectRoot}/src`,
     targets: {
-      compile: {
-        executor: '@nrwl/node:package',
+      build: {
+        //executor: '@nrwl/node:package',
+        executor: '@simondotm/nxfirebase:build',
         outputs: ['{options.outputPath}'],
         options: {
             outputPath: `dist/${appsDir}/${normalizedOptions.projectDirectory}`,
@@ -184,12 +185,12 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
         },
       },
       //TODO: replace this with a self-contained build command
-      build: {
+      compile: {
         executor: "@nrwl/workspace:run-commands",
         options: {
             "commands": [
                 {
-                    "command": `nx run ${normalizedOptions.projectName}:compile --with-deps`
+                    "command": `nx run ${normalizedOptions.projectName}:build --with-deps`
                 },
                 {
                     "command": `nx run ${normalizedOptions.projectName}:functions`
