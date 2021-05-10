@@ -6,15 +6,13 @@ import { FirebaseBuildExecutorSchema } from './schema';
 
 import { ExecutorContext } from '@nrwl/devkit';
 import { createProjectGraph } from '@nrwl/workspace/src/core/project-graph';
-import { assetGlobsToFiles, copyAssetFiles, copyAssets } from '@nrwl/workspace/src/utilities/assets';
+import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
 import {
   calculateProjectDependencies,
   checkDependentProjectsHaveBeenBuilt,
-  createTmpTsConfig,
   DependentBuildableProjectNode,
   updateBuildableProjectPackageJsonDependencies,
 } from '@nrwl/workspace/src/utilities/buildable-libs-utils';
-//import { NodePackageBuilderOptions } from './utils/models';
 import compileTypeScriptFiles from './node/package/utils/compile-typescript-files';
 import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';
@@ -24,16 +22,32 @@ import { join } from 'path'
 import { copy } from 'fs-extra';
 import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
+const ENABLE_DEBUG = false
+function debugLog(...args) {
+    if (ENABLE_DEBUG) {
+        console.log(args)
+    }
+}
+
 /**
  * Custom Firebase Functions "Application" nx build exector
  * Based on @nrwl/node:package executor
+ * 
+ * - Builds the current application as a Typescript package library for Firebase functions
+ * - Copies any dependent libraries to the dist folder
+ * - Auto generates the firebase functions package.json
+ * - Updates the firebase functions package.json to convert library dependency references to local file references
+ * 
+ * After building, the project can be deployed using the firebase CLI as usual
+ * 
  * @param options 
  * @param context 
  * @returns build success/failure outcome
  */
 export default async function runExecutor(options: FirebaseBuildExecutorSchema, context: ExecutorContext) {
-  console.log("Running Executor for Firebase Build for project '" + context.projectName + "'");
-  console.log('options=', options)
+  debugLog("Running Executor for Firebase Build for project '" + context.projectName + "'");
+  debugLog('options=', options)
+  
   // get the project graph; returns an object containing all nodes in the workspace, files, and dependencies
   const projGraph = createProjectGraph();
   // nx firebase functions are essentially @nrwl/node:package libraries, but are added to the project
@@ -54,20 +68,6 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     context.configurationName
   );
 
-/*
-    normalizedOptions.tsConfig = createTmpTsConfig(
-      options.tsConfig,
-      context.root,
-      target.data.root,
-      dependencies
-    );
-        console.log("tsConfig=" + JSON.stringify(normalizedOptions.tsConfig, null, 3))
-        console.log("libRoot=" + libRoot)
-        console.log("target=" + JSON.stringify(target, null, 3))
-
-    const tscfg = readJsonFile(normalizedOptions.tsConfig)
-        console.log("tsConfig=" + JSON.stringify(tscfg, null, 3))
-*/
 
   const dependentsBuilt = checkDependentProjectsHaveBeenBuilt(
     context.root,
@@ -77,12 +77,6 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   );
   if (!dependentsBuilt) {
     throw new Error();
-  }
-    console.log("dependencies=" + JSON.stringify(dependencies, null, 3))
-
-  for (const d of dependencies) {
-      const type = d.node.type
-      console.log("- Firebase functions app has '" + type + "' dependency '" + d.name + "'")
   }
 
 
@@ -98,9 +92,15 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
 
   // there aren't really any assets needed for firebase functions
   // but left here for compatibility with node:package
-    console.log("- Copying functions assets")
+  debugLog("- Copying functions assets")
   await copyAssetFiles(normalizedOptions.files);
 
+  console.log("- Processing dependencies for firebase functions app")
+  debugLog("dependencies=" + JSON.stringify(dependencies, null, 3))
+  for (const d of dependencies) {
+      const type = d.node.type
+      console.log(" - Firebase functions app has '" + type + "' dependency '" + d.name + "'")
+  }
 
 
   // ensure the output package file has typings and a correct "main" entry point
@@ -143,18 +143,6 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // do this AFTER the app typescript has compiled, because the outdir is deleted before the typescript build! (Doh! Spent an hour figuring that obvious gotcha out)
   const depLibsDir = 'libs'
   const workspaceRoot = context.root
-  const assetsGlob = [ '**/*' ]
-  /*
-  for (const dep of workspaceDependencies) {
-      const rootDir = join(workspaceRoot, dep.outputs[0])
-      const outDir = join(workspaceRoot, normalizedOptions.outputPath, depLibsDir, dep.node.name);
-      console.log("- Copying dependent workspace library '" + dep.node.name + "' from '" + rootDir + '/' + assetsGlob[0] + "' to '" + outDir + "'")
-      const files = assetGlobsToFiles(assetsGlob, rootDir, outDir);
-      console.log("files=" + JSON.stringify(files, null, 3))
-      await copyAssetFiles(files)
-  }
-  */
-
   const localLibraries: { [name:string]: DependentBuildableProjectNode } = {}
   for (const dep of workspaceDependencies) {
       const localPackageName = dep.name // the library dependency package name
@@ -167,35 +155,39 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
       // see: https://firebase.google.com/docs/functions/handle-dependencies
       const nodeModulesDir = join(workspaceRoot, normalizedOptions.outputPath, 'node_modules', localPackageName);
         try {
-            console.log("- Copying dependent workspace library '" + dep.node.name + "' from '" + srcDir + "' to '" + outDir + "'")
+            debugLog("- Copying dependent workspace library '" + dep.node.name + "' from '" + srcDir + "' to '" + outDir + "'")
+            debugLog("- Copying dependent workspace library '" + dep.node.name + "' from '" + srcDir + "' to '" + nodeModulesDir + "'")
             await copy(srcDir, outDir);
-            console.log("- Copying dependent workspace library '" + dep.node.name + "' from '" + srcDir + "' to '" + nodeModulesDir + "'")
             await copy(srcDir, nodeModulesDir);
         } catch (err) {
             console.error(err.message)
         }    
   }
 
+  console.log("- Updating firebase package.json")
+
+
   // rewrite references to library packages in the functions package.json
   // to be local package references to the copies we made
   const functionsPackageFile = `${options.outputPath}/package.json`
-  console.log("- functions PackageFile=" + functionsPackageFile)
+  
+  debugLog("- functions PackageFile=" + functionsPackageFile)
   const functionsPackageJson = readJsonFile(functionsPackageFile);
   const functionsPackageDeps = functionsPackageJson.dependencies;
   if (functionsPackageDeps) {
-      console.log("- Updating local dependencies for Firebase functions package.json")
+      debugLog("- Updating local dependencies for Firebase functions package.json")
       for (const d in functionsPackageDeps) {
           const localDep = localLibraries[d]
-          console.log("- Checking dependency '" + d + "', isLocalDep=" + (localDep!==undefined))
+          debugLog("- Checking dependency '" + d + "', isLocalDep=" + (localDep!==undefined))
           if (localDep) {
               const localRef = 'file:' + join('.', 'libs', localDep.node.name)
-              console.log(" - Replacing '" + d + "' with '" + localRef + "'")
+              debugLog(" - Replacing '" + d + "' with '" + localRef + "'")
               functionsPackageDeps[d] = localRef
           }
       }
   }
   writeJsonFile(functionsPackageFile, functionsPackageJson);
-  console.log("functions package deps = ", JSON.stringify(functionsPackageDeps, null, 3))
+  debugLog("functions package deps = ", JSON.stringify(functionsPackageDeps, null, 3))
 
 
 
