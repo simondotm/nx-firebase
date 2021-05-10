@@ -170,6 +170,7 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
             firebaseConfig: `firebase.${normalizedOptions.projectName}.json`,
         },
       },
+      /*
       //TODO: deprecate this
       functions: {
         executor: '@simondotm/nxfirebase:functions',
@@ -201,6 +202,7 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
             ],
             "parallel": false
         },
+        */
       }
 
 /*        
