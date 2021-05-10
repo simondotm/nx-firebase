@@ -6,12 +6,17 @@ import {
   names,
   offsetFromRoot,
   Tree,
+  joinPathFragments,
+  GeneratorCallback
 } from '@nrwl/devkit';
 import { addDepsToPackageJson, runCommandsGenerator } from '@nrwl/workspace';
 import { chain, noop, Rule } from '@angular-devkit/schematics';
 import * as path from 'path';
 import * as fs from 'fs';
 import { NxFirebaseAppGeneratorSchema } from './schema';
+import { Linter, lintProjectGenerator } from '@nrwl/linter';
+import { jestProjectGenerator } from '@nrwl/jest';
+import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial';
 
 interface NormalizedSchema extends NxFirebaseAppGeneratorSchema {
   projectName: string;
@@ -48,6 +53,27 @@ function normalizeOptions(
     importPath
   };
 }
+
+
+export async function addLintingToApplication(
+  tree: Tree,
+  options: NormalizedSchema
+): Promise<GeneratorCallback> {
+  const lintTask = await lintProjectGenerator(tree, {
+    linter: options.linter,
+    project: options.name,
+    tsConfigPaths: [
+      joinPathFragments(options.projectRoot, 'tsconfig.app.json'),
+    ],
+    eslintFilePatterns: [
+      `${options.projectRoot}/**/*.ts`,
+    ],
+    skipFormat: true,
+  });
+
+  return lintTask;
+}
+
 
 function addFiles(host: Tree, options: NormalizedSchema) {
   const templateOptions = {
@@ -202,8 +228,8 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
             ],
             "parallel": false
         },
-        */
       }
+      */
 
 /*        
       build: {
@@ -221,10 +247,29 @@ export default async function (host: Tree, options: NxFirebaseAppGeneratorSchema
         {}
     );   
     */ 
+
   await formatFiles(host);
 
-
-
+/*
+ // add lint target to firebase functions application
+  const tasks: GeneratorCallback[] = [];
+  if (options.linter !== Linter.None) {
+    const lintTask = await addLintingToApplication(host, normalizedOptions);
+    tasks.push(lintTask);    
+  }  
+ // add test target to firebase functions application
+  if (options.unitTestRunner === 'jest') {
+    const jestTask = await jestProjectGenerator(host, {
+      project: options.name,
+      setupFile: 'none',
+      skipSerializers: true,
+      supportTsx: true,
+      babelJest: options.babelJest,
+    });
+    tasks.push(jestTask);
+  }
+  await runTasksInSerial(...tasks);  
+*/
     return chain([
         addDependencies(),
     ])

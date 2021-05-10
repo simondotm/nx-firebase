@@ -6,7 +6,7 @@
   "type": "object",
   "examples": [
     {
-      "command": "g lib myfirebaseapp --directory=myapp",
+      "command": "g @simondotm/nxfirebase:app myfirebaseapp --directory=myapp",
       "description": "Generate a firebase application in apps/myfirebaseapp/myapp"
     }
   ],  
@@ -20,6 +20,18 @@
       },
       "x-prompt": "What name would you like to use?"
     },
+    "linter": {
+      "description": "The tool to use for running lint checks.",
+      "type": "string",
+      "enum": ["eslint", "tslint"],
+      "default": "eslint"
+    },
+    "unitTestRunner": {
+      "type": "string",
+      "enum": ["jest", "none"],
+      "description": "Test runner to use for unit tests",
+      "default": "jest"
+    },    
     "tags": {
       "type": "string",
       "description": "Add tags to the project (used for linting)",
@@ -33,7 +45,32 @@
     "importPath": {
       "type": "string",
       "description": "The library name used to import it, like @myorg/my-awesome-lib. Must be a valid npm name."
-    }
+    },
+    "publishable": {
+      "type": "boolean",
+      "description": "Create a publishable library."
+    },
+    "buildable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Generate a buildable library."
+    },
+    "testEnvironment": {
+      "type": "string",
+      "enum": ["jsdom", "node"],
+      "description": "The test environment to use if unitTestRunner is set to jest",
+      "default": "node"
+    },   
+    "strict": {
+      "type": "boolean",
+      "description": "Whether to enable tsconfig strict mode or not.",
+      "default": false
+    },
+    "babelJest": {
+      "type": "boolean",
+      "description": "Use babel instead ts-jest",
+      "default": false
+    }    
   },
   "required": ["name"]
 }
