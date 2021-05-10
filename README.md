@@ -39,9 +39,11 @@ The app generator will also create a Firebase configuration file called `firebas
 
 ## Build Project
 
-**`nx run appname:build`**
+**`nx build appname [--with-deps]`**
 
 Compiles & builds the target Nx Firebase (functions) application to `dist/apps/[dir]/appname`. It will also auto-generate a `package.json` that is compatible with the Firebase CLI for functions deployment.
+
+(`nx affected:build [--with-deps]` should also work fine).
 
 ## Deploy Project (Firebase functions)
 
@@ -231,6 +233,10 @@ Firebase functions does support [private packages](https://firebase.google.com/d
 
 If you use `ModuleAlias` and TSC path aliases in your Firebase functions (as I do), please note that I've not yet figured out how to support project-specific `tsc` `paths` in the Typescript configurations. It seems tricky since Nx uses path aliases in the workspace root `tsconfig` for library imports, and adding any path overrides in applications will overwrite these. The only workaround I can think of is to add global aliases with some naming convention to the workspace root TSC config... If anyone has any ideas they'd be very welcome.
 
+
+**Unit Tests**
+
+I've not implemented a full set of unit tests yet, but the e2e tests do perform a few standard tests.
 
 ## Future features
 It feels like there could be more utility added to this plugin, but for now I'd thought I'd just share the the early version to see where things go with it.
