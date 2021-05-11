@@ -169,10 +169,15 @@ function addProject(tree: Tree, options: NormalizedSchema) {
  * @param options 
  */
 function addAppFiles(tree: Tree, options: NormalizedSchema) {
+  const relativeRootPath = offsetFromRoot(options.appProjectRoot)
+  const firebaseAppConfig = `firebase.${options.appProjectName}.json`
+  const offsetFirebaseAppConfig = joinPathFragments(relativeRootPath, firebaseAppConfig)
   const templateOptions = {
     ...options,
     ...names(options.name),
-    offsetFromRoot: offsetFromRoot(options.appProjectRoot),
+    offsetFromRoot: relativeRootPath,
+    offsetFirebaseAppConfig: offsetFirebaseAppConfig,
+    firebaseAppConfig: firebaseAppConfig,
     template: '',
   };
   // generate the firebase app specific files
@@ -212,9 +217,9 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
   //  in order to use commands like 'firebase use --add'
   // firebase.json is an annoying artefact of this requirement, as it isn't actually used by our firebase apps
   //  which each have their own firebase.<appname>.json config
-  const firebaseConfig = path.join(tree.root, "firebase.json")
-  //console.log("firebaseConfig=" + firebaseConfig)
-  if (!fs.existsSync(firebaseConfig)) {
+  const firebaseDefaultConfig = path.join(tree.root, "firebase.json")
+  //console.log("firebaseDefaultConfig=" + firebaseDefaultConfig)
+  if (!fs.existsSync(firebaseDefaultConfig)) {
     generateFiles(
         tree,
         path.join(__dirname, 'files_firebase'),
