@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  publish:
+  publish_github:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -33,8 +33,29 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
+  publish_npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '15.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+
+      - name: Build plugin
+        run: npx nx build nxfirebase
+
+      - name: Publish to NPM
+      - run: npm publish --access=public
+        working-directory: ./dist/packages/nxfirebase
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   release:
-    needs: publish
+    needs: [ publish_github, publish_npm ]
     name: Release
     runs-on: ubuntu-latest
     steps:
