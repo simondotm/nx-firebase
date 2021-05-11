@@ -20,9 +20,9 @@ function patchAppRoot() : string {
     }
     const appRoot = pathInner(cwd)
 
-    console.log("cwd=" + cwd)
-    console.log("is e2e=" + e2e)
-    console.log("appRoot=" + appRoot)
+    //console.log("cwd=" + cwd)
+    //console.log("is e2e=" + e2e)
+    //console.log("appRoot=" + appRoot)
 
     //only patch the workspace rootpath if we are running in an nx-e2e workspace path
     if (e2e) {

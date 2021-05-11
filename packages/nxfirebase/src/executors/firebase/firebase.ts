@@ -42,7 +42,13 @@ function runFirebaseCli(args:string[]) {
   });
 }
 
-
+/**
+ * Experimental executor to wrap Firebase CLI with the --config <config> option auto-added for convenience
+ * Not yet convinced this is actually adding value
+ * @param options 
+ * @param context 
+ * @returns 
+ */
 export default async function runExecutor(options: FirebaseExecutorSchema, context: ExecutorContext) {
   console.log('Executor ran for Firebase', options);
 
