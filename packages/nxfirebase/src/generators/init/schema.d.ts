@@ -1,3 +1,4 @@
 export interface NxFirebaseInitGeneratorSchema {
-  skipFormat?: boolean;
+  unitTestRunner?: 'jest' | 'none';
+  skipFormat?: boolean;  
 }

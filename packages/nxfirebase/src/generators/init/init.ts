@@ -1,84 +1,62 @@
-import { NxFirebaseInitGeneratorSchema } from './schema';
 import {
   addDependenciesToPackageJson,
-//  convertNxGenerator,
+  convertNxGenerator,
+  formatFiles,
   GeneratorCallback,
-  readWorkspaceConfiguration,
   Tree,
   updateJson,
-  updateWorkspaceConfiguration,
 } from '@nrwl/devkit';
-//import { jestInitGenerator } from '@nrwl/jest';
-//import { cypressInitGenerator } from '@nrwl/cypress';
-//import { webInitGenerator } from '@nrwl/web';
+import { NxFirebaseInitGeneratorSchema } from './schema';
 import { setDefaultCollection } from '@nrwl/workspace/src/utilities/set-default-collection';
-import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial';
-/*
-import {
-  nxVersion,
-  reactDomVersion,
-  reactVersion,
-  testingLibraryReactVersion,
-  typesReactDomVersion,
-  typesReactVersion,
-} from '../../utils/versions';
-*/
+import { jestInitGenerator } from '@nrwl/jest';
 
-function setDefault(host: Tree) {
-  const workspace = readWorkspaceConfiguration(host);
-
-  workspace.generators = workspace.generators || {};
-  const reactGenerators = workspace.generators['@nrwl/react'] || {};
-  const generators = {
-    ...workspace.generators,
-    '@nrwl/react': {
-      ...reactGenerators,
-      application: {
-        ...reactGenerators.application,
-        babel: true,
-      },
-    },
-  };
-
-  updateWorkspaceConfiguration(host, { ...workspace, generators });
-  setDefaultCollection(host, '@nrwl/react');
-}
-
-function updateDependencies(host: Tree) {
-  updateJson(host, 'package.json', (json) => {
-    if (json.dependencies && json.dependencies['@nrwl/react']) {
-      delete json.dependencies['@nrwl/react'];
-    }
+function updateDependencies(tree: Tree) {
+  //SM: nrwl plugins auto update their plugins here, we don't need to do that.
+  /*
+  updateJson(tree, 'package.json', (json) => {
+    delete json.dependencies['@nrwl/node'];
     return json;
   });
-  // we install the latest versions of firebase for convenience
-  // users can uninstall or install at a preferred version if they like.
-  return addDependenciesToPackageJson(
-    host,
+  */
+  // instead we just add the firebase dependencies
+  return addDependenciesToPackageJson(tree, 
     {
         'firebase-admin': 'latest', //"^9.2.0",
         'firebase-functions': 'latest' //"^3.11.0"
-    },
+    }, 
     {
+      //'@nrwl/node': nxVersion 
+    });
+}
+
+function normalizeOptions(schema: NxFirebaseInitGeneratorSchema) {
+  return {
+    ...schema,
+    unitTestRunner: schema.unitTestRunner ?? 'jest',
+  };
+}
+
+export async function initGenerator(tree: Tree, schema: NxFirebaseInitGeneratorSchema) {
+  const options = normalizeOptions(schema);
+
+  setDefaultCollection(tree, '@nrwl/node');
+
+  let jestInstall: GeneratorCallback;
+  if (options.unitTestRunner === 'jest') {
+    jestInstall = await jestInitGenerator(tree, {});
+  }
+  const installTask = await updateDependencies(tree);
+  if (!options.skipFormat) {
+    await formatFiles(tree);
+  }
+
+  return async () => {
+    if (jestInstall) {
+      await jestInstall();
     }
-  );
+    await installTask();
+  };
 }
 
-export async function nxfirebaseInitGenerator(host: Tree, schema: NxFirebaseInitGeneratorSchema) {
-  const tasks: GeneratorCallback[] = [];
-
-  console.log("called firebase init generator")
-  //setDefault(host);
-
-
-  //const initTask = await webInitGenerator(host, schema);
-  //tasks.push(initTask);
-  const installTask = updateDependencies(host);
-  tasks.push(installTask);
-
-  return runTasksInSerial(...tasks);
-}
-
-export default nxfirebaseInitGenerator;
-
-//export const reactInitSchematic = convertNxGenerator(nxfirebaseInitGenerator);
+export default initGenerator;
+export const initSchematic = convertNxGenerator(initGenerator);

@@ -1,18 +1,19 @@
 {
   "database": {
-    "rules": "<%= projectRoot %>/database.rules.json"
+    "rules": "<%= appProjectRoot %>/database.rules.json"
   },
   "firestore": {
-    "rules": "<%= projectRoot %>/firestore.rules",
-    "indexes": "<%= projectRoot %>/firestore.indexes.json"
+    "rules": "<%= appProjectRoot %>/firestore.rules",
+    "indexes": "<%= appProjectRoot %>/firestore.indexes.json"
   },    
   "hosting": [],
   "storage": [],
   "functions": {
     "predeploy": [
-      "nx run <%= projectName %>:build"
+      "nx build <%= appProjectName %> --with-deps",
+      "nx lint <%= appProjectName %>"
     ],
-    "source": "dist/<%= projectRoot %>"
+    "source": "dist/<%= appProjectRoot %>"
   },
   "emulators": {
     "functions": {
