@@ -2,11 +2,11 @@ import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 import { Tree, readProjectConfiguration } from '@nrwl/devkit';
 
 import generator from './application';
-import { NxFirebaseAppGeneratorSchema } from './schema';
+import { Schema } from './schema';
 
 describe('nxfirebase generator', () => {
   let appTree: Tree;
-  const options: NxFirebaseAppGeneratorSchema = { name: 'test' };
+  const options: Schema = { name: 'test' };
 
   beforeEach(() => {
     appTree = createTreeWithEmptyWorkspace();

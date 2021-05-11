@@ -6,6 +6,8 @@ This project was generated using the Nx plugin workspace generator v12.1.1
 
 > **Note**: This project is an early beta and feedback is very welcome. Please note I created this plugin to primarily serve my own needs, so feature requests may take a bit of time to consider. Also, I don't use the Firebase emulators much so it is probably needing some additional work for supporting that.
 
+I'm making this project in my spare time, so if you find it useful, or it saved you some time, you are very welcome to [buy me a ☕ coffee](https://ko-fi.com/simondotm). 
+
 ## Overview
 
 Nx provides a great way to manage monorepo workflows, however if you have a development setup where your Nx workspace uses one or more Firebase projects that use different combinations and configurations of Firebase features such as _hosting_, _storage_, _database rules/indexes_, and _functions_, then some extra tooling is necessary in order to maintain a familiar Firebase workflow within your monorepo.
@@ -37,9 +39,11 @@ The app generator will also create a Firebase configuration file called `firebas
 
 ## Build Project
 
-**`nx run appname:build`**
+**`nx build appname [--with-deps]`**
 
 Compiles & builds the target Nx Firebase (functions) application to `dist/apps/[dir]/appname`. It will also auto-generate a `package.json` that is compatible with the Firebase CLI for functions deployment.
+
+(`nx affected:build [--with-deps]` should also work fine).
 
 ## Deploy Project (Firebase functions)
 
@@ -90,7 +94,7 @@ The Firebase CLI usually warns you anyway if you try to deploy a feature that is
 ## Nx Workspaces With Multiple Firebase Projects
 This plugin supports multiple Firebase Applications/Projects inside one Nx workspace. 
 
-Each Nx Firebase Application generates its own `firebase.<appname>.json` configuration which can then be used with any Firebase CLI command by using the `--config <config>` [CLI option](https://firebase.google.com/docs/cli#initialize_a_firebase_project).
+Each Nx Firebase Application generates its own `firebase.<appname>.json` configuration in the Nx workspace root which can then be used with any Firebase CLI command by using the `--config <config>` [CLI option](https://firebase.google.com/docs/cli#initialize_a_firebase_project).
 
 > _When using multiple Firebase projects in a workspace, remember that there is only one `.firebaserc` file to contain aliases for all of your deployment targets._
 >
@@ -103,6 +107,16 @@ Each Nx Firebase Application generates its own `firebase.<appname>.json` configu
 If you only use a single Firebase project in your Nx workspace, feel free to delete the auto-generated empty `firebase.json` config and rename the app specific `firebase.appname.json` config to just `firebase.json`.
 
 The Firebase CLI will then just use this default configuration file instead, and in this scenario there's no need to pass the additional `--config` CLI option.
+
+## Firebase Functions
+
+An NxFirebase app is essentially a Firebase _functions_ directory (along with the few other configuration files as mentioned above). The main difference is that there isn't a directory called `functions` which you may be used to from projects setup by the Firebase CLI; with NxFirebase your app directory IS your functions folder.
+
+Inside the new `apps/appname` directory you will find the following functions-specific files:
+* `package.json` - The stub package file used when deploying firebase functions
+* `src` - Your Firebase functions code goes in here. You are free to structure your code however you like in this directory
+* `tsconfig.json` and `tsconfig.app.json` as usual
+
 
 ## Firebase Hosting
 If you have one or more other web apps (Angular/React/HTML) that are deployed to a hosting site on your Firebase project, simply add them to your workspace as usual using the standard `nx g` app generators.
@@ -124,7 +138,7 @@ To keep the root of your Nx workspace tidy, the NxFirebase plugin puts default F
 
 Again, this works just fine with the usual Firebase CLI command, eg:
 
-**`firebase deploy --only firestore:rules`**
+**`firebase deploy --only firestore:rules --config firebase.appname.json`**
 
 This is also useful for cleaner separation if you have multiple Firebase projects in your Nx workspace.
 
@@ -132,7 +146,7 @@ Again, you are free to modify these locations if you wish by simply changing the
 
 ## Migrating an existing Firebase project to Nx
 
-To bring an existing Firebase project into an Nx workspace, simply generate the Nx Firebase application first, and then just overwrite the default configuration & rules/indexes with your existing `firebase.json`, rules & index files.
+To bring an existing Firebase project into an Nx workspace, simply generate the Nx Firebase application(s) first, and then just overwrite the generated Firebase configuration & rules/indexes with your existing `firebase.json`, rules & index files.
 
 ## Using Nx Libraries with Firebase Functions
 
@@ -188,9 +202,9 @@ Other considerations:
 2. The Firebase CLI is great and familar, so we don't really want to have to add any extra complexity or wrappers around it if we can help it.
 
 ## Supporting Libraries in Functions
-Supporting libraries as external packages is slightly tricky. The solution the NxFirebase plugin uses is to use [local package references](https://firebase.google.com/docs/functions/handle-dependencies#including_local_nodejs_modules).
+Supporting Nx libraries as external packages with Firebase functions is slightly tricky. The solution the NxFirebase plugin uses is to use [local package references](https://firebase.google.com/docs/functions/handle-dependencies#including_local_nodejs_modules).
 
-NxFirebase has a custom build executor which is based on the `@nrwl/node:package` executor, with a few additional processes.
+NxFirebase has a custom build executor which is based on the `@nrwl/node:package` executor, with a few additional build steps.
 
 1. It compiles any node libraries that are dependents of our Firebase application
 2. It compiles the Firebase application functions code as a pure buildable Typescript library package
@@ -203,18 +217,31 @@ NxFirebase has a custom build executor which is based on the `@nrwl/node:package
 "@myorg/mylib": "0.0.1" => "@myorg/mylib": "file:libs/mylib"
 ```
 
-These steps ensure that the Firebase CLI can deploy functions with all of the correct dependencies and local library fully self contained within the `dist/apps/appname` directory (which pleases the CLI).
+These extra steps ensure that the Firebase CLI can deploy functions with all of the correct dependencies and local libraries fully self contained within the `dist/apps/appname` directory (which pleases the CLI).
 
 The reason why we make an additional copy of dependent libraries to the `node_modules` folder is because the Firebase CLI runs some checks (and partially processes the primary functions entry point node script) prior to deployment to ensure everything is in order. 
+
+There's no need to do a full `npm install` here, we only have to ensure local libraries exist inside `node_modules` at deployment time.
 
 The Firebase CLI doesn't upload the `node_modules` folder, only the `./src` and `./libs` folders.
 
 Firebase functions does support [private packages](https://firebase.google.com/docs/functions/handle-dependencies#using_private_modules), but they are frankly a bit of a headache, so packaging libraries locally is a much neater solution, and actually works pretty nicely with Nx workspace workflow.
 
+## Unsupported features
 
+**Project specific Typescript Paths**
+
+If you use `ModuleAlias` and TSC path aliases in your Firebase functions (as I do), please note that I've not yet figured out how to support project-specific `tsc` `paths` in the Typescript configurations. It seems tricky since Nx uses path aliases in the workspace root `tsconfig` for library imports, and adding any path overrides in applications will overwrite these. The only workaround I can think of is to add global aliases with some naming convention to the workspace root TSC config... If anyone has any ideas they'd be very welcome.
+
+
+**Unit Tests**
+
+I've not implemented a full set of unit tests yet, but the e2e tests do perform a few standard tests.
 
 ## Future features
-It feels like there could be more utility added to this plugin, but for now I'd thought I'd just share the the early version to see what feedback is like.
+It feels like there could be more utility added to this plugin, but for now I'd thought I'd just share the the early version to see where things go with it.
+
+Eagle eyed viewers might notice there is a work in progress `firebase` executor for wrapping the Firebase CLI, and adding the `--config <path>` CLI option for convenience, but I wasn't especially happy with it's utility, so we'll see how that goes.
 
 
 # Plugin Development

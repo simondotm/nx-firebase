@@ -13,6 +13,7 @@ import {
   DependentBuildableProjectNode,
   updateBuildableProjectPackageJsonDependencies,
 } from '@nrwl/workspace/src/utilities/buildable-libs-utils';
+//SM: Much of our build executor is based on @nrwl/node:package executor
 import compileTypeScriptFiles from './node/package/utils/compile-typescript-files';
 import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';

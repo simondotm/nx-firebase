@@ -1,6 +1,22 @@
 {
   "name": "@simondotm/nxfirebase",
   "version": "0.1.1",
+  "description": "A Firebase plugin for Nx monorepo workspaces.",
+  "author": "Simon Morris",
+  "license": "MIT",
+  "homepage": "https://github.com/simondotm/nxfirebase",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:simondotm/nxfirebase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/simondotm/nxfirebase/issues"
+  },
+  "keywords": [
+    "Firebase",
+    "Nx",
+    "Monorepo"
+  ],
   "main": "src/index.js",
   "generators": "./generators.json",
   "executors": "./executors.json"
