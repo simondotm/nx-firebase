@@ -1,6 +1,5 @@
 import {
   addProjectConfiguration,
-  formatFiles,
   generateFiles,
   getWorkspaceLayout,
   names,
@@ -8,7 +7,6 @@ import {
   Tree,
   joinPathFragments,
   GeneratorCallback,
-  addDependenciesToPackageJson,
   ProjectConfiguration,
   TargetConfiguration,
   NxJsonProjectConfiguration,
@@ -16,32 +14,24 @@ import {
   updateWorkspaceConfiguration,
   convertNxGenerator
 } from '@nrwl/devkit';
-//import { addDepsToPackageJson, runCommandsGenerator } from '@nrwl/workspace';
-//import { chain, noop, Rule } from '@angular-devkit/schematics';
 import * as path from 'path';
 import * as fs from 'fs';
 import { initGenerator } from '../init/init';
-import { NxFirebaseAppGeneratorSchema } from './schema';
+import { Schema } from './schema';
 import { Linter, lintProjectGenerator } from '@nrwl/linter';
 import { jestProjectGenerator } from '@nrwl/jest';
 import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial';
 
-interface NormalizedSchema extends NxFirebaseAppGeneratorSchema {
+// SM: This generator is based on @nrwl/node:app
+interface NormalizedSchema extends Schema {
   appProjectRoot: string;
-  parsedTags: string[];
   appProjectName: string;
-  /*
-
-    projectName: string;
-  projectRoot: string;
-  projectDirectory: string;
   parsedTags: string[];
-  */
 }
 
 function normalizeOptions(
   host: Tree,
-  options: NxFirebaseAppGeneratorSchema
+  options: Schema
 ): NormalizedSchema {
 
   const { appsDir, npmScope } = getWorkspaceLayout(host);
@@ -58,12 +48,11 @@ function normalizeOptions(
     ? options.tags.split(',').map((s) => s.trim())
     : [];
 
-  // we put the scoped project name into the firebase functions package.json
+  // SM: we put the scoped project name into the firebase functions package.json
   // it's not actually necessary to do this for firebase functions, 
   // but it gives the package.json more context when viewed
   const importPath =
     options.importPath || `@${npmScope}/${appProjectName}`;
-
 
   return {
     ...options,
@@ -75,36 +64,14 @@ function normalizeOptions(
     unitTestRunner: options.unitTestRunner ?? 'jest',
     importPath: importPath
   };
-
-/*
-
-  const { npmScope } = getWorkspaceLayout(host);    
-  const defaultPrefix = npmScope;
-  const name = names(options.name).fileName;
-  const projectDirectory = options.directory
-    ? `${names(options.directory).fileName}/${name}`
-    : name;
-  const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-');
-  const projectRoot = `${getWorkspaceLayout(host).appsDir}/${projectDirectory}`;
-  const parsedTags = options.tags
-    ? options.tags.split(',').map((s) => s.trim())
-    : [];
-
-  const importPath =
-    options.importPath || `@${defaultPrefix}/${projectDirectory}`;
-
-  return {
-    ...options,
-    projectName,
-    projectRoot,
-    projectDirectory,
-    parsedTags,
-    importPath
-  };
-*/
 }
 
-
+/**
+ * 
+ * @param tree 
+ * @param options 
+ * @returns 
+ */
 export async function addLintingToApplication(
   tree: Tree,
   options: NormalizedSchema
@@ -124,7 +91,12 @@ export async function addLintingToApplication(
   return lintTask;
 }
 
-
+/**
+ * Create build target for NxFirebase apps
+ * @param project 
+ * @param options 
+ * @returns target configuration
+ */
 function getBuildConfig(
   project: ProjectConfiguration,
   options: NormalizedSchema
@@ -142,7 +114,13 @@ function getBuildConfig(
   };
 }
 
-
+/**
+ * Create "firebase" target for NxFirebase apps
+ * This is a work in progress, idea was to wrap the Firebase CLI with the --config part auto added
+ *  but not sure its actually much more convenient yet.
+ * @param options 
+ * @returns target configuration
+ */
 function getFirebaseConfig(
   options: NormalizedSchema
 ): TargetConfiguration {
@@ -154,7 +132,11 @@ function getFirebaseConfig(
   };
 }
 
-
+/**
+ * Generate the new Firebase app project in the workspace
+ * @param tree 
+ * @param options 
+ */
 function addProject(tree: Tree, options: NormalizedSchema) {
   const project: ProjectConfiguration & NxJsonProjectConfiguration = {
     root: options.appProjectRoot,
@@ -177,7 +159,15 @@ function addProject(tree: Tree, options: NormalizedSchema) {
 }
 
 
-
+/**
+ * Populate the NxFirebase app directory with the application files it needs:
+ * - default database rules & indexes
+ * - functions Typescript source directory & default entry script
+ * - functions package.json
+ * Also creates default `firebase.json` `.firebaserc` in the workspace root if they dont already exist
+ * @param tree 
+ * @param options 
+ */
 function addAppFiles(tree: Tree, options: NormalizedSchema) {
   const templateOptions = {
     ...options,
@@ -249,29 +239,14 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
 
 }
 
-
-function addDependencies(tree: Tree) {
-  return addDependenciesToPackageJson(tree, {
-        'firebase-admin': 'latest', //"^9.2.0",
-        'firebase-functions': 'latest' //"^3.11.0"
-    }, 
-    {});
-}
-/*
-function addDependencies(): Rule {
-    console.log("adding deps")
-  return addDepsToPackageJson(
-    {
-        'firebase-admin': 'latest', //"^9.2.0",
-        'firebase-functions': 'latest' //"^3.11.0"
-    },
-    {}
-  );
-}
-*/
-
-
-export async function applicationGenerator(tree: Tree, schema: NxFirebaseAppGeneratorSchema) {
+/**
+ * NxFirebase application generator
+ * Creates a new firebase application in the nx workspace
+ * @param tree 
+ * @param schema 
+ * @returns 
+ */
+export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(tree, schema);
 
   const tasks: GeneratorCallback[] = [];
@@ -303,86 +278,6 @@ export async function applicationGenerator(tree: Tree, schema: NxFirebaseAppGene
   return runTasksInSerial(...tasks);
 }
 
-
-/*
-export default async function (tree: Tree, options: NxFirebaseAppGeneratorSchema) {
-  const normalizedOptions = normalizeOptions(tree, options);
-
-  //const project = readProjectConfiguration(host, options.name);
-  const { appsDir } = getWorkspaceLayout(tree);
-
-  //add files before we add project config
-  // so that functions folder exists
-  addAppFiles(tree, normalizedOptions);
-
-  
-  // now add the project config, based on a node:package builder
-  // no webpack required or desired for firebase functions
-  addProjectConfiguration(tree, normalizedOptions.appProjectName, {
-    root: normalizedOptions.appProjectRoot,
-    projectType: 'application',
-    sourceRoot: `${normalizedOptions.appProjectRoot}/src`,
-    targets: {
-      build: {
-        //executor: '@nrwl/node:package',
-        executor: '@simondotm/nxfirebase:build',
-        outputs: ['{options.outputPath}'],
-        options: {
-            outputPath: `dist/${appsDir}/${normalizedOptions.projectDirectory}`,
-            tsConfig: `${normalizedOptions.projectRoot}/tsconfig.app.json`,
-            packageJson: `${normalizedOptions.projectRoot}/package.json`,
-            main: `${normalizedOptions.projectRoot}/src/index.ts`,
-            assets: [
-                `${normalizedOptions.projectRoot}/*.md`
-            ],
-        },
-      },
-      firebase: {
-        executor: '@simondotm/nxfirebase:firebase',
-        options: {
-            firebaseConfig: `firebase.${normalizedOptions.projectName}.json`,
-        },
-      },
-    },
-    tags: normalizedOptions.parsedTags,
-  });
-
-  console.log("tree1=" + JSON.stringify(tree, null, 3))
-
-  await formatFiles(tree);
-
-  const tasks: GeneratorCallback[] = [];
-
-  // add firebase dependencies to workspace package.json
-  const depsTask = addDependencies(tree)
-  tasks.push(depsTask);  
-
-  console.log("tree2=" + JSON.stringify(tree, null, 3))
-
-
- // add lint target to firebase functions application
-  if (options.linter !== Linter.None) {
-    const lintTask = await addLintingToApplication(tree, normalizedOptions);
-    tasks.push(lintTask);    
-  }  
-
-    console.log("tree3=" + JSON.stringify(tree, null, 3))
-
- // add test target to firebase functions application
-  if (options.unitTestRunner === 'jest') {
-    const jestTask = await jestProjectGenerator(tree, {
-      project: options.name,
-      setupFile: 'none',
-      skipSerializers: true,
-      supportTsx: true,
-      babelJest: options.babelJest,
-    });
-    tasks.push(jestTask);
-  }
-
-  return runTasksInSerial(...tasks);  
-}
-*/
 
 export default applicationGenerator
 export const applicationSchematic = convertNxGenerator(applicationGenerator);

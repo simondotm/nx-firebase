@@ -1,11 +1,11 @@
 import { readJson, readWorkspaceConfiguration, Tree } from '@nrwl/devkit';
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 import nxfirebaseInitGenerator from './init';
-import { NxFirebaseInitGeneratorSchema } from './schema';
+import { Schema } from './schema';
 
 describe('init', () => {
   let tree: Tree;
-  const schema: NxFirebaseInitGeneratorSchema = {
+  const schema: Schema = {
     skipFormat: false,
   };
 

@@ -6,7 +6,7 @@ import {
   Tree,
   updateJson,
 } from '@nrwl/devkit';
-import { NxFirebaseInitGeneratorSchema } from './schema';
+import { Schema } from './schema';
 import { setDefaultCollection } from '@nrwl/workspace/src/utilities/set-default-collection';
 import { jestInitGenerator } from '@nrwl/jest';
 
@@ -19,6 +19,7 @@ function updateDependencies(tree: Tree) {
   });
   */
   // instead we just add the firebase dependencies
+  // we'll use "latest" so we dont have to keep versions of the plugin tracked to firebase versions
   return addDependenciesToPackageJson(tree, 
     {
         'firebase-admin': 'latest', //"^9.2.0",
@@ -29,14 +30,14 @@ function updateDependencies(tree: Tree) {
     });
 }
 
-function normalizeOptions(schema: NxFirebaseInitGeneratorSchema) {
+function normalizeOptions(schema: Schema) {
   return {
     ...schema,
     unitTestRunner: schema.unitTestRunner ?? 'jest',
   };
 }
 
-export async function initGenerator(tree: Tree, schema: NxFirebaseInitGeneratorSchema) {
+export async function initGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(schema);
 
   setDefaultCollection(tree, '@nrwl/node');

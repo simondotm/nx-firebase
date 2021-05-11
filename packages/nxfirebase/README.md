@@ -50,13 +50,19 @@ Then:
 
 **`firebase deploy --only functions --config firebase.appname.json`**
 
+See the full plugin [README](https://github.com/simondotm/nxfirebase/blob/main/README.md) for more details.
+
 # NxFirebase Features
 
-* Supports Typescript Firebase functions
-* Supports single or multiple Firebase projects in one Nx workspace
-* Enables Firebase functions to easily import from buildable node libraries in the Nx workspace
-* Supports Nx dependency checking for builds
+Supports:
+* Typescript Firebase functions
+* Single or multiple Firebase projects in one Nx workspace
+* Firebase applications in app subdirectories
+* Use of Nx buildable node libraries in Firebase functions
+* Nx dependency checking for builds
+
+Additionally:
 * Auto generates Firebase functions `package.json` ready for no fuss deployment using the Firebase CLI
 * Auto generates default `firebase.json` configurations, rules and indexes for each Firebase app
-* Only very lightly opinionated about your Firebase configurations and layouts; you can just use the Firebase CLI as usual
+* Only very lightly opinionated about your Firebase configurations and workspace layouts; you can just use the Firebase CLI as usual
 * Keeps all of your firebase rules and indexes within your app folder, to keep your workspace root free of clutter

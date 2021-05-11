@@ -52,7 +52,7 @@
     },
     "buildable": {
       "type": "boolean",
-      "default": false,
+      "default": true,
       "description": "Generate a buildable library."
     },
     "testEnvironment": {
