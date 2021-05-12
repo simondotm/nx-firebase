@@ -49,7 +49,7 @@ jobs:
         run: npx nx build nxfirebase
 
       - name: Publish to NPM
-      - run: npm publish --access=public
+        run: npm publish --access=public
         working-directory: ./dist/packages/nxfirebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
