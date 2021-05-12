@@ -67,7 +67,7 @@ function normalizeOptions(
 }
 
 /**
- * 
+ * Add lint target to the firebase functions app
  * @param tree 
  * @param options 
  * @returns 
@@ -227,7 +227,7 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
         templateOptions
     );
   }else{
-      console.log("✔️ firebase.json already exists in this workspace")
+      console.log("✓ firebase.json already exists in this workspace")
   }
   const firebaseRc = path.join(tree.root, ".firebaserc")
   //console.log("firebaseRc=" + firebaseRc)
@@ -239,7 +239,7 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
         templateOptions
     );
   }else{
-      console.log("✔️ .firebaserc already exists in this workspace")
+      console.log("✓ .firebaserc already exists in this workspace")
   }
 
 }

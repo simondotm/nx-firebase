@@ -7,7 +7,9 @@
     "indexes": "<%= appProjectRoot %>/firestore.indexes.json"
   },    
   "hosting": [],
-  "storage": [],
+  "storage": {
+      "rules": "<%= appProjectRoot %>/storage.rules"
+  },
   "functions": {
     "predeploy": [
       "nx build <%= appProjectName %> --with-deps",
