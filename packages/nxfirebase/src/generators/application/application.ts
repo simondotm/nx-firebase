@@ -119,6 +119,11 @@ function getBuildConfig(
 
 /**
  * Create serve target for NxFirebase apps
+ * Uses run-commands executor to:
+ * 1. compile the functions app in watch mode
+ * 2. select a firebase project
+ * 3. run the firebase emulator(s)
+ * 
  * @param project 
  * @param options 
  * @returns target configuration
@@ -132,16 +137,13 @@ function getServeConfig(
     options: {
         commands: [
             {
-                command: `nx run ${options.appProjectName}:build`
-            },
-            {
-                command: "firebase use default"
+                command: `nx run ${options.appProjectName}:build --watch`
             },
             {
                 command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
             }
         ],
-        parallel: false
+        parallel: true
     }
   };
 }
