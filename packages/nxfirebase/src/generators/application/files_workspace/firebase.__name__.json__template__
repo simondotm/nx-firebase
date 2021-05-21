@@ -12,8 +12,8 @@
   },
   "functions": {
     "predeploy": [
-      "nx build <%= appProjectName %> --with-deps",
-      "nx lint <%= appProjectName %>"
+      "npx nx build <%= appProjectName %> --with-deps",
+      "npx nx lint <%= appProjectName %>"
     ],
     "source": "dist/<%= appProjectRoot %>"
   },
