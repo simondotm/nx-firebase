@@ -70,6 +70,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   );
 
 
+  // ensure dependent libraries are upto date.
   const dependentsBuilt = checkDependentProjectsHaveBeenBuilt(
     context.root,
     context.projectName,
@@ -77,13 +78,15 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     dependencies
   );
   if (!dependentsBuilt) {
-    throw new Error();
+    throw new Error("Dependent libraries need to be built first. Try adding '--with-deps' CLI option");
   }
 
-
-  // compile the firebase functions application
+  // compile the firebase functions Typescript application
   // uses the same builder logic as @nrwl/node:package
   // since we do not want or need to use webpack for cloud functions
+  // We may wish like to support --watch (https://github.com/simondotm/nxfirebase/issues/11)
+  // But the issue is that the compileTypeScriptFiles function deletes the output folder before compiling,
+  // which will delete our custom package.json and local libs if we do TSC as the last step. 
   const result = await compileTypeScriptFiles(
     normalizedOptions,
     context,
