@@ -20,7 +20,7 @@ import normalizeOptions from './node/package/utils/normalize-options';
 import addCliWrapper from './node/package/utils/cli';
 import { readJsonFile } from '@nrwl/workspace'
 import { join } from 'path'
-import { copy } from 'fs-extra';
+import { copy, removeSync } from 'fs-extra';
 import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
 const ENABLE_DEBUG = false
@@ -70,7 +70,8 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   );
 
 
-  // ensure dependent libraries are upto date.
+  // ensure dependent libraries exist.
+  // note that this check does not check if they are out of date. Not quite sure yet how to do that, but --with-deps will always work.
   const dependentsBuilt = checkDependentProjectsHaveBeenBuilt(
     context.root,
     context.projectName,
@@ -81,18 +82,11 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     throw new Error("Dependent libraries need to be built first. Try adding '--with-deps' CLI option");
   }
 
-  // compile the firebase functions Typescript application
-  // uses the same builder logic as @nrwl/node:package
-  // since we do not want or need to use webpack for cloud functions
-  // We may wish like to support --watch (https://github.com/simondotm/nxfirebase/issues/11)
-  // But the issue is that the compileTypeScriptFiles function deletes the output folder before compiling,
-  // which will delete our custom package.json and local libs if we do TSC as the last step. 
-  const result = await compileTypeScriptFiles(
-    normalizedOptions,
-    context,
-    appRoot,
-    dependencies
-  );
+  // clean the output folder
+  if (normalizedOptions.deleteOutputPath) {
+    removeSync(normalizedOptions.outputPath);
+  }
+  
 
   // there aren't really any assets needed for firebase functions
   // but left here for compatibility with node:package
@@ -198,6 +192,22 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   if (options.cli) {
     addCliWrapper(normalizedOptions, context);
   }
+
+
+
+  // compile the firebase functions Typescript application
+  // uses the same builder logic as @nrwl/node:package
+  // since we do not want or need to use webpack for cloud functions
+
+  // So that we can support --watch (https://github.com/simondotm/nxfirebase/issues/11)
+  // We run tsc as the last step, but we disable `deleteOutputPath` so that our previous steps are not deleted.
+  normalizedOptions.deleteOutputPath = false;
+  const result = await compileTypeScriptFiles(
+    normalizedOptions,
+    context,
+    appRoot,
+    dependencies
+  );
 
   return {
     ...result,
