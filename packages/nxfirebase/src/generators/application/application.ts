@@ -91,6 +91,8 @@ export async function addLintingToApplication(
   return lintTask;
 }
 
+
+
 /**
  * Create build target for NxFirebase apps
  * @param project 
@@ -113,6 +115,37 @@ function getBuildConfig(
     }
   };
 }
+
+
+/**
+ * Create serve target for NxFirebase apps
+ * @param project 
+ * @param options 
+ * @returns target configuration
+ */
+function getServeConfig(
+  project: ProjectConfiguration,
+  options: NormalizedSchema
+): TargetConfiguration {
+  return {
+    executor: '@nrwl/workspace:run-commands',
+    options: {
+        commands: [
+            {
+                command: `nx run ${options.appProjectName}:build`
+            },
+            {
+                command: "firebase use default"
+            },
+            {
+                command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
+            }
+        ],
+        parallel: false
+    }
+  };
+}
+
 
 /**
  * Create "firebase" target for NxFirebase apps
@@ -146,6 +179,7 @@ function addProject(tree: Tree, options: NormalizedSchema) {
     tags: options.parsedTags,
   };
   project.targets.build = getBuildConfig(project, options);
+  project.targets.serve = getServeConfig(project, options);
   project.targets.firebase = getFirebaseConfig(options);
 
   addProjectConfiguration(tree, options.name, project);
