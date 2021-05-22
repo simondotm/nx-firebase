@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "<%= offsetFromRoot %>dist/out-tsc",
     "module": "commonjs",
-    "types": ["node"]
+    "types": ["node"],
+    "target": "es2018"
   },
   "exclude": ["**/*.spec.ts"],
   "include": ["**/*.ts"]

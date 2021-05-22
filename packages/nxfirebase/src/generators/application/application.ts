@@ -91,6 +91,8 @@ export async function addLintingToApplication(
   return lintTask;
 }
 
+
+
 /**
  * Create build target for NxFirebase apps
  * @param project 
@@ -110,6 +112,61 @@ function getBuildConfig(
       tsConfig: joinPathFragments(options.appProjectRoot, 'tsconfig.app.json'),
       packageJson: joinPathFragments(options.appProjectRoot, 'package.json'),
       assets: [joinPathFragments(options.appProjectRoot, '*.md')],
+    }
+  };
+}
+
+
+/**
+ * Create serve target for NxFirebase apps
+ * Uses run-commands executor to:
+ * 1. compile the functions app in watch mode
+ * 2. select a firebase project
+ * 3. run the firebase emulator(s)
+ * 
+ * @param project 
+ * @param options 
+ * @returns target configuration
+ */
+function getServeConfig(
+  project: ProjectConfiguration,
+  options: NormalizedSchema
+): TargetConfiguration {
+  return {
+    executor: '@nrwl/workspace:run-commands',
+    options: {
+        commands: [
+            {
+                command: `nx run ${options.appProjectName}:build --watch`
+            },
+            {
+                command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
+            }
+        ],
+        parallel: true
+    }
+  };
+}
+
+
+/**
+ * Create deploy target for NxFirebase apps
+ * Uses run-commands executor to run firebase CLI
+ * Default Firebase Config has build+lint as predeploy
+ * Additional command arguments are forwarded by default
+ * 
+ * @param project 
+ * @param options 
+ * @returns target configuration
+ */
+function getDeployConfig(
+  project: ProjectConfiguration,
+  options: NormalizedSchema
+): TargetConfiguration {
+  return {
+    executor: '@nrwl/workspace:run-commands',
+    options: {
+        command: `firebase deploy --config firebase.${options.appProjectName}.json`
     }
   };
 }
@@ -146,8 +203,10 @@ function addProject(tree: Tree, options: NormalizedSchema) {
     tags: options.parsedTags,
   };
   project.targets.build = getBuildConfig(project, options);
+  project.targets.serve = getServeConfig(project, options);
   project.targets.firebase = getFirebaseConfig(options);
-
+  project.targets.deploy = getDeployConfig(project, options);
+  
   addProjectConfiguration(tree, options.name, project);
 
   const workspace = readWorkspaceConfiguration(tree);
