@@ -150,6 +150,28 @@ function getServeConfig(
 
 
 /**
+ * Create deploy target for NxFirebase apps
+ * Uses run-commands executor to run firebase CLI
+ * Default Firebase Config has build+lint as predeploy
+ * Additional command arguments are forwarded by default
+ * 
+ * @param project 
+ * @param options 
+ * @returns target configuration
+ */
+function getDeployConfig(
+  project: ProjectConfiguration,
+  options: NormalizedSchema
+): TargetConfiguration {
+  return {
+    executor: '@nrwl/workspace:run-commands',
+    options: {
+        command: `firebase deploy --config firebase.${options.appProjectName}.json`
+    }
+  };
+}
+
+/**
  * Create "firebase" target for NxFirebase apps
  * This is a work in progress, idea was to wrap the Firebase CLI with the --config part auto added
  *  but not sure its actually much more convenient yet.
@@ -183,7 +205,8 @@ function addProject(tree: Tree, options: NormalizedSchema) {
   project.targets.build = getBuildConfig(project, options);
   project.targets.serve = getServeConfig(project, options);
   project.targets.firebase = getFirebaseConfig(options);
-
+  project.targets.deploy = getDeployConfig(project, options);
+  
   addProjectConfiguration(tree, options.name, project);
 
   const workspace = readWorkspaceConfiguration(tree);
