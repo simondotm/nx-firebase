@@ -1,7 +1,10 @@
 # @simondotm/nx-firebase
 
-A plugin for [Nx](https://nx.dev) that provides support for Firebase projects in an Nx monorepo workspace.
+A plugin for [Nx](https://nx.dev) >= 12.1.1 that provides support for Firebase projects in an Nx monorepo workspace.
 
+**This project has been renamed from `@simondotm/nxfirebase` to `@simondotm/nx-firebase`**
+
+See [CHANGELOG](https://github.com/simondotm/nx-firebase/blob/main/CHANGELOG.md) for more details. 
 
 ## Overview
 
