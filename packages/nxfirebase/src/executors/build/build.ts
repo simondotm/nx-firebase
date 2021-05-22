@@ -199,7 +199,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // uses the same builder logic as @nrwl/node:package
   // since we do not want or need to use webpack for cloud functions
 
-  // So that we can support --watch (https://github.com/simondotm/nxfirebase/issues/11)
+  // So that we can support --watch (https://github.com/simondotm/nx-firebase/issues/11)
   // We run tsc as the last step, but we disable `deleteOutputPath` so that our previous steps are not deleted.
   normalizedOptions.deleteOutputPath = false;
   const result = await compileTypeScriptFiles(

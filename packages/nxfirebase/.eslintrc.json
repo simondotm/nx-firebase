@@ -5,7 +5,7 @@
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "parserOptions": {
-        "project": ["packages/nxfirebase/tsconfig.*?.json"]
+        "project": ["packages/nx-firebase/tsconfig.*?.json"]
       },
       "rules": {}
     },

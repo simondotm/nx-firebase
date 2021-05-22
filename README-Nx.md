@@ -1,4 +1,4 @@
-# @simondotm/nxfirebase
+# @simondotm/nx-firebase
 
 This project was generated using [Nx](https://nx.dev).
 

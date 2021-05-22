@@ -3,27 +3,27 @@
 	"tasks": [
         {
             "type": "npm",
-            "script": "build -- nxfirebase",
+            "script": "build -- nx-firebase",
             "group": "build",
             "problemMatcher": [],
             "label": "Build Nx firebase plugin",
-            "detail": "nx build nxfirebase"
+            "detail": "nx build nx-firebase"
         },
         {
             "type": "npm",
-            "script": "test -- nxfirebase",
+            "script": "test -- nx-firebase",
             "group": "test",
             "problemMatcher": [],
             "label": "Test Nx firebase plugin",
-            "detail": "nx test nxfirebase"
+            "detail": "nx test nx-firebase"
         },
         {
             "type": "npm",
-            "script": "e2e -- nxfirebase-e2e",
+            "script": "e2e -- nx-firebase-e2e",
             "group": "test",
             "problemMatcher": [],
             "label": "Test e2e Nx firebase plugin",
-            "detail": "nx e2e nxfirebase-e2e"
+            "detail": "nx e2e nx-firebase-e2e"
         }
     ]
 }
