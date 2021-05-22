@@ -140,6 +140,8 @@ If you only use a single Firebase project in your Nx workspace, feel free to del
 
 The Firebase CLI will then just use this default configuration file instead, and in this scenario there's no need to pass the additional `--config` CLI option.
 
+> **Important:** _If you do rename your firebase configuration files, remember to update (or remove) any `--config` settings in your NxFirebase application's `serve` and `deploy` targets in your `workspace.json` or `angular.json` configuration file._
+
 ## Firebase Functions
 
 An NxFirebase app is essentially a Firebase _functions_ directory (along with the few other configuration files as mentioned above). The main difference is that there isn't a directory called `functions` which you may be used to from projects setup by the Firebase CLI; with NxFirebase your app directory IS your functions folder.
