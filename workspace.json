@@ -61,7 +61,7 @@
         }
       }
     },
-    "nx=firebase-e2e": {
+    "nx-firebase-e2e": {
       "projectType": "application",
       "root": "e2e\\nx-firebase-e2e",
       "sourceRoot": "e2e\\nx-firebase-e2e/src",
