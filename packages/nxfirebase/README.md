@@ -50,6 +50,15 @@ Then:
 
 **`firebase deploy --only functions --config firebase.appname.json`**
 
+Or
+
+**`nx deploy appname --only functions`**
+
+
+## Serve Project
+
+**`nx serve appname`** - will run `tsc` in watch mode on the app function code and start the Firebase emulators
+
 See the full plugin [README](https://github.com/simondotm/nxfirebase/blob/main/README.md) for more details.
 
 # NxFirebase Features
@@ -60,6 +69,7 @@ Supports:
 * Firebase applications in app subdirectories
 * Use of Nx buildable node libraries in Firebase functions
 * Nx dependency checking for builds
+* Building functions with `tsc` `--watch` mode
 
 Additionally:
 * Auto generates Firebase functions `package.json` ready for no fuss deployment using the Firebase CLI
