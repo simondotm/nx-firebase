@@ -70,6 +70,7 @@ Supports:
 * Use of Nx buildable node libraries in Firebase functions
 * Nx dependency checking for builds
 * Building functions with `tsc` `--watch` mode
+* Convenience Nx `deploy` and `serve` targets for functions
 
 Additionally:
 * Auto generates Firebase functions `package.json` ready for no fuss deployment using the Firebase CLI
