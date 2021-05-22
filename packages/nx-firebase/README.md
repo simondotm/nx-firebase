@@ -1,4 +1,4 @@
-# @simondotm/nxfirebase
+# @simondotm/nx-firebase
 
 A plugin for [Nx](https://nx.dev) that provides support for Firebase projects in an Nx monorepo workspace.
 
@@ -15,18 +15,18 @@ This plugin aims to help with this by:
 # Quick Start
 
 ## Installation
-**`npm install @simondotm/nxfirebase`**
+**`npm install @simondotm/nx-firebase`**
 
 Installs this plugin into your Nx workspace.
 
 
-**`nx g @simondotm/nxfirebase:init`**
+**`nx g @simondotm/nx-firebase:init`**
 
 Installs firebase dependencies (both for backend and frontend) to your root workspace `package.json` (or you can just `npm install` firebase dependencies manually)
 
 ## Create Firebase Application
 
-**`nx g @simondotm/nxfirebase:app <appname> [--directory dir]`**
+**`nx g @simondotm/nx-firebase:app <appname> [--directory dir]`**
 
 Generates a new Nx Firebase application in the workspace - `/apps/[dir]/appname`
 
@@ -59,9 +59,9 @@ Or
 
 **`nx serve appname`** - will run `tsc` in watch mode on the app function code and start the Firebase emulators
 
-See the full plugin [README](https://github.com/simondotm/nxfirebase/blob/main/README.md) for more details.
+See the full plugin [README](https://github.com/simondotm/nx-firebase/blob/main/README.md) for more details.
 
-# NxFirebase Features
+# Nx-Firebase Features
 
 Supports:
 * Typescript Firebase functions

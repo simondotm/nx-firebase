@@ -1,26 +1,26 @@
 {
   "version": 2,
   "projects": {
-    "nxfirebase": {
-      "root": "packages/nxfirebase",
-      "sourceRoot": "packages/nxfirebase/src",
+    "nx-firebase": {
+      "root": "packages/nx-firebase",
+      "sourceRoot": "packages/nx-firebase/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": [
-              "packages/nxfirebase/**/*.ts"
+              "packages/nx-firebase/**/*.ts"
             ]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
           "outputs": [
-            "coverage/packages/nxfirebase"
+            "coverage/packages/nx-firebase"
           ],
           "options": {
-            "jestConfig": "packages/nxfirebase/jest.config.js",
+            "jestConfig": "packages/nx-firebase/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -30,29 +30,29 @@
             "{options.outputPath}"
           ],
           "options": {
-            "outputPath": "dist/packages/nxfirebase",
-            "tsConfig": "packages/nxfirebase/tsconfig.lib.json",
-            "packageJson": "packages/nxfirebase/package.json",
-            "main": "packages/nxfirebase/src/index.ts",
+            "outputPath": "dist/packages/nx-firebase",
+            "tsConfig": "packages/nx-firebase/tsconfig.lib.json",
+            "packageJson": "packages/nx-firebase/package.json",
+            "main": "packages/nx-firebase/src/index.ts",
             "assets": [
-              "packages/nxfirebase/*.md",
+              "packages/nx-firebase/*.md",
               {
-                "input": "./packages/nxfirebase/src",
+                "input": "./packages/nx-firebase/src",
                 "glob": "**/*.!(ts)",
                 "output": "./src"
               },
               {
-                "input": "./packages/nxfirebase/src",
+                "input": "./packages/nx-firebase/src",
                 "glob": "**/.!(ts)",
                 "output": "./src"
               },
               {
-                "input": "./packages/nxfirebase",
+                "input": "./packages/nx-firebase",
                 "glob": "generators.json",
                 "output": "."
               },
               {
-                "input": "./packages/nxfirebase",
+                "input": "./packages/nx-firebase",
                 "glob": "executors.json",
                 "output": "."
               }
@@ -61,18 +61,18 @@
         }
       }
     },
-    "nxfirebase-e2e": {
+    "nx-firebase-e2e": {
       "projectType": "application",
-      "root": "e2e\\nxfirebase-e2e",
-      "sourceRoot": "e2e\\nxfirebase-e2e/src",
+      "root": "e2e\\nx-firebase-e2e",
+      "sourceRoot": "e2e\\nx-firebase-e2e/src",
       "targets": {
         "e2e": {
           "executor": "@nrwl/nx-plugin:e2e",
           "options": {
-            "target": "nxfirebase:build",
-            "npmPackageName": "@simondotm/nxfirebase",
-            "pluginOutputPath": "dist/packages/nxfirebase",
-            "jestConfig": "e2e/nxfirebase-e2e/jest.config.js"
+            "target": "nx-firebase:build",
+            "npmPackageName": "@simondotm/nx-firebase",
+            "pluginOutputPath": "dist/packages/nx-firebase",
+            "jestConfig": "e2e/nx-firebase-e2e/jest.config.js"
           }
         }
       }

@@ -12,8 +12,8 @@
     }
   },
   "projects": {
-    "nxfirebase": { "tags": [] },
-    "nxfirebase-e2e": { "tags": [], "implicitDependencies": ["nxfirebase"] }
+    "nx-firebase": { "tags": [] },
+    "nx-firebase-e2e": { "tags": [], "implicitDependencies": ["nx-firebase"] }
   },
   "workspaceLayout": { "appsDir": "e2e", "libsDir": "packages" }
 }

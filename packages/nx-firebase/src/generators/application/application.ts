@@ -104,7 +104,7 @@ function getBuildConfig(
   options: NormalizedSchema
 ): TargetConfiguration {
   return {
-    executor: '@simondotm/nxfirebase:build',
+    executor: '@simondotm/nx-firebase:build',
     outputs: ['{options.outputPath}'],
     options: {
       outputPath: joinPathFragments('dist', options.appProjectRoot),
@@ -182,7 +182,7 @@ function getFirebaseConfig(
   options: NormalizedSchema
 ): TargetConfiguration {
   return {
-    executor: '@simondotm/nxfirebase:firebase',
+    executor: '@simondotm/nx-firebase:firebase',
     options: {
         firebaseConfig: `firebase.${options.appProjectName}.json`,
     },

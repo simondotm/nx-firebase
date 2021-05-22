@@ -1,3 +1,3 @@
 module.exports = {
-  projects: ['<rootDir>/packages/nxfirebase', '<rootDir>/e2e\\nxfirebase-e2e'],
+  projects: ['<rootDir>/packages/nx-firebase', '<rootDir>/e2e\\nx-firebase-e2e'],
 };

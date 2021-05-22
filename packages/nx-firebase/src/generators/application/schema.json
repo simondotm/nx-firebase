@@ -6,7 +6,7 @@
   "type": "object",
   "examples": [
     {
-      "command": "g @simondotm/nxfirebase:app myfirebaseapp --directory=myapp",
+      "command": "g @simondotm/nx-firebase:app myfirebaseapp --directory=myapp",
       "description": "Generate a firebase application in apps/myfirebaseapp/myapp"
     }
   ],  

@@ -21,15 +21,15 @@ jobs:
       - run: npm install
 
       - name: Build plugin
-        run: npx nx build nxfirebase
+        run: npx nx build nx-firebase
 
       - name: Create package
         run: npm pack
-        working-directory: ./dist/packages/nxfirebase
+        working-directory: ./dist/packages/nx-firebase
 
       - name: Publish to GitHub Packages
         run: npm publish
-        working-directory: ./dist/packages/nxfirebase
+        working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -46,11 +46,11 @@ jobs:
       - run: npm install
 
       - name: Build plugin
-        run: npx nx build nxfirebase
+        run: npx nx build nx-firebase
 
       - name: Publish to NPM
         run: npm publish --access=public
-        working-directory: ./dist/packages/nxfirebase
+        working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
