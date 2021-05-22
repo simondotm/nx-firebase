@@ -6,7 +6,20 @@
     "rules": "<%= appProjectRoot %>/firestore.rules",
     "indexes": "<%= appProjectRoot %>/firestore.indexes.json"
   },    
-  "hosting": [],
+  "hosting": {
+    "public": "<%= appProjectRoot %>/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
   "storage": {
       "rules": "<%= appProjectRoot %>/storage.rules"
   },
