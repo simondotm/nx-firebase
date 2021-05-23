@@ -1,6 +1,11 @@
 # @simondotm/nx-firebase Changelog
 All notable changes to this project will be documented in this file.
 
+## v0.3.1
+
+- Removed undocumented/unusued `firebase` target in app generator. No longer needed.
+
+- `serve` target now builds `--with-deps` before watching to ensure all dependent local libraries are built. Note that `serve` only detects incremental changes to the main application, and not dependent libraries as well at this time.
 
 ## v0.3.0
 
