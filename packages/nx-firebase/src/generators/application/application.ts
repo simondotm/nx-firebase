@@ -137,7 +137,7 @@ function getServeConfig(
     options: {
         commands: [
             {
-                command: `nx run ${options.appProjectName}:build --with-deps --watch`
+                command: `nx run ${options.appProjectName}:build --with-deps && nx run ${options.appProjectName}:build --watch`
             },
             {
                 command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
