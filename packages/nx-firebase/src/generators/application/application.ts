@@ -204,8 +204,9 @@ function addProject(tree: Tree, options: NormalizedSchema) {
   };
   project.targets.build = getBuildConfig(project, options);
   project.targets.serve = getServeConfig(project, options);
-  project.targets.firebase = getFirebaseConfig(options);
   project.targets.deploy = getDeployConfig(project, options);
+  // As of v0.3.1 the firebase target is no longer added. Doesn't have much utility since the Firebase CLI can be used directly anywhere in the Nx workspace.
+  //project.targets.firebase = getFirebaseConfig(options);
   
   addProjectConfiguration(tree, options.name, project);
 
