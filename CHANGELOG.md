@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## v0.3.0
 
-Project has been renamed from `@simondotm/nxfirebase` to `@simondotm/nx-firebase` to better match Nx plugin naming conventions. Took a deep breath and did it early before many installs occurred. Apologies to any users who this may have inconvenienced - I didn't realise I could deprecate packages until after I'd deleted & renamed the pnm project. Live & learn!
+Project has been renamed from `@simondotm/nxfirebase` to `@simondotm/nx-firebase` to better match Nx plugin naming conventions. Took a deep breath and did it early before many installs occurred. Apologies to any users who this may have inconvenienced - I didn't realise I could deprecate packages until after I'd deleted & renamed the pnm project. Rest assured, I won't be making any further major modifications like this!
 
+If you have already generated NxFirebase applications using `@simondotm/nxfirebase` you will need to migrate as follows:
+
+1. `npm uninstall @simondotm/nxfirebase`
+2. `npm install @simondotm/nx-firebase --save-dev`
+3. Update the `builder` targets in any NxFirebase applications you already have in your `workspace.json` or `angular.json` config from `@simondotm/nxfirebase:build` to `@simondotm/nx-firebase:build`
 
 ## v0.2.3
 
