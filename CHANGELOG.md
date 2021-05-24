@@ -46,6 +46,34 @@ Built against Nx 12.3.4
 
 - Plugin peer dependencies set so there's some indication of plugin compatibility
 
+**Migrating from apps generated with v0.2.2**
+
+v0.2.3 adds these targets to your `workspace.json` or `angular.json`, so for users of earlier versions of the plugin this will have to be done manually:
+
+```
+                "serve": {
+                    "builder": "@nrwl/workspace:run-commands",
+                    "options": {
+                        "commands": [
+                            {
+                                "command": "nx run <appname>:build --with-deps && nx run <appname>:build --watch"
+                            },
+                            {
+                                "command": "firebase emulators:start --config firebase.<appname>.json"
+                            }
+                        ],
+                        "parallel": true
+                    }
+                },
+                "deploy": {
+                    "builder": "@nrwl/workspace:run-commands",
+                    "options": {
+                        "command": "firebase deploy --config firebase.<appname>.json"
+                    }
+                },
+   ```
+
+
 
 ## v0.2.2 - Initial Release
 
