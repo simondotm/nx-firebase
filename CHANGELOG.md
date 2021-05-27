@@ -1,6 +1,19 @@
 # @simondotm/nx-firebase Changelog
 All notable changes to this project will be documented in this file.
 
+## v0.3.2
+
+- Plugin now detects incompatible Nx library dependencies and aborts compilation when found
+
+Incompatible dependencies are as follows:
+
+1. Non `--buildable` libraries
+2. Nested libraries that were not created with `--importPath`
+
+If either of these two types of libraries are imported by Firebase functions, the compilation will be halted, since a functional app cannot be created with these types of dependencies.
+
+See the [README](README.md#using-nx-libraries-within-nested-sub-directories) for more information.
+
 ## v0.3.1
 
 - Removed undocumented/unusued `firebase` target in app generator. No longer needed.
