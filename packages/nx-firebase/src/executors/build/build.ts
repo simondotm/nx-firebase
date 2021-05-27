@@ -70,7 +70,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   );
 
 
-  // ensure dependent libraries exist.
+  // ensure dependent libraries exist (ie. have been built at least once)
   // note that this check does not check if they are out of date. Not quite sure yet how to do that, but --with-deps will always work.
   const dependentsBuilt = checkDependentProjectsHaveBeenBuilt(
     context.root,
@@ -82,7 +82,9 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     throw new Error("Dependent libraries need to be built first. Try adding '--with-deps' CLI option");
   }
 
-  // clean the output folder
+  // clean the output folder first
+  // this way, if there are any issues with the compilation or dependency checks
+  // we do not have inconsistent build output left lying around
   if (normalizedOptions.deleteOutputPath) {
     removeSync(normalizedOptions.outputPath);
   }
@@ -93,19 +95,44 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   debugLog("- Copying functions assets")
   await copyAssetFiles(normalizedOptions.files);
 
-  console.log("- Processing dependencies for firebase functions app")
-  debugLog("dependencies=" + JSON.stringify(dependencies, null, 3))
-  for (const d of dependencies) {
-      const type = d.node.type
-      console.log(" - Firebase functions app has '" + type + "' dependency '" + d.name + "'")
-  }
-
 
   // ensure the output package file has typings and a correct "main" entry point
   updatePackageJson(normalizedOptions, context);
 
+
+
+  // Process Firebase Functions dependencies
+  console.log("- Processing dependencies for firebase functions app")
+  debugLog("dependencies=" + JSON.stringify(dependencies, null, 3))
+
+  for (const d of dependencies) {
+      const type = d.node.type
+      console.log(" - Firebase functions app has '" + type + "' dependency '" + d.name + "'")
+  }  
+
+
+  // Sniff out any dependencies of this application that are 
+  //  non-buildable libraries
+  // These won't show up in `dependencies` because they don't have a `build` target
+  //
+  // Probably added as user error (done it myself) so better to warn here explicitly
+  // than ignore it and allow wierd side-effects to happen if we proceed.
+  const projectDeps = projGraph.dependencies[context.projectName].map((dep) => {
+      const depName = dep.target
+      const node = projGraph.nodes[depName]
+      return node
+  })
+
+  const nonBuildableDeps = projectDeps.filter( (dep) => {
+      return ((dep.type === 'lib') && (dep.data.targets['build'] === undefined))
+  })
+  //console.log("nonBuildableDeps=", JSON.stringify(nonBuildableDeps, null, 3));
+
+
+
   // automatically add any dependencies this application has to the output "package.json"
   // this will include both npm imports and workspace library imports
+  // non-buildable deps will not show up here, but we've captured them already
   if (
     dependencies.length > 0 &&
     options.updateBuildableProjectDepsInPackageJson
@@ -138,7 +165,6 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   });
 
   // copy each of their build outputs in dist to a "libs" sub directory in our application dist output folder
-  // do this AFTER the app typescript has compiled, because the outdir is deleted before the typescript build! (Doh! Spent an hour figuring that obvious gotcha out)
   const depLibsDir = 'libs'
   const workspaceRoot = context.root
   const localLibraries: { [name:string]: DependentBuildableProjectNode } = {}
@@ -164,6 +190,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
 
   console.log("- Updating firebase package.json")
 
+  const incompatibleNestedDeps:string[] = []
 
   // rewrite references to library packages in the functions package.json
   // to be local package references to the copies we made
@@ -181,6 +208,12 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
               const localRef = 'file:' + join('.', 'libs', localDep.node.name)
               debugLog(" - Replacing '" + d + "' with '" + localRef + "'")
               functionsPackageDeps[d] = localRef
+
+              // detect any incompatible nested libraries
+              if (d.split('/').length > 2) {
+                  incompatibleNestedDeps.push(d);
+              }
+
           }
       }
   }
@@ -189,13 +222,32 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
 
 
 
+
+  // Final dep check before we compile for:
+  // 1) non-buildable libraries
+  // 2) nested libraries generated without `--importPath`
+  // These are both show-stoppers for successful Firebase functions compilation
+  // If any bad dependencies were found, report and throw
+
+
+  // Non-buildable library dependencies are a show stopper
+  // If any bad dependencies were found, report and throw
+  for (const dep of nonBuildableDeps) {
+      console.log("ERROR: Found non-buildable library dependency '" + dep.name + "' in Firebase Application. Imported libraries must be created with `--buildable`.")
+  }
+  for (const dep of incompatibleNestedDeps) {
+      console.log("ERROR: Found incompatible nested library dependency '" + dep + "' in Firebase Application. Imported nested libraries must be created with `--importPath`.")
+  }
+  if (nonBuildableDeps.length || incompatibleNestedDeps.length) {
+      throw new Error("Firebase Application contains references to non-buildable or incompatible nested libraries, please fix in order to proceed with build.")
+  }    
+
+
   if (options.cli) {
     addCliWrapper(normalizedOptions, context);
   }
 
-
-
-  // compile the firebase functions Typescript application
+  // Finally, compile the firebase functions Typescript application
   // uses the same builder logic as @nrwl/node:package
   // since we do not want or need to use webpack for cloud functions
 
