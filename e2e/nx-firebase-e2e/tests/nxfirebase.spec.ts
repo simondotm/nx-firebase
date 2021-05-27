@@ -264,6 +264,45 @@ describe('nxfirebase e2e', () => {
 
 
 
+    //-----------------------------------------------------------------------------------------------
+    // test that application can import a library from a 2nd subdir in the workspace
+    // this uses --importPath
+    //-----------------------------------------------------------------------------------------------
+    describe('nxfirebase generate 2nd subdir nodelibrary using --importPath', () => {
+
+
+        const libProject = 'nodelib' //uniq('nxfirebase-functions-app');
+        const subDir = 'subdir'
+        it('should create subdir-subdir-nodelib', async (done) => {
+            await runNxCommandAsync(
+                `generate @nrwl/node:lib ${libProject} --directory ${subDir}/${subDir} --buildable --importPath='@proj/${subDir}-${subDir}-${libProject}'`
+            );
+
+            done();
+        });
+
+        // add our new subdir-subdir-nodelib as an imported dependency
+        it('should add subdir-subdir-nodelib as an index.ts dependency', async (done) => {
+            const importAddition = `import * as g from '@proj/${subDir}-${subDir}-${libProject}'\nconsole.log(g.subdirSubdirNodelib())\n`
+            const inFile = readFile(indexTs)
+            expect(inFile).toContain(importMatch);
+            latestWorkingIndexTsFile = inFile
+
+            addContentToIndexTs(importMatch, importAddition);
+
+            expect(readFile(indexTs)).toContain(importAddition);
+            done();
+        });
+
+
+        // rebuild app with deps
+        it('should build nxfirebase:app', async (done) => {
+            const result = await runNxCommandAsync(`build ${appProject} --with-deps`);
+            expect(result.stdout).toContain('Done compiling TypeScript files');
+            done();
+        });
+
+    });
 
 
 
