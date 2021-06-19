@@ -1,6 +1,118 @@
 # @simondotm/nx-firebase Changelog
 All notable changes to this project will be documented in this file.
 
+## v0.3.3
+
+**General changes**
+- Improved listing of firebase functions dependencies; now ordered by npm module libraries first, then local libraries, sorted alphabetically.
+
+**Enhanced Support for Firebase Emulators**
+
+`nx g @simondotm/nx-firebase:app` generator now additionally:
+
+- Adds default `auth` and `pubsub` settings to `"emulators": {...}` config in `firebase.<appname>.json` so that these services are also emulated by default. 
+
+- Adds a new `getconfig` target to firebase functions app, where:
+    * `nx getconfig <firebaseappname>` will fetch the [functions configuration variables](https://firebase.google.com/docs/functions/local-emulator#set_up_functions_configuration_optional) from the server and store it locally as `.runtimeconfig.json` 
+
+- Adds `.runtimeconfig.json` to asset list to be copied (if it exists) from app directory to output `dist` directory when built, so that the function emulators will now run if the functions being emulated access variables from the functions config. 
+
+- Adds `.runtimeconfig.json` to the Nx workspace root `.gitignore` file (if not already added), since these files should not be version controlled
+
+- Adds an `emulate` target to the Nx-firebase app, which is used by `serve` but also allows Firebase emulators to be started independently of a watched build.
+
+**Plugin maintenance**
+
+  * Executors use workspace logger routines instead of console
+  * Fixed minor issues in e2e tests 
+  * Removed redundant/legacy firebase target
+  * Replaced plugin use of node `join` with workspace `joinPathFragments`
+
+**Migration from v0.3.2**
+
+For users with existing nx-firebase applications in their workspace you may wish to add the new version schema updates manually to your workspace configuration files.
+
+In your `angular.json` or `workspace.json` file, for each `nx-firebase` app project:
+
+1. Add the `.runtimeconfig.json` to your build assets:
+
+```
+      "targets": {
+        "build": {
+          ...
+          "options": {
+            ...
+            "assets": [
+              ...
+              "apps/nxfirebase-root-app/.runtimeconfig.json"
+            ]
+          }
+        },
+```
+2. Add the new `emulate` target to your app:
+```
+      "targets": {
+        ...
+        "emulate": {
+          "executor": "@nrwl/workspace:run-commands",
+          "options": {
+            "command": "firebase emulators:start --config firebase.nxfirebase-root-app.json"
+          }
+        },
+```
+3. Modify the `serve` target to:
+```
+      "targets": {
+        ...
+        "serve": {
+          ...
+          "options": {
+            "commands": [
+              {
+                "command": "nx run <appname>:build --with-deps && nx run <appname>:build --watch"
+              },
+              {
+                "command": "nx run <appname>:emulate"
+              }
+            ],
+            "parallel": true
+          }
+        },
+```
+4. Add the new `getconfig` target:
+```
+      "targets": {
+        ...
+        "getconfig": {
+          "executor": "@nrwl/workspace:run-commands",
+          "options": {
+            "command": "firebase functions:config:get --config firebase.<appname>.json > apps/<path-to-app>/.runtimeconfig.json"
+          }
+        },
+        ...
+```
+
+And in your `firebase.<appname>.json` config settings for `"emulators"` add `"auth"` and `"pubsub"` configs:
+
+```
+    "emulators": {
+        ...
+        "auth": {
+            "port": 9099
+        },
+        "pubsub": {
+            "port": 8085
+        }    
+    }
+```
+
+
+
+
+
+
+
+
 ## v0.3.2
 
 - Plugin now detects incompatible Nx library dependencies and aborts compilation when found
