@@ -24,6 +24,8 @@
     "workspace-generator": "nx workspace-generator",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
+    "clean": "rimraf tmp && rimraf dist",
+    "clean:install": "npm run clean && rimraf package-lock.json && rimraf node_modules",
     "release": "npm version patch --prefix packages/nx-firebase --no-git-tag-version",
     "release:help": "echo Bump patch version & commit. Using Github Desktop doesn't push tags it didn't make, so they have to be manually added & pushed to create the release on Github"
   },
@@ -51,6 +53,7 @@
     "eslint-config-prettier": "8.1.0",
     "jest": "26.2.2",
     "prettier": "2.2.1",
+    "rimraf": "^3.0.2",
     "ts-jest": "26.5.5",
     "ts-node": "~9.1.1",
     "tslib": "^2.0.0",

@@ -4,7 +4,7 @@ import '../../utils/e2ePatch'
 
 import { FirebaseBuildExecutorSchema } from './schema';
 
-import { ExecutorContext } from '@nrwl/devkit';
+import { ExecutorContext, logger, joinPathFragments } from '@nrwl/devkit';
 import { createProjectGraph } from '@nrwl/workspace/src/core/project-graph';
 import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
 import {
@@ -19,7 +19,6 @@ import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';
 import addCliWrapper from './node/package/utils/cli';
 import { readJsonFile } from '@nrwl/workspace'
-import { join } from 'path'
 import { copy, removeSync } from 'fs-extra';
 import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
@@ -102,12 +101,14 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
 
 
   // Process Firebase Functions dependencies
-  console.log("- Processing dependencies for firebase functions app")
+  logger.log("- Processing dependencies for firebase functions app '" + context.projectName + "':")
   debugLog("dependencies=" + JSON.stringify(dependencies, null, 3))
 
-  for (const d of dependencies) {
+  // list npm deps first, sorted alphabetically
+  const npmDeps = dependencies.filter( (dep:DependentBuildableProjectNode) => dep.node.type !== 'lib').sort( (a:DependentBuildableProjectNode, b:DependentBuildableProjectNode) => a.name.localeCompare(b.name))
+  for (const d of npmDeps) {
       const type = d.node.type
-      console.log(" - Firebase functions app has '" + type + "' dependency '" + d.name + "'")
+      logger.log(" -  Added '" + type + "' dependency '" + d.name + "'")
   }  
 
 
@@ -159,10 +160,10 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // - all local code for the functions will be uploaded to GCP without any need to faff with private npm packages
 
 
-  // create a list of dependencies that are nx workspace libraries
+  // create a list of dependencies that are nx workspace libraries, sorted alphabetically
   const workspaceDependencies = dependencies.filter( (dep: DependentBuildableProjectNode) => {
     return (dep.node.type === 'lib');
-  });
+  }).sort( (a:DependentBuildableProjectNode, b:DependentBuildableProjectNode) => a.name.localeCompare(b.name));
 
   // copy each of their build outputs in dist to a "libs" sub directory in our application dist output folder
   const depLibsDir = 'libs'
@@ -172,23 +173,24 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
       const localPackageName = dep.name // the library dependency package name
       const localLibraryName = dep.node.name // the library dependency project name
       localLibraries[localPackageName] = dep
-      const srcDir = join(workspaceRoot, dep.outputs[0])
-      const outDir = join(workspaceRoot, normalizedOptions.outputPath, depLibsDir, localLibraryName);
+      const srcDir = joinPathFragments(workspaceRoot, dep.outputs[0])
+      const outDir = joinPathFragments(workspaceRoot, normalizedOptions.outputPath, depLibsDir, localLibraryName);
       // we also copy libraries to node_modules in dist, because the Firebase CLI also runs the entry point script during a deploy to determine the exported functions
       // however, firebase does NOT upload node_modules to GCP, so we have to make two copies of each dependent local library package
       // see: https://firebase.google.com/docs/functions/handle-dependencies
-      const nodeModulesDir = join(workspaceRoot, normalizedOptions.outputPath, 'node_modules', localPackageName);
+      const nodeModulesDir = joinPathFragments(workspaceRoot, normalizedOptions.outputPath, 'node_modules', localPackageName);
         try {
             debugLog("- Copying dependent workspace library '" + dep.node.name + "' from '" + srcDir + "' to '" + outDir + "'")
             debugLog("- Copying dependent workspace library '" + dep.node.name + "' from '" + srcDir + "' to '" + nodeModulesDir + "'")
             await copy(srcDir, outDir);
             await copy(srcDir, nodeModulesDir);
+            logger.log(" - Copied 'lib' dependency '" + dep.name + "'")
+
         } catch (err) {
-            console.error(err.message)
+            logger.error(err.message)
         }    
   }
 
-  console.log("- Updating firebase package.json")
 
   const incompatibleNestedDeps:string[] = []
 
@@ -205,7 +207,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
           const localDep = localLibraries[d]
           debugLog("- Checking dependency '" + d + "', isLocalDep=" + (localDep!==undefined))
           if (localDep) {
-              const localRef = 'file:' + join('.', 'libs', localDep.node.name)
+              const localRef = 'file:' + joinPathFragments('.', 'libs', localDep.node.name)
               debugLog(" - Replacing '" + d + "' with '" + localRef + "'")
               functionsPackageDeps[d] = localRef
 
@@ -218,6 +220,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
       }
   }
   writeJsonFile(functionsPackageFile, functionsPackageJson);
+  logger.log("- Updated firebase functions package.json")
   debugLog("functions package deps = ", JSON.stringify(functionsPackageDeps, null, 3))
 
 
@@ -233,13 +236,13 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // Non-buildable library dependencies are a show stopper
   // If any bad dependencies were found, report and throw
   for (const dep of nonBuildableDeps) {
-      console.log("ERROR: Found non-buildable library dependency '" + dep.name + "' in Firebase Application. Imported libraries must be created with `--buildable`.")
+      logger.error("ERROR: Found non-buildable library dependency '" + dep.name + "' in Firebase Application. Imported libraries must be created with `--buildable`.")
   }
   for (const dep of incompatibleNestedDeps) {
-      console.log("ERROR: Found incompatible nested library dependency '" + dep + "' in Firebase Application. Imported nested libraries must be created with `--importPath`.")
+      logger.error("ERROR: Found incompatible nested library dependency '" + dep + "' in Firebase Application. Imported nested libraries must be created with `--importPath`.")
   }
   if (nonBuildableDeps.length || incompatibleNestedDeps.length) {
-      throw new Error("Firebase Application contains references to non-buildable or incompatible nested libraries, please fix in order to proceed with build.")
+      throw new Error("ERROR: Firebase Application contains references to non-buildable or incompatible nested libraries, please fix in order to proceed with build.")
   }    
 
 

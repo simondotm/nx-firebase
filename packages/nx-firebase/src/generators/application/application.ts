@@ -12,7 +12,8 @@ import {
   NxJsonProjectConfiguration,
   readWorkspaceConfiguration,
   updateWorkspaceConfiguration,
-  convertNxGenerator
+  convertNxGenerator,
+  logger
 } from '@nrwl/devkit';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -111,11 +112,33 @@ function getBuildConfig(
       main: joinPathFragments(project.sourceRoot, 'index.ts'),
       tsConfig: joinPathFragments(options.appProjectRoot, 'tsconfig.app.json'),
       packageJson: joinPathFragments(options.appProjectRoot, 'package.json'),
-      assets: [joinPathFragments(options.appProjectRoot, '*.md')],
+      assets: [joinPathFragments(options.appProjectRoot, '*.md'), joinPathFragments(options.appProjectRoot, '.runtimeconfig.json')],
     }
   };
 }
 
+
+
+
+/**
+ * Create `emulate` target for NxFirebase apps
+ * Uses run-commands executor to run the firebase emulator(s)
+ * 
+ * @param project 
+ * @param options 
+ * @returns target configuration
+ */
+function getEmulateConfig(
+  project: ProjectConfiguration,
+  options: NormalizedSchema
+): TargetConfiguration {
+  return {
+    executor: '@nrwl/workspace:run-commands',
+    options: {
+        command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
+    }
+  };
+}
 
 /**
  * Create serve target for NxFirebase apps
@@ -140,7 +163,7 @@ function getServeConfig(
                 command: `nx run ${options.appProjectName}:build --with-deps && nx run ${options.appProjectName}:build --watch`
             },
             {
-                command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
+                command: `nx run ${options.appProjectName}:emulate`
             }
         ],
         parallel: true
@@ -171,22 +194,41 @@ function getDeployConfig(
   };
 }
 
+
 /**
- * Create "firebase" target for NxFirebase apps
- * This is a work in progress, idea was to wrap the Firebase CLI with the --config part auto added
- *  but not sure its actually much more convenient yet.
+ * Create functions `getconfig` target
+ * Uses run-commands executor to run firebase CLI
+ * 
+ * @param project 
  * @param options 
  * @returns target configuration
  */
-function getFirebaseConfig(
+function getGetConfigConfig(
+  project: ProjectConfiguration,
   options: NormalizedSchema
 ): TargetConfiguration {
   return {
-    executor: '@simondotm/nx-firebase:firebase',
+    executor: '@nrwl/workspace:run-commands',
     options: {
-        firebaseConfig: `firebase.${options.appProjectName}.json`,
-    },
+        command: `firebase functions:config:get --config firebase.${options.appProjectName}.json > ${options.appProjectRoot}/.runtimeconfig.json`
+    }
   };
+}
+
+/**
+ * Add `.runtimeconfig.json` to workspace `.gitignore` file if not already added
+ * @param host 
+ */
+export function addGitIgnoreEntry(host: Tree) {
+  if (host.exists('.gitignore')) {
+    let content = host.read('.gitignore', 'utf-8');
+    if (!content.includes(".runtimeconfig.json")) {
+        content = `${content}\n.runtimeconfig.json\n`;
+        host.write('.gitignore', content);
+    }
+  } else {
+    logger.warn(`Couldn't find .gitignore file to update`);
+  }
 }
 
 /**
@@ -203,10 +245,10 @@ function addProject(tree: Tree, options: NormalizedSchema) {
     tags: options.parsedTags,
   };
   project.targets.build = getBuildConfig(project, options);
-  project.targets.serve = getServeConfig(project, options);
   project.targets.deploy = getDeployConfig(project, options);
-  // As of v0.3.1 the firebase target is no longer added. Doesn't have much utility since the Firebase CLI can be used directly anywhere in the Nx workspace.
-  //project.targets.firebase = getFirebaseConfig(options);
+  project.targets.getconfig = getGetConfigConfig(project, options);
+  project.targets.emulate = getEmulateConfig(project, options)
+  project.targets.serve = getServeConfig(project, options);
   
   addProjectConfiguration(tree, options.name, project);
 
@@ -216,6 +258,8 @@ function addProject(tree: Tree, options: NormalizedSchema) {
     workspace.defaultProject = options.name;
     updateWorkspaceConfiguration(tree, workspace);
   }
+
+  addGitIgnoreEntry(tree);
 }
 
 
@@ -287,7 +331,7 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
         templateOptions
     );
   }else{
-      console.log("✓ firebase.json already exists in this workspace")
+      logger.log("✓ firebase.json already exists in this workspace")
   }
   const firebaseRc = path.join(tree.root, ".firebaserc")
   //console.log("firebaseRc=" + firebaseRc)
@@ -299,7 +343,7 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
         templateOptions
     );
   }else{
-      console.log("✓ .firebaserc already exists in this workspace")
+      logger.log("✓ .firebaserc already exists in this workspace")
   }
 
 }

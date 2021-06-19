@@ -6,7 +6,7 @@ This project was generated using the Nx plugin workspace generator v12.3.4 but s
 
 See the [CHANGELOG](CHANGELOG.md) for release notes.
 
-> **Note**: This project is an early beta and feedback is very welcome. Please note I created this plugin to primarily serve my own needs, so feature requests may take a bit of time to consider. Also, I don't use the Firebase emulators much so it is probably needing some additional work for supporting that.
+> **Note**: This project is an early beta and feedback is very welcome. Please note I created this plugin to primarily serve my own needs, so feature requests may take a bit of time to consider. 
 
 I'm making this project in my spare time, so if you find it useful, or it saved you some time, you are very welcome to [buy me a ☕ coffee](https://ko-fi.com/simondotm). 
 
@@ -77,6 +77,10 @@ Or
 ## Serve Project
 
 **`nx serve appname`** - will build the functions application in `--watch` mode and start the Firebase emulators in parallel
+
+## Get Remote Functions Config
+
+**`nx getconfig appname`** will fetch the remote server functions configuration variables and save them locally to the app directory as `.runtimeconfig.json` for the emulators to use.
 
 
 # Usage
@@ -338,6 +342,30 @@ our functions code and libraries are now able to import other public API modules
 >
 > Note also that the path aliases used must match the built library output directory structure in `dist`, because the `package` executor for buildable `@nrwl/node:lib` projects that import other buildable node libraries [generate temporary `tsconfig.generated.json` files for buildable node libraries](https://github.com/nrwl/nx/blob/d007d37fb4f625fc4854d06d2e083ed778d6a3db/packages/workspace/src/utilities/buildable-libs-utils.ts#L142) , and [automatically converts the Typescript compiler path aliases](https://github.com/nrwl/nx/blob/d007d37fb4f625fc4854d06d2e083ed778d6a3db/packages/workspace/src/utilities/buildable-libs-utils.ts#L217) in this temp config to point to the built `dist/libs/...` library output instead of the library source.
 
+## Using Firebase Emulators
+
+The Firebase emulators work well within Nx and `nx-firebase`.
+
+To startup the Firebase emulator suite:
+
+* **`nx emulate appname`** - will launch the Firebase emulators using the app's firebase configuration
+
+When the Firebase Emulators are running, it is no longer possible to run `nx build appname` because the build script always attempts to delete the output directory in `dist` prior to compilation, which conflicts with a resource lock placed on this directory by the emulators.
+
+To workaround this, use:
+* **`nx build appname --with-deps --deleteOutputPath=false`**
+
+which will instruct the build to proceed without cleaning the output directory first. Note this approach could lead to scenarios where spurious files exist in `dist` due to skipping the cleaning step.
+
+The emulators automatically detect changes to configuration files and source files for functions.
+
+To serve the application, use:
+* **`nx serve appname`**
+
+Which will build the functions application and all of its dependencies, whilst launching the emulators, and the typescript compiler in watch mode.
+
+> **IMPORTANT:** _Note that whilst `nx serve` will be useful when changing existing functions code, due to `tsc --watch` being enabled, it will NOT correctly detect changes if additional library imports are added to the source code or changes are made to any imported libraries during a watched session. To remedy this, relaunch the emulators by running `nx serve` again._
+
 
 
 # Technical Notes
@@ -395,10 +423,7 @@ If you use `ModuleAlias` and TSC path aliases in your Firebase functions (as I d
 
 I've not implemented a full set of unit tests yet, but the e2e tests do perform a few standard tests.
 
-## Future features
-It feels like there could be more utility added to this plugin, but for now I'd thought I'd just share the the early version to see where things go with it.
 
-Eagle eyed viewers might notice there is a work in progress `firebase` executor for wrapping the Firebase CLI, and adding the `--config <path>` CLI option for convenience, but I wasn't especially happy with it's utility, so we'll see how that goes.
 
 
 # Plugin Development
