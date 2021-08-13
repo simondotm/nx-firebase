@@ -1,5 +1,7 @@
 # @simondotm/nx-firebase
 
+![npm](https://img.shields.io/npm/dw/@simondotm/nx-firebase.svg)
+
 A plugin for [Nx](https://nx.dev) that provides support for Firebase projects in an Nx monorepo workspace.
 
 This project was generated using the Nx plugin workspace generator v12.3.4 but should be compatible with Nx versions > 12.1.1.
