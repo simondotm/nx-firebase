@@ -6,7 +6,7 @@ import {
   uniq,
   updateFile,
   readFile
-  
+
 } from '@nrwl/nx-plugin/testing';
 
 // default 5000 is not long enough for some of our tests.
@@ -174,7 +174,7 @@ describe('nxfirebase e2e', () => {
         function addContentToIndexTs(match:string, addition:string) {
             updateFile(indexTs, (content:string) => {
                 const replaced = content.replace(
-                    importMatch, 
+                    importMatch,
                     `${match}\n${addition}`);
                 return replaced
 
@@ -188,7 +188,7 @@ describe('nxfirebase e2e', () => {
             updateFile(indexTs, (content:string) => {
                 return latestWorkingIndexTsFile;
             });
-        }    
+        }
 
 
 
@@ -221,7 +221,7 @@ describe('nxfirebase e2e', () => {
 
             // rebuild app with deps
             it('should build nxfirebase:app', async (done) => {
-                const result = await runNxCommandAsync(`build ${appProject} --with-deps`);
+                const result = await runNxCommandAsync(`build ${appProject}`);
                 expect(result.stdout).toContain('Done compiling TypeScript files');
                 done();
             });
@@ -263,7 +263,7 @@ describe('nxfirebase e2e', () => {
 
             // rebuild app with deps
             it('should build nxfirebase:app', async (done) => {
-                const result = await runNxCommandAsync(`build ${appProject} --with-deps`);
+                const result = await runNxCommandAsync(`build ${appProject}`);
                 expect(result.stdout).toContain('Done compiling TypeScript files');
                 done();
             });
@@ -305,7 +305,7 @@ describe('nxfirebase e2e', () => {
 
             // rebuild app with deps
             it('should build nxfirebase:app', async (done) => {
-                const result = await runNxCommandAsync(`build ${appProject} --with-deps`);
+                const result = await runNxCommandAsync(`build ${appProject}`);
                 expect(result.stdout).toContain('Done compiling TypeScript files');
                 done();
             });
@@ -347,7 +347,7 @@ describe('nxfirebase e2e', () => {
 
             // rebuild app with deps - should throw an error because the library is not buildable
             it('should not build nxfirebase:app due to non buildable library', async (done) => {
-                const result = await runNxCommandAsync(`build ${appProject} --with-deps`, { silenceError: true });
+                const result = await runNxCommandAsync(`build ${appProject}`, { silenceError: true });
                 expect(result.stderr).toContain('ERROR: Found non-buildable library');
                 expect(result.stderr).toContain('Firebase Application contains references to non-buildable');
                 done();
@@ -403,7 +403,7 @@ describe('nxfirebase e2e', () => {
             // rebuild app with deps
             // should throw an error because the nested library is incompatible
             it('should not build nxfirebase:app due to incompatible nested library', async (done) => {
-                const result = await runNxCommandAsync(`build ${appProject} --with-deps`, { silenceError: true });
+                const result = await runNxCommandAsync(`build ${appProject}`, { silenceError: true });
                 expect(result.stderr).toContain('ERROR: Found incompatible nested library');
                 expect(result.stderr).toContain('Firebase Application contains references to non-buildable');
                 done();

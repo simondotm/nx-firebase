@@ -1,19 +1,28 @@
 {
   "npmScope": "simondotm",
-  "affected": { "defaultBase": "main" },
+  "affected": {
+    "defaultBase": "main"
+  },
   "implicitDependencies": {
-    "package.json": { "dependencies": "*", "devDependencies": "*" },
+    "package.json": {
+      "dependencies": "*",
+      "devDependencies": "*"
+    },
     ".eslintrc.json": "*"
   },
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": { "cacheableOperations": ["build", "lint", "test", "e2e"] }
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e"]
+      }
     }
   },
-  "projects": {
-    "nx-firebase": { "tags": [] },
-    "nx-firebase-e2e": { "tags": [], "implicitDependencies": ["nx-firebase"] }
+  "workspaceLayout": {
+    "appsDir": "e2e",
+    "libsDir": "packages"
   },
-  "workspaceLayout": { "appsDir": "e2e", "libsDir": "packages" }
+  "cli": {
+    "defaultCollection": "@nrwl/workspace"
+  }
 }
