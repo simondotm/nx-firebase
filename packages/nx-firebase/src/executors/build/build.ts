@@ -4,7 +4,7 @@ import '../../utils/e2ePatch'
 
 import { FirebaseBuildExecutorSchema } from './schema';
 
-import { ExecutorContext, logger, joinPathFragments } from '@nrwl/devkit';
+import { ExecutorContext, logger, joinPathFragments, readJsonFile, writeJsonFile } from '@nrwl/devkit';
 import { createProjectGraphAsync } from '@nrwl/workspace/src/core/project-graph';
 import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
 import {
@@ -18,9 +18,7 @@ import compileTypeScriptFiles from './node/package/utils/compile-typescript-file
 import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';
 import addCliWrapper from './node/package/utils/cli';
-import { readJsonFile } from '@nrwl/workspace'
 import { copy, removeSync } from 'fs-extra';
-import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
 const ENABLE_DEBUG = false
 function debugLog(...args) {
