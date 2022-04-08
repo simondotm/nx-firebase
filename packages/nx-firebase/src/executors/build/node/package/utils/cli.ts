@@ -1,8 +1,6 @@
-import { ExecutorContext } from '@nrwl/devkit';
+import { ExecutorContext, readJsonFile, writeJsonFile } from '@nrwl/devkit';
 
 import {
-  readJsonFile,
-  writeJsonFile,
   writeToFile,
 } from '@nrwl/workspace/src/utilities/fileutils';
 import { chmodSync } from 'fs-extra';

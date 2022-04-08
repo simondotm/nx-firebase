@@ -4,8 +4,8 @@ import '../../utils/e2ePatch'
 
 import { FirebaseBuildExecutorSchema } from './schema';
 
-import { ExecutorContext, logger, joinPathFragments } from '@nrwl/devkit';
-import { createProjectGraph } from '@nrwl/workspace/src/core/project-graph';
+import { ExecutorContext, logger, joinPathFragments, readJsonFile, writeJsonFile } from '@nrwl/devkit';
+import { createProjectGraphAsync } from '@nrwl/workspace/src/core/project-graph';
 import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
 import {
   calculateProjectDependencies,
@@ -18,9 +18,7 @@ import compileTypeScriptFiles from './node/package/utils/compile-typescript-file
 import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';
 import addCliWrapper from './node/package/utils/cli';
-import { readJsonFile } from '@nrwl/workspace'
 import { copy, removeSync } from 'fs-extra';
-import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
 const ENABLE_DEBUG = false
 function debugLog(...args) {
@@ -32,24 +30,24 @@ function debugLog(...args) {
 /**
  * Custom Firebase Functions "Application" nx build exector
  * Based on @nrwl/node:package executor
- * 
+ *
  * - Builds the current application as a Typescript package library for Firebase functions
  * - Copies any dependent libraries to the dist folder
  * - Auto generates the firebase functions package.json
  * - Updates the firebase functions package.json to convert library dependency references to local file references
- * 
+ *
  * After building, the project can be deployed using the firebase CLI as usual
- * 
- * @param options 
- * @param context 
+ *
+ * @param options
+ * @param context
  * @returns build success/failure outcome
  */
 export default async function runExecutor(options: FirebaseBuildExecutorSchema, context: ExecutorContext) {
   debugLog("Running Executor for Firebase Build for project '" + context.projectName + "'");
   debugLog('options=', options)
-  
+
   // get the project graph; returns an object containing all nodes in the workspace, files, and dependencies
-  const projGraph = createProjectGraph();
+  const projGraph = await createProjectGraphAsync('4.0');
   // nx firebase functions are essentially @nrwl/node:package libraries, but are added to the project
   // as applications as they are fundamentally the deployable "application" output of a build pipeline.
   // Due to this, we can import standard node libraries as dependencies from within the workspace
@@ -64,10 +62,9 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     projGraph,
     context.root,
     context.projectName,
-    context.targetName, 
+    context.targetName,
     context.configurationName
   );
-
 
   // ensure dependent libraries exist (ie. have been built at least once)
   // note that this check does not check if they are out of date. Not quite sure yet how to do that, but --with-deps will always work.
@@ -87,7 +84,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   if (normalizedOptions.deleteOutputPath) {
     removeSync(normalizedOptions.outputPath);
   }
-  
+
 
   // there aren't really any assets needed for firebase functions
   // but left here for compatibility with node:package
@@ -109,10 +106,10 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   for (const d of npmDeps) {
       const type = d.node.type
       logger.log(" -  Added '" + type + "' dependency '" + d.name + "'")
-  }  
+  }
 
 
-  // Sniff out any dependencies of this application that are 
+  // Sniff out any dependencies of this application that are
   //  non-buildable libraries
   // These won't show up in `dependencies` because they don't have a `build` target
   //
@@ -141,7 +138,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
     updateBuildableProjectPackageJsonDependencies(
       context.root,
       context.projectName,
-      context.targetName, 
+      context.targetName,
       context.configurationName,
       target,
       dependencies,
@@ -188,7 +185,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
 
         } catch (err) {
             logger.error(err.message)
-        }    
+        }
   }
 
 
@@ -197,7 +194,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // rewrite references to library packages in the functions package.json
   // to be local package references to the copies we made
   const functionsPackageFile = `${options.outputPath}/package.json`
-  
+
   debugLog("- functions PackageFile=" + functionsPackageFile)
   const functionsPackageJson = readJsonFile(functionsPackageFile);
   const functionsPackageDeps = functionsPackageJson.dependencies;
@@ -243,7 +240,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   }
   if (nonBuildableDeps.length || incompatibleNestedDeps.length) {
       throw new Error("ERROR: Firebase Application contains references to non-buildable or incompatible nested libraries, please fix in order to proceed with build.")
-  }    
+  }
 
 
   if (options.cli) {
