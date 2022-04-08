@@ -18,7 +18,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
       #- run: npm run addscope
-      - run: npm install
+      - run: npm install --legacy-peer-deps
 
       - name: Build plugin
         run: npx nx build nx-firebase
@@ -43,7 +43,7 @@ jobs:
         with:
           node-version: '15.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm install
+      - run: npm install --legacy-peer-deps
 
       - name: Build plugin
         run: npx nx build nx-firebase
