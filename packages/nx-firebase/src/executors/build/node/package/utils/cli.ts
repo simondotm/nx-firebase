@@ -1,3 +1,7 @@
+//SM: 04'22 - not needed with Nx 13.x
+
+/*
+
 import { ExecutorContext, readJsonFile, writeJsonFile } from '@nrwl/devkit';
 
 import {
@@ -28,3 +32,5 @@ require('${packageJson.main}');
   };
   writeJsonFile(`${options.outputPath}/package.json`, packageJson);
 }
+
+*/

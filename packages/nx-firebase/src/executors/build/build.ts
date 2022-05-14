@@ -6,7 +6,10 @@ import { FirebaseBuildExecutorSchema } from './schema';
 
 import { ExecutorContext, logger, joinPathFragments, readJsonFile, writeJsonFile } from '@nrwl/devkit';
 import { createProjectGraphAsync } from '@nrwl/workspace/src/core/project-graph';
-import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
+
+//import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
+import { CopyAssetsHandler } from '@nrwl/js/src/utils/copy-assets-handler';
+
 import {
   calculateProjectDependencies,
   checkDependentProjectsHaveBeenBuilt,
@@ -17,7 +20,7 @@ import {
 import compileTypeScriptFiles from './node/package/utils/compile-typescript-files';
 import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';
-import addCliWrapper from './node/package/utils/cli';
+//import addCliWrapper from './node/package/utils/cli';
 import { copy, removeSync } from 'fs-extra';
 
 const ENABLE_DEBUG = false
@@ -47,7 +50,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   debugLog('options=', options)
 
   // get the project graph; returns an object containing all nodes in the workspace, files, and dependencies
-  const projGraph = await createProjectGraphAsync('4.0');
+  const projGraph = await createProjectGraphAsync();//'4.0');
   // nx firebase functions are essentially @nrwl/node:package libraries, but are added to the project
   // as applications as they are fundamentally the deployable "application" output of a build pipeline.
   // Due to this, we can import standard node libraries as dependencies from within the workspace
@@ -89,8 +92,16 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // there aren't really any assets needed for firebase functions
   // but left here for compatibility with node:package
   debugLog("- Copying functions assets")
-  await copyAssetFiles(normalizedOptions.files);
+  //await copyAssetFiles(normalizedOptions.files);
 
+  const assetHandler = new CopyAssetsHandler({
+    projectDir: appRoot,
+    rootDir: context.root,
+    outputDir: normalizedOptions.outputPath,
+    assets: normalizedOptions.assets,
+  });
+
+  await assetHandler.processAllAssetsOnce();
 
   // ensure the output package file has typings and a correct "main" entry point
   updatePackageJson(normalizedOptions, context);
@@ -242,10 +253,12 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
       throw new Error("ERROR: Firebase Application contains references to non-buildable or incompatible nested libraries, please fix in order to proceed with build.")
   }
 
-
+  //SM 04-22: no longer needed for nx13.10.x+
+/*
   if (options.cli) {
     addCliWrapper(normalizedOptions, context);
   }
+*/
 
   // Finally, compile the firebase functions Typescript application
   // uses the same builder logic as @nrwl/node:package

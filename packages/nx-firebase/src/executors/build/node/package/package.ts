@@ -1,3 +1,5 @@
+//SM: 04/22 - no longer needed
+/*
 import { ExecutorContext } from '@nrwl/devkit';
 import { createProjectGraphAsync } from '@nrwl/workspace/src/core/project-graph';
 import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
@@ -72,3 +74,4 @@ export async function packageExecutor(
 }
 
 export default packageExecutor;
+*/
