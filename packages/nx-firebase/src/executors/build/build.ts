@@ -6,7 +6,6 @@ import { FirebaseBuildExecutorSchema } from './schema';
 
 import { ExecutorContext, logger, joinPathFragments, readJsonFile, writeJsonFile } from '@nrwl/devkit';
 import { createProjectGraphAsync } from '@nrwl/workspace/src/core/project-graph';
-import { copyAssetFiles } from '@nrwl/workspace/src/utilities/assets';
 import {
   calculateProjectDependencies,
   checkDependentProjectsHaveBeenBuilt,
@@ -89,7 +88,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   // there aren't really any assets needed for firebase functions
   // but left here for compatibility with node:package
   debugLog("- Copying functions assets")
-  await copyAssetFiles(normalizedOptions.files);
+  await Promise.all(normalizedOptions.files.map((file) => copy(file.input, file.output)));
 
 
   // ensure the output package file has typings and a correct "main" entry point
@@ -122,7 +121,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   })
 
   const nonBuildableDeps = projectDeps.filter( (dep) => {
-      return ((dep.type === 'lib') && (dep.data.targets['build'] === undefined))
+      return (dep && (dep.type === 'lib') && (dep.data.targets['build'] === undefined))
   })
   //console.log("nonBuildableDeps=", JSON.stringify(nonBuildableDeps, null, 3));
 
