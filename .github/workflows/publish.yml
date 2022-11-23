@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js 15.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: 15.x
+          node-version: 16.x
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
       #- run: npm run addscope
-      - run: npm install --legacy-peer-deps
+      - run: npm install
 
       - name: Build plugin
         run: npx nx build nx-firebase
@@ -41,9 +41,9 @@ jobs:
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v2
         with:
-          node-version: '15.x'
+          node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm install --legacy-peer-deps
+      - run: npm install
 
       - name: Build plugin
         run: npx nx build nx-firebase
