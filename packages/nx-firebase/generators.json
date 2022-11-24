@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "name": "nx-firebase",
+  "version": "0.0.1",
+  "generators": {
+    "nx-firebase": {
+      "factory": "./src/generators/nx-firebase/generator",
+      "schema": "./src/generators/nx-firebase/schema.json",
+      "description": "nx-firebase generator"
+    }
+  }
+}
