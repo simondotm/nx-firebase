@@ -1,7 +1,7 @@
 import type { Tree } from '@nrwl/devkit'
 import * as devkit from '@nrwl/devkit'
 import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { nestJsVersion, nxVersion } from '../../utils/versions'
+import { firebaseAdminVersion, firebaseFunctionsVersion, firebaseToolsVersion, firebaseVersion } from '../../utils/versions'
 import { initGenerator } from './init'
 
 describe('init generator', () => {
@@ -16,20 +16,17 @@ describe('init generator', () => {
     await initGenerator(tree, {})
 
     const packageJson = devkit.readJson(tree, 'package.json')
-    expect(packageJson.dependencies['@nestjs/common']).toBe(nestJsVersion)
-    expect(packageJson.dependencies['@nestjs/core']).toBe(nestJsVersion)
-    expect(packageJson.dependencies['@nestjs/platform-express']).toBe(
-      nestJsVersion,
+    expect(packageJson.dependencies['firebase']).toBe(firebaseVersion)
+    expect(packageJson.dependencies['firebase-admin']).toBe(firebaseAdminVersion)
+    expect(packageJson.dependencies['firebase-functions']).toBe(
+      firebaseFunctionsVersion,
     )
-    expect(packageJson.dependencies['reflect-metadata']).toBeDefined()
-    expect(packageJson.dependencies['rxjs']).toBeDefined()
     expect(packageJson.dependencies['tslib']).toBeDefined()
-    expect(packageJson.dependencies['@nrwl/nest']).toBeUndefined()
-    expect(packageJson.devDependencies['@nestjs/schematics']).toBe(
-      nestJsVersion,
+
+    expect(packageJson.devDependencies['firebase-tools']).toBe(
+      firebaseToolsVersion,
     )
-    expect(packageJson.devDependencies['@nestjs/testing']).toBe(nestJsVersion)
-    expect(packageJson.devDependencies['@nrwl/nest']).toBe(nxVersion)
+
   })
 
   it('should add jest config when unitTestRunner is jest', async () => {

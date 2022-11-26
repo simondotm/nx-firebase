@@ -4,8 +4,9 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
-    "build": "nx build",
-    "test": "nx test"
+    "build": "nx run nx-firebase:build",
+    "test": "nx run nx-firebase:test",
+    "e2e": "nx run nx-firebase-e2e:e2e"
   },
   "private": true,
   "devDependencies": {
