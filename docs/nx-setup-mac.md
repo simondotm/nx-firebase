@@ -1,7 +1,5 @@
 # Nx Setup Guide (Mac)
 
-TODO: Move this doc to Gist
-
 Clean installation steps for the whole setup of node/npm/nvm/nx, assuming mac with `zsh` shell.
 
 Recommendations:
