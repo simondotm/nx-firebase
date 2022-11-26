@@ -67,3 +67,10 @@ antigen apply
 * Not sure when this became a thing, nor sure if the nx cli is still required as a global install, but it works.
 * `nx` should now be accessible from the terminal/shell prompt
 
+## 6. Visual Studio Code
+Recommended extensions for Nx development:
+* [VS Code ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+* [Prettier Formatter for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+* [Nx Console](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console)
+* [vscode-jest-runner](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner)
+
