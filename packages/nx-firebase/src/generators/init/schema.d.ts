@@ -1,4 +1,4 @@
-import { UnitTestRunner } from '../utils'
+import { UnitTestRunner } from '../../utils'
 
 export interface InitGeneratorOptions {
   skipFormat?: boolean
