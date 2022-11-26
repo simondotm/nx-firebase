@@ -11,6 +11,10 @@ Notes mainly for my own benefit/reminder here.
 
 ## To test the plugin
 
+`nx run nx-firebase:test`
+
+## To run end-to-end tests for the plugin
+
 `nx run nx-firebase-e2e:e2e`
 
 Creates a temporary workspace in `/tmp/nx-e2e/`
