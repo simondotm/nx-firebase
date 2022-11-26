@@ -7,6 +7,12 @@
       "factory": "./src/generators/nx-firebase/generator",
       "schema": "./src/generators/nx-firebase/schema.json",
       "description": "nx-firebase generator"
+    },
+    "init": {
+      "factory": "./src/generators/init/init",
+      "schema": "./src/generators/init/schema.json",
+      "description": "nx-firebase initializer",
+      "hidden": true
     }
   }
 }
