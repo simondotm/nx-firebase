@@ -1,0 +1,50 @@
+{
+  "database": {
+    "rules": "<%= appProjectRoot %>/database.rules.json"
+  },
+  "firestore": {
+    "rules": "<%= appProjectRoot %>/firestore.rules",
+    "indexes": "<%= appProjectRoot %>/firestore.indexes.json"
+  },    
+  "hosting": {
+    "public": "<%= appProjectRoot %>/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+      "rules": "<%= appProjectRoot %>/storage.rules"
+  },
+  "functions": {
+    "predeploy": [
+      "npx nx build <%= appProjectName %> --with-deps",
+      "npx nx lint <%= appProjectName %>"
+    ],
+    "source": "dist/<%= appProjectRoot %>"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "auth": {
+      "port": 9099
+    },
+    "pubsub": {
+      "port": 8085
+    }
+  }
+}

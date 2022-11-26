@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "id": "NxFirebaseApplication",
+  "title": "Create a Firebase Application for Nx",
+  "type": "object",
+  "examples": [
+    {
+      "command": "g @simondotm/nx-firebase:app myfirebaseapp --directory=myapp",
+      "description": "Generate a firebase application in apps/myfirebaseapp/myapp"
+    }
+  ],  
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "linter": {
+      "description": "The tool to use for running lint checks.",
+      "type": "string",
+      "enum": ["eslint", "tslint"],
+      "default": "eslint"
+    },
+    "unitTestRunner": {
+      "type": "string",
+      "enum": ["jest", "none"],
+      "description": "Test runner to use for unit tests",
+      "default": "jest"
+    },    
+    "tags": {
+      "type": "string",
+      "description": "Add tags to the project (used for linting)",
+      "alias": "t"
+    },
+    "directory": {
+      "type": "string",
+      "description": "A directory where the project is placed",
+      "alias": "d"
+    },
+    "importPath": {
+      "type": "string",
+      "description": "The library name used to import it, like @myorg/my-awesome-lib. Must be a valid npm name."
+    },
+    "publishable": {
+      "type": "boolean",
+      "description": "Create a publishable library."
+    },
+    "buildable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Generate a buildable library."
+    },
+    "testEnvironment": {
+      "type": "string",
+      "enum": ["jsdom", "node"],
+      "description": "The test environment to use if unitTestRunner is set to jest",
+      "default": "node"
+    },   
+    "strict": {
+      "type": "boolean",
+      "description": "Whether to enable tsconfig strict mode or not.",
+      "default": false
+    },
+    "babelJest": {
+      "type": "boolean",
+      "description": "Use babel instead ts-jest",
+      "default": false
+    }    
+  },
+  "required": ["name"]
+}

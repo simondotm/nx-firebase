@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "name": "nx-firebase",
+  "version": "0.0.1",
+  "generators": {
+    "nx-firebase": {
+      "factory": "./src/generators/nx-firebase/generator",
+      "schema": "./src/generators/nx-firebase/schema.json",
+      "description": "nx-firebase generator"
+    },
+    "init": {
+      "factory": "./src/generators/init/init",
+      "schema": "./src/generators/init/schema.json",
+      "description": "Initialize the @simondotm/nx-firebase plugin",
+      "hidden": true
+    },
+    "application": {
+      "factory": "./src/generators/application/application",
+      "schema": "./src/generators/application/schema.json",
+      "description": "nxfirebase application generator",
+      "aliases": ["app"]
+    }    
+  }
+}
