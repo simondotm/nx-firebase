@@ -19,6 +19,6 @@
       "schema": "./src/generators/application/schema.json",
       "description": "nxfirebase application generator",
       "aliases": ["app"]
-    }    
+    }
   }
 }

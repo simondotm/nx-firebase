@@ -1,29 +1,29 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-        {
-            "type": "npm",
-            "script": "build -- nx-firebase",
-            "group": "build",
-            "problemMatcher": [],
-            "label": "Build Nx firebase plugin",
-            "detail": "nx build nx-firebase"
-        },
-        {
-            "type": "npm",
-            "script": "test -- nx-firebase",
-            "group": "test",
-            "problemMatcher": [],
-            "label": "Test Nx firebase plugin",
-            "detail": "nx test nx-firebase"
-        },
-        {
-            "type": "npm",
-            "script": "e2e -- nx-firebase-e2e",
-            "group": "test",
-            "problemMatcher": [],
-            "label": "Test e2e Nx firebase plugin",
-            "detail": "nx e2e nx-firebase-e2e"
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "build -- nx-firebase",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "Build Nx firebase plugin",
+      "detail": "nx build nx-firebase"
+    },
+    {
+      "type": "npm",
+      "script": "test -- nx-firebase",
+      "group": "test",
+      "problemMatcher": [],
+      "label": "Test Nx firebase plugin",
+      "detail": "nx test nx-firebase"
+    },
+    {
+      "type": "npm",
+      "script": "e2e -- nx-firebase-e2e",
+      "group": "test",
+      "problemMatcher": [],
+      "label": "Test e2e Nx firebase plugin",
+      "detail": "nx e2e nx-firebase-e2e"
+    }
+  ]
 }

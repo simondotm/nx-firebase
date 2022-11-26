@@ -1,28 +1,28 @@
-import { readJson, readWorkspaceConfiguration, Tree } from '@nrwl/devkit';
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
-import nxfirebaseInitGenerator from './generator';
-import { Schema } from './schema';
+import { readJson, readWorkspaceConfiguration, Tree } from '@nrwl/devkit'
+import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import nxfirebaseInitGenerator from './generator'
+import { Schema } from './schema'
 
 describe('init', () => {
-  let tree: Tree;
+  let tree: Tree
   const schema: Schema = {
     skipFormat: false,
-  };
+  }
 
   beforeEach(() => {
-    tree = createTreeWithEmptyWorkspace();
-  });
+    tree = createTreeWithEmptyWorkspace()
+  })
 
   it('should add firebase dependencies', async () => {
-    await nxfirebaseInitGenerator(tree, schema);
-    const packageJson = readJson(tree, 'package.json');
-    expect(packageJson.dependencies['firebase-admin']).toBeDefined();
-    expect(packageJson.dependencies['firebase-functions']).toBeDefined();
+    await nxfirebaseInitGenerator(tree, schema)
+    const packageJson = readJson(tree, 'package.json')
+    expect(packageJson.dependencies['firebase-admin']).toBeDefined()
+    expect(packageJson.dependencies['firebase-functions']).toBeDefined()
     //expect(packageJson.devDependencies['@types/react']).toBeDefined();
     //expect(packageJson.devDependencies['@types/react-dom']).toBeDefined();
     //expect(packageJson.devDependencies['@testing-library/react']).toBeDefined();
-  });
-/*
+  })
+  /*
   describe('defaultCollection', () => {
     it('should be set if none was set before', async () => {
       await nxfirebaseInitGenerator(tree, schema);
@@ -37,4 +37,4 @@ describe('init', () => {
     expect(tree.exists('jest.config.js')).toEqual(false);
   });
   */
-});
+})

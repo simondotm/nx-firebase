@@ -8,15 +8,16 @@ This project was generated using the Nx plugin workspace generator v12.3.4 but s
 
 See the [CHANGELOG](CHANGELOG.md) for release notes.
 
-> **Note**: This project is an early beta and feedback is very welcome. Please note I created this plugin to primarily serve my own needs, so feature requests may take a bit of time to consider. 
+> **Note**: This project is an early beta and feedback is very welcome. Please note I created this plugin to primarily serve my own needs, so feature requests may take a bit of time to consider.
 
-I'm making this project in my spare time, so if you find it useful, or it saved you some time, you are very welcome to [buy me a ☕ coffee](https://ko-fi.com/simondotm). 
+I'm making this project in my spare time, so if you find it useful, or it saved you some time, you are very welcome to [buy me a ☕ coffee](https://ko-fi.com/simondotm).
 
 ## Overview
 
 Nx provides a great way to manage monorepo workflows, however if you have a development setup where your Nx workspace uses one or more Firebase projects that use different combinations and configurations of Firebase features such as _hosting_, _storage_, _database rules/indexes_, and _functions_, then some extra tooling is necessary in order to maintain a familiar Firebase workflow within your monorepo.
 
 This plugin aims to help with this by:
+
 1. Enabling & promoting use of shared Typescript code libraries within Firebase functions
 2. Retaining a familiar usage of all Firebase features in a way that feels integrated with Nx workflow
 3. Requiring minimal friction/setup for configuration of an Nx workspace in order to be productive with development, building & deployment of Firebase projects
@@ -24,10 +25,10 @@ This plugin aims to help with this by:
 # Quick Start
 
 ## Installation
+
 **`npm install @simondotm/nx-firebase`**
 
 Installs this plugin into your Nx workspace.
-
 
 **`nx g @simondotm/nx-firebase:init`**
 
@@ -57,7 +58,6 @@ Compiles & builds the target Nx Firebase (functions) application to `dist/apps/[
 >
 > _If your functions reference any local libraries, always use `--with-deps`_
 
-
 ## Deploy Project (Firebase functions)
 
 For inital deployment:
@@ -84,7 +84,6 @@ Or
 
 **`nx getconfig appname`** will fetch the remote server functions configuration variables and save them locally to the app directory as `.runtimeconfig.json` for the emulators to use.
 
-
 # Usage
 
 ## Nx Firebase Applications
@@ -96,32 +95,34 @@ You don't have to use all of these features, but the Nx-Firebase plugin ensures 
 When a new Nx Firebase application project is added to the workspace it will generate:
 
 **Within the application folder:**
-* A buildable Typescript node library for Firebase functions
-* Default `package.json` for the Firebase functions
-* Default `firestore.indexes` for Firestore database indexes
-* Default `firestore.rules` for Firestore database rules
-* Default `database.rules.json` for Firebase realtime database
-* Default `storage.rules` for Firebase storage rules
-* Default `public/index.html` for Firebase hosting - _you can delete this if your firebase configuration for hosting points elsewhere_.
+
+- A buildable Typescript node library for Firebase functions
+- Default `package.json` for the Firebase functions
+- Default `firestore.indexes` for Firestore database indexes
+- Default `firestore.rules` for Firestore database rules
+- Default `database.rules.json` for Firebase realtime database
+- Default `storage.rules` for Firebase storage rules
+- Default `public/index.html` for Firebase hosting - _you can delete this if your firebase configuration for hosting points elsewhere_.
 
 **And in the workspace root:**
-* A `firebase.<appname>.json` configuration file for the Firebase project, which is preset with references to the various configuration files in the application folder
+
+- A `firebase.<appname>.json` configuration file for the Firebase project, which is preset with references to the various configuration files in the application folder
 
 **It will also generate:**
-* A default/empty `.firebaserc` in the root of the workspace (if it doesn't already exist)
-* A default/empty/stub `firebase.json` in the root of the workspace (again, if it doesn't already exist)
-> _Note: These two files must exist in the root of a workspace otherwise the Firebase CLI will complain that it needs to initialise itself._
->
-> _**Important:** The default `firebase.json` is intentionally empty, because the idea is to use `firebase.appname.json` instead. (Although I'm reviewing this atm as it seems slightly unintuitive for [single firebase project workspaces](#nx-workspaces-with-single-firebase-projects)!)_
+
+- A default/empty `.firebaserc` in the root of the workspace (if it doesn't already exist)
+- A default/empty/stub `firebase.json` in the root of the workspace (again, if it doesn't already exist)
+  > _Note: These two files must exist in the root of a workspace otherwise the Firebase CLI will complain that it needs to initialise itself._
+  >
+  > _**Important:** The default `firebase.json` is intentionally empty, because the idea is to use `firebase.appname.json` instead. (Although I'm reviewing this atm as it seems slightly unintuitive for [single firebase project workspaces](#nx-workspaces-with-single-firebase-projects)!)_
 
 ## Nx-Firebase Application Targets (Executors)
 
-* `build` - Build the functions applicaion
-* `serve` - Build the functions application in `--watch` mode and start the Firebase Emulators
-* `deploy` - Run the Firebase CLI `deploy` command with the application's Firebase configuration. This target accepts forwarded command line options.
-* `lint` - Lint the functions application code
-* `test` - Run Jest unit tests on the functions application code
-
+- `build` - Build the functions applicaion
+- `serve` - Build the functions application in `--watch` mode and start the Firebase Emulators
+- `deploy` - Run the Firebase CLI `deploy` command with the application's Firebase configuration. This target accepts forwarded command line options.
+- `lint` - Lint the functions application code
+- `test` - Run Jest unit tests on the functions application code
 
 ## Updating Configurations
 
@@ -130,7 +131,8 @@ Once your Nx Firebase application has been initially generated you are free to c
 The Firebase CLI usually warns you anyway if you try to deploy a feature that isn't yet enabled on your Firebase Project console.
 
 ## Nx Workspaces With Multiple Firebase Projects
-This plugin supports multiple Firebase Applications/Projects inside one Nx workspace. 
+
+This plugin supports multiple Firebase Applications/Projects inside one Nx workspace.
 
 Each Nx Firebase Application generates its own `firebase.<appname>.json` configuration in the Nx workspace root which can then be used with any Firebase CLI command by using the `--config <config>` [CLI option](https://firebase.google.com/docs/cli#initialize_a_firebase_project).
 
@@ -153,9 +155,10 @@ The Firebase CLI will then just use this default configuration file instead, and
 An Nx-Firebase app is essentially a Firebase _functions_ directory (along with the few other configuration files as mentioned above). The main difference is that there isn't a directory called `functions` which you may be used to from projects setup by the Firebase CLI; with Nx-Firebase your app directory IS your functions folder.
 
 Inside the new `apps/appname` directory you will find the following functions-specific files:
-* `package.json` - The stub package file used when deploying firebase functions
-* `src` - Your Firebase functions code goes in here. You are free to structure your code however you like in this directory
-* `tsconfig.json` and `tsconfig.app.json` as usual
+
+- `package.json` - The stub package file used when deploying firebase functions
+- `src` - Your Firebase functions code goes in here. You are free to structure your code however you like in this directory
+- `tsconfig.json` and `tsconfig.app.json` as usual
 
 > **Note:** _Firebase functions `tsconfig.app.json` is by default set to target `es2018` which is the maximum ES version for Node 10 engine. This override exists in case the root `tsconfig.base.json` sets an ES target that is incompatible with Firebase Functions Node environment. If you are using Node 12 engine, you can change this target to `es2019`._
 
@@ -188,9 +191,8 @@ So your workspace layout might look like this:
         ...
 ```
 
-
-
 ## Firebase Hosting
+
 If you have one or more other web apps (Angular/React/HTML) that are deployed to a hosting site on your Firebase project, simply add them to your workspace as usual using the standard `nx g` app generators.
 
 Then just update your `firebase.appname.json` [hosting configuration](https://firebase.google.com/docs/hosting/full-config) to point to the `dist/apps/<webapp>` where your web app build output is.
@@ -204,6 +206,7 @@ Or
 **`nx deploy appname --only hosting`**
 
 ### Static Sites
+
 If you deploy static websites to Firebase Hosting (that do not need to get built by Nx), just create a folder in your `apps` directory (rather than generate an Nx web app) and put your content in that folder. Then update the `hosting` section of your `firebase.appname.json` to simply point directly to this folder.
 
 The firebase CLI hosting deploy command above will just upload the static content as required.
@@ -212,13 +215,13 @@ An application generated by Nx-Firebase is by default configured to host content
 
 ## Rules & Indexes
 
-To keep the root of your Nx workspace tidy, the Nx-Firebase plugin puts default Firebase rules and index files inside the app folder, and the `firebase.appname.json` configuration file simply points to them there. 
+To keep the root of your Nx workspace tidy, the Nx-Firebase plugin puts default Firebase rules and index files inside the app folder, and the `firebase.appname.json` configuration file simply points to them there.
 
 Again, this works just fine with the usual Firebase CLI command, eg:
 
 **`firebase deploy --only firestore:rules --config firebase.appname.json`**
 
-Or 
+Or
 
 **`nx deploy appname --only firestore:rules`**
 
@@ -249,6 +252,7 @@ You can then build your Firebase application (and any dependencies) with:
 **`nx run appname:build --with-deps [--force]`**
 
 This action will:
+
 1. Compile any dependent Typescript libraries imported by your Functions Application
 2. Compile the Typescript Functions code in your Firebase Application directory
 3. Auto generate dependencies in the output `package.json` for your functions
@@ -265,11 +269,9 @@ Or
 
 **`nx deploy appname --only functions`**
 
- _(see Technical Notes below for further explanation of all this)_
-
+_(see Technical Notes below for further explanation of all this)_
 
 > _**Note:** The Nx-Firebase plugin will detect if any non-buildable libraries have been imported by a firebase application, and halt compilation._
-
 
 ## Using Nx Libraries within nested sub-directories
 
@@ -297,11 +299,12 @@ Both of these library options are compatible with Nx-Firebase applications.
 
 ## Optimizing Nx Libraries for Firebase Functions
 
-Buildable Node libraries in Nx are typically used in environments where it is typical to export the entire public API for a library in a single `index.ts`, and then consuming some or all of this API by importing from this barrel export eg. 
+Buildable Node libraries in Nx are typically used in environments where it is typical to export the entire public API for a library in a single `index.ts`, and then consuming some or all of this API by importing from this barrel export eg.
 
 `import { stuff } from '@myorg/mylib'`
 
 For Firebase functions however, we need to be efficient with our imports since each import has some impact on the [cold start time](https://firebase.google.com/docs/functions/tips#use_dependencies_wisely) of our functions because:
+
 1. Importing an entire library from a barrel file is rarely optimal on a per-function basis
 2. We are not doing any tree-shaking of our imports, since we're not using webpack
 3. Buildable node libraries do not really support multiple entry points like Angular libraries do
@@ -310,7 +313,6 @@ So we ideally need a means of only importing the specific modules that our funct
 
 One option is to sub divide into multiple smaller libraries that are used by Firebase functions, however this can lead to too much fragmentation of shared code, and inconvenient splitting of library code in ways that prevent us from grouping libraries by functional scope.
 
-
 A better solution for Firebase Functions is to use _deep imports_, that allow our functions to import only specific modules from node libraries, eg.
 
 `import { SpecificModule } from '@myorg/mylib`**`/src/lib/specificmodule`**`'`
@@ -318,6 +320,7 @@ A better solution for Firebase Functions is to use _deep imports_, that allow ou
 This approach means our buildable library is still packaged as `@myorg/mylib`, but we are able to import its internal modules as well as its public API.
 
 ### **Supporting deep imports with Nx Node libraries**
+
 When we add buildable node libraries to our Nx workspace, the node library generator adds its own Typescript path alias to `compilerOptions.paths` in our workspace `tsconfig.base.json` such as:
 
 `"@myorg/mylib": ["libs/mylib/src/index.ts"]`
@@ -350,25 +353,25 @@ The Firebase emulators work well within Nx and `nx-firebase`.
 
 To startup the Firebase emulator suite:
 
-* **`nx emulate appname`** - will launch the Firebase emulators using the app's firebase configuration
+- **`nx emulate appname`** - will launch the Firebase emulators using the app's firebase configuration
 
 When the Firebase Emulators are running, it is no longer possible to run `nx build appname` because the build script always attempts to delete the output directory in `dist` prior to compilation, which conflicts with a resource lock placed on this directory by the emulators.
 
 To workaround this, use:
-* **`nx build appname --with-deps --deleteOutputPath=false`**
+
+- **`nx build appname --with-deps --deleteOutputPath=false`**
 
 which will instruct the build to proceed without cleaning the output directory first. Note this approach could lead to scenarios where spurious files exist in `dist` due to skipping the cleaning step.
 
 The emulators automatically detect changes to configuration files and source files for functions.
 
 To serve the application, use:
-* **`nx serve appname`**
+
+- **`nx serve appname`**
 
 Which will build the functions application and all of its dependencies, whilst launching the emulators, and the typescript compiler in watch mode.
 
 > **IMPORTANT:** _Note that whilst `nx serve` will be useful when changing existing functions code, due to `tsc --watch` being enabled, it will NOT correctly detect changes if additional library imports are added to the source code or changes are made to any imported libraries during a watched session. To remedy this, relaunch the emulators by running `nx serve` again._
-
-
 
 # Technical Notes
 
@@ -377,18 +380,22 @@ This plugin builds on a number of interesting conversations in the Nx Github iss
 The main feature I wanted was to be able to easily build & deploy Firebase functions in a way that would be familiar (Firebase CLI) but also leverage the power of Nx libraries to share common backend code across multiple Firebase projects.
 
 Firebase is quite particular about how it deploys functions code to GCP, in so much that:
-1. It does not upload `node_modules` folder, and 
+
+1. It does not upload `node_modules` folder, and
 2. It requires all code used by all functions to be self-contained within the `functions` directory that is set in the `firebase.json` [configuration file](https://firebase.google.com/docs/functions/manage-functions#deploy_functions).
 
 An additional constraint is that we do not want to use Webpack for building function code because:
+
 1. It prevents us from using dynamic function exports that optimize cold starts (since webpack bundles all functions and all exports into one module)
 2. With Firebase functions, there's really no need or benefit to optimize, minify or otherwise change the compiled JS we upload
 
 Other considerations:
+
 1. We do care about only deploying functions code that is relevant to the functions being deployed (some workarounds upload all of the workspace)
 2. The Firebase CLI is great and familar, so we don't really want to have to add any extra complexity or wrappers around it if we can help it.
 
 ## Supporting Libraries in Functions
+
 Supporting Nx libraries as external packages with Firebase functions is slightly tricky. The solution the Nx-Firebase plugin uses is to use [local package references](https://firebase.google.com/docs/functions/handle-dependencies#including_local_nodejs_modules).
 
 Nx-Firebase has a custom build executor which is based on the `@nrwl/node:package` executor, with a few additional build steps.
@@ -406,7 +413,7 @@ Nx-Firebase has a custom build executor which is based on the `@nrwl/node:packag
 
 These extra steps ensure that the Firebase CLI can deploy functions with all of the correct dependencies and local libraries fully self contained within the `dist/apps/appname` directory (which pleases the CLI).
 
-The reason why we make an additional copy of dependent libraries to the `node_modules` folder is because the Firebase CLI runs some checks (and partially processes the primary functions entry point node script) prior to deployment to ensure everything is in order. 
+The reason why we make an additional copy of dependent libraries to the `node_modules` folder is because the Firebase CLI runs some checks (and partially processes the primary functions entry point node script) prior to deployment to ensure everything is in order.
 
 There's no need to do a full `npm install` here, we only have to ensure local libraries exist inside `node_modules` at deployment time.
 
@@ -420,9 +427,6 @@ Firebase functions does support [private packages](https://firebase.google.com/d
 
 If you use `ModuleAlias` and TSC path aliases in your Firebase functions (as I do), please note that I've not yet figured out how to support project-specific `tsc` `paths` in the Typescript configurations. It seems tricky since Nx uses path aliases in the workspace root `tsconfig` for library imports, and adding any path overrides in applications will overwrite these. The best workaround I can think of is to add global aliases with some naming convention to the workspace root TSC config... If anyone has any better ideas they'd be very welcome!
 
-
 **Unit Tests**
 
 I've not implemented a full set of unit tests yet, but the e2e tests do perform a few standard tests.
-
-

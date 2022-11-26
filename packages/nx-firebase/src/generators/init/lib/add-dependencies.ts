@@ -1,12 +1,12 @@
-import type { GeneratorCallback, Tree } from '@nrwl/devkit';
-import { addDependenciesToPackageJson } from '@nrwl/devkit';
+import type { GeneratorCallback, Tree } from '@nrwl/devkit'
+import { addDependenciesToPackageJson } from '@nrwl/devkit'
 import {
   nestJsVersion,
   nxVersion,
   reflectMetadataVersion,
   rxjsVersion,
   tsLibVersion,
-} from '../../../utils/versions';
+} from '../../../utils/versions'
 
 export function addDependencies(tree: Tree): GeneratorCallback {
   return addDependenciesToPackageJson(
@@ -23,6 +23,6 @@ export function addDependencies(tree: Tree): GeneratorCallback {
       '@nestjs/schematics': nestJsVersion,
       '@nestjs/testing': nestJsVersion,
       '@nrwl/nest': nxVersion,
-    }
-  );
+    },
+  )
 }

@@ -5,5 +5,11 @@
     "module": "commonjs",
     "types": ["jest", "node"]
   },
-  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts", "../archived-nx-firebase/src/generators/init/generator.spec.ts"]
+  "include": [
+    "jest.config.ts",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.d.ts",
+    "../archived-nx-firebase/src/generators/init/generator.spec.ts"
+  ]
 }

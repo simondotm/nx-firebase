@@ -1,10 +1,10 @@
-import type { InitGeneratorOptions } from '../schema';
+import type { InitGeneratorOptions } from '../schema'
 
 export function normalizeOptions(
-  options: InitGeneratorOptions
+  options: InitGeneratorOptions,
 ): InitGeneratorOptions {
   return {
     ...options,
     unitTestRunner: options.unitTestRunner ?? 'jest',
-  };
+  }
 }
