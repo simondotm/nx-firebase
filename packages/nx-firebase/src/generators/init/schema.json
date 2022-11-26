@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "NxNestInitGenerator",
-  "title": "Init Nest Plugin",
-  "description": "Init Nest Plugin.",
+  "$id": "NxFirebaseInitGenerator",
+  "title": "Init Firebase Plugin",
+  "description": "Init Firebase Plugin.",
   "cli": "nx",
   "type": "object",
   "properties": {
@@ -10,12 +10,12 @@
       "description": "Adds the specified unit test runner.",
       "type": "string",
       "enum": ["jest", "none"],
-      "default": "jest"
+      "default": "none"
     },
     "skipFormat": {
       "description": "Skip formatting files.",
       "type": "boolean",
-      "default": false
+      "default": true
     }
   },
   "additionalProperties": false,
