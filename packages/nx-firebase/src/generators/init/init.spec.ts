@@ -1,7 +1,7 @@
 import type { Tree } from '@nrwl/devkit'
 import * as devkit from '@nrwl/devkit'
 import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { firebaseAdminVersion, firebaseFunctionsVersion, firebaseToolsVersion, firebaseVersion } from '../../utils/versions'
+import { firebaseAdminVersion, firebaseFunctionsTestVersion, firebaseFunctionsVersion, firebaseToolsVersion, firebaseVersion } from '../../utils/versions'
 import { initGenerator } from './init'
 
 describe('init generator', () => {
@@ -23,6 +23,9 @@ describe('init generator', () => {
     )
     expect(packageJson.dependencies['tslib']).toBeDefined()
 
+    expect(packageJson.devDependencies['firebase-functions-test']).toBe(
+      firebaseFunctionsTestVersion,
+    )
     expect(packageJson.devDependencies['firebase-tools']).toBe(
       firebaseToolsVersion,
     )

@@ -6,6 +6,7 @@ import {
   firebaseAdminVersion,
   firebaseFunctionsVersion,
   firebaseToolsVersion,
+  firebaseFunctionsTestVersion,
 } from '../../../utils/versions'
 
 export function addDependencies(tree: Tree): GeneratorCallback {
@@ -19,6 +20,7 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     },
     {
       'firebase-tools': firebaseToolsVersion,
+      'firebase-functions-test': firebaseFunctionsTestVersion,
     },
   )
 }
