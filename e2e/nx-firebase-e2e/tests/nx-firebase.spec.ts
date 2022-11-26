@@ -6,6 +6,8 @@ import {
   uniq,
 } from '@nrwl/nx-plugin/testing';
 
+const JEST_TIMEOUT = 120000;
+
 describe('nx-firebase e2e', () => {
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
@@ -30,7 +32,7 @@ describe('nx-firebase e2e', () => {
     );
     const result = await runNxCommandAsync(`build ${project}`);
     expect(result.stdout).toContain('Executor ran');
-  }, 120000);
+  }, JEST_TIMEOUT);
 
   describe('--directory', () => {
     it('should create src in the specified directory', async () => {
@@ -41,7 +43,7 @@ describe('nx-firebase e2e', () => {
       expect(() =>
         checkFilesExist(`libs/subdir/${project}/src/index.ts`)
       ).not.toThrow();
-    }, 120000);
+    }, JEST_TIMEOUT);
   });
 
   describe('--tags', () => {
@@ -53,6 +55,6 @@ describe('nx-firebase e2e', () => {
       );
       const project = readJson(`libs/${projectName}/project.json`);
       expect(project.tags).toEqual(['e2etag', 'e2ePackage']);
-    }, 120000);
+    }, JEST_TIMEOUT);
   });
 });
