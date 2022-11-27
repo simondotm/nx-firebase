@@ -2,10 +2,19 @@ import type { Tree } from '@nrwl/devkit'
 import * as devkit from '@nrwl/devkit'
 import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
 import { applicationGenerator } from './application'
+import {
+  getBuildTarget,
+  getConfigTarget,
+  getDeployTarget,
+  getEmulateTarget,
+  getServeTarget,
+} from './lib'
 
 describe('application generator', () => {
   let tree: Tree
-  const appName = 'myFirebaseApp'
+  //TODO: currently the plugin doesnt properly support camelCase project names (split to kebab-case by node plugin)
+  // or --directory sub directories for applications.
+  const appName = 'my-firebase-app' //'myFirebaseApp'
   const appDirectory = 'my-firebase-app'
 
   beforeEach(() => {
@@ -51,6 +60,31 @@ describe('application generator', () => {
       '**/*.spec.ts',
       '**/*.test.ts',
     ])
+  })
+
+  it('should update project configuration', async () => {
+    await applicationGenerator(tree, { name: appName })
+
+    const project = devkit.readProjectConfiguration(tree, appName)
+
+    //const workspaceJson = devkit.readJson(tree, '/workspace.json');
+    expect(project.root).toEqual(
+      devkit.joinPathFragments(
+        devkit.getWorkspaceLayout(tree).appsDir,
+        appName,
+      ),
+    )
+
+    // validate the custom targets for nx-firebase apps
+    expect(project.targets.build).toEqual(getBuildTarget(project))
+    expect(project.targets.deploy).toEqual(getDeployTarget(project))
+    expect(project.targets.getconfig).toEqual(getConfigTarget(project))
+    expect(project.targets.emulate).toEqual(getEmulateTarget(project))
+    expect(project.targets.serve).toEqual(getServeTarget(project))
+
+    // assume @nrwl/node is working, we dont need to validate these objects
+    expect(project.targets.lint).toBeDefined()
+    expect(project.targets.test).toBeDefined()
   })
 
   describe('--skipFormat', () => {

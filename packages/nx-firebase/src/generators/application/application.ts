@@ -4,11 +4,12 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial'
 import { initGenerator } from '../init/init'
 import {
+  addProject,
   createFiles,
   normalizeOptions,
   toNodeApplicationGeneratorOptions,
   updateTsConfig,
-} from './lib/'
+} from './lib'
 import { deleteFiles } from './lib/delete-files'
 import type { ApplicationGeneratorOptions } from './schema'
 
@@ -36,6 +37,7 @@ export async function applicationGenerator(
   deleteFiles(tree, options)
   createFiles(tree, options)
   updateTsConfig(tree, options)
+  addProject(tree, options)
 
   // ensures newly added files are formatted to match workspace style
   if (!options.skipFormat) {
