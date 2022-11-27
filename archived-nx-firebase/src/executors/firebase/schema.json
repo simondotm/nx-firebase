@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "title": "Firebase executor",
+  "description": "Runs the Firebase CLI for the target project's firebase configuration",
+  "type": "object",
+  "examples": [
+    {
+      "command": "myfirebaseapp:firebase --cmd <firebase cli commands>",
+      "description": "Run the Firebase CLI for the target project's firebase configuration"
+    }
+  ],    
+  "properties": {
+    "firebaseConfig": {
+      "type": "string",
+      "description": "The path to the firebase configuration for this project."
+    },
+    "cmd": {
+      "description": "The Firebase CLI command.",
+      "type": "string"
+    }    
+  },
+  "required": []
+}
