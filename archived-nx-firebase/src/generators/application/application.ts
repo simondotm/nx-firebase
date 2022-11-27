@@ -151,7 +151,7 @@ function getServeConfig(
     options: {
       commands: [
         {
-          command: `nx run ${options.appProjectName}:build --with-deps && nx run ${options.appProjectName}:build --watch`,
+          command: `nx run ${options.appProjectName}:build && nx run ${options.appProjectName}:build --watch`,
         },
         {
           command: `nx run ${options.appProjectName}:emulate`,

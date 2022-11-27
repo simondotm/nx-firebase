@@ -25,7 +25,7 @@
   },
   "functions": {
     "predeploy": [
-      "npx nx build <%= name %> --with-deps",
+      "npx nx build <%= name %>",
       "npx nx lint <%= name %>"
     ],
     "source": "dist/<%= root %>"

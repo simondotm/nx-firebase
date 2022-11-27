@@ -55,7 +55,7 @@ export function getServeTarget(project: ProjectConfiguration) {
     options: {
       commands: [
         {
-          command: `nx run ${project.name}:build --with-deps && nx run ${project.name}:build --watch`,
+          command: `nx run ${project.name}:build && nx run ${project.name}:build --watch`,
         },
         {
           command: `nx run ${project.name}:emulate`,
