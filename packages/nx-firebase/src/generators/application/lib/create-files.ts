@@ -1,12 +1,6 @@
-import type { Tree } from '@nrwl/devkit'
-import {
-  generateFiles,
-  joinPathFragments,
-  workspaceRoot,
-  logger,
-} from '@nrwl/devkit'
+import { offsetFromRoot, Tree } from '@nrwl/devkit'
+import { generateFiles, joinPathFragments, logger } from '@nrwl/devkit'
 import type { NormalizedOptions } from '../schema'
-import { relative } from 'path'
 
 /**
  * Generate the firebase app specific files
@@ -16,9 +10,9 @@ import { relative } from 'path'
  */
 export function createFiles(tree: Tree, options: NormalizedOptions): void {
   const firebaseAppConfig = `firebase.${options.name}.json`
-  const firebaseAppConfigPath = relative(
-    options.appProjectRoot,
-    joinPathFragments(workspaceRoot, firebaseAppConfig),
+  const firebaseAppConfigPath = joinPathFragments(
+    offsetFromRoot(options.appProjectRoot),
+    firebaseAppConfig,
   )
 
   const substitutions = {
