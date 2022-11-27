@@ -1,0 +1,50 @@
+{
+  "database": {
+    "rules": "<%= root %>/database.rules.json"
+  },
+  "firestore": {
+    "rules": "<%= root %>/firestore.rules",
+    "indexes": "<%= root %>/firestore.indexes.json"
+  },    
+  "hosting": {
+    "public": "<%= root %>/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+      "rules": "<%= root %>/storage.rules"
+  },
+  "functions": {
+    "predeploy": [
+      "npx nx build <%= name %> --with-deps",
+      "npx nx lint <%= name %>"
+    ],
+    "source": "dist/<%= root %>"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "auth": {
+      "port": 9099
+    },
+    "pubsub": {
+      "port": 8085
+    }
+  }
+}

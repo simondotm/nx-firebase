@@ -13,6 +13,12 @@
       "schema": "./src/generators/init/schema.json",
       "description": "nx-firebase initializer",
       "hidden": true
-    }
+    },
+    "application": {
+      "factory": "./src/generators/application/application",
+      "schema": "./src/generators/application/schema.json",
+      "description": "nx-firebase application generator",
+      "aliases": ["app"]
+    }    
   }
 }

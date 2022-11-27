@@ -1,13 +1,13 @@
 {
   "database": {
-    "rules": "<%= appProjectRoot %>/database.rules.json"
+    "rules": "<%= root %>/database.rules.json"
   },
   "firestore": {
-    "rules": "<%= appProjectRoot %>/firestore.rules",
-    "indexes": "<%= appProjectRoot %>/firestore.indexes.json"
+    "rules": "<%= root %>/firestore.rules",
+    "indexes": "<%= root %>/firestore.indexes.json"
   },    
   "hosting": {
-    "public": "<%= appProjectRoot %>/public",
+    "public": "<%= root %>/public",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -21,14 +21,14 @@
     ]
   },
   "storage": {
-      "rules": "<%= appProjectRoot %>/storage.rules"
+      "rules": "<%= root %>/storage.rules"
   },
   "functions": {
     "predeploy": [
-      "npx nx build <%= appProjectName %> --with-deps",
-      "npx nx lint <%= appProjectName %>"
+      "npx nx build <%= name %>",
+      "npx nx lint <%= name %>"
     ],
-    "source": "dist/<%= appProjectRoot %>"
+    "source": "dist/<%= root %>"
   },
   "emulators": {
     "functions": {

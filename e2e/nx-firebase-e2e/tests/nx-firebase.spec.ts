@@ -73,4 +73,20 @@ describe('nx-firebase e2e', () => {
   //--------------------------------------------------------------------------------------------------
   // New e2e tests
   //--------------------------------------------------------------------------------------------------
+
+  it(
+    'should create nx-firebase application',
+    async () => {
+      const project = uniq('functions')
+      await runNxCommandAsync(`generate @simondotm/nx-firebase:app ${project}`)
+
+      expect(() =>
+        checkFilesExist(`apps/${project}/storage.rules`),
+      ).not.toThrow()
+
+      //const result = await runNxCommandAsync(`build ${project}`)
+      //expect(result.stdout).toContain('Executor ran')
+    },
+    JEST_TIMEOUT,
+  )
 })
