@@ -6,7 +6,7 @@
     "start": "nx serve",
     "build": "nx run nx-firebase:build",
     "test": "nx run nx-firebase:test",
-    "e2e": "nx run nx-firebase-e2e:e2e"
+    "e2e": "nx run nx-firebase-e2e:e2e && cd ./tmp/nx-e2e/proj"
   },
   "private": true,
   "devDependencies": {

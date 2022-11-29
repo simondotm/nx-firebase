@@ -75,9 +75,32 @@ describe('nx-firebase e2e', () => {
   //--------------------------------------------------------------------------------------------------
 
   it(
+    'should create buildable typescript library',
+    async () => {
+      const project = 'lib1' //uniq('functions')
+      await runNxCommandAsync(
+        `generate @nrwl/js:lib ${project} --buildable --importPath="@proj/${project}"`,
+      )
+
+      expect(() =>
+        checkFilesExist(`libs/${project}/package.json`),
+      ).not.toThrow()
+
+      const result = await runNxCommandAsync(`build ${project}`)
+      expect(result.stdout).toContain(
+        'Done compiling TypeScript files for project',
+      )
+      expect(result.stdout).toContain(
+        `Successfully ran target build for project ${project}`,
+      )
+    },
+    JEST_TIMEOUT,
+  )
+
+  it(
     'should create nx-firebase application',
     async () => {
-      const project = uniq('functions')
+      const project = 'functions' //uniq('functions')
       await runNxCommandAsync(`generate @simondotm/nx-firebase:app ${project}`)
 
       expect(() =>

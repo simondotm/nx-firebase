@@ -1,7 +1,12 @@
 import { ExecutorContext, logger } from '@nrwl/devkit'
 import type { ExecutorOptions } from '@nrwl/js/src/utils/schema'
 import { tscExecutor as jsTscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
+import { updateFirebaseDependencies } from './lib'
 
+/**
+ * @simondotm/nx-firebase:build executor is a
+ *  customized version of @nrwl/js:tsc executor
+ */
 export async function* runExecutor(
   options: ExecutorOptions,
   context: ExecutorContext,
@@ -9,8 +14,10 @@ export async function* runExecutor(
   logger.log('running our custom build executor')
   yield* jsTscExecutor(options, context)
   logger.log('post yield from jsTscExecutor in our custom build executor')
-}
 
+  // Process Firebase Functions dependencies
+  await updateFirebaseDependencies(context, options.outputPath)
+}
 //export default convertNxExecutor(runExecutor);
 
 export default runExecutor
