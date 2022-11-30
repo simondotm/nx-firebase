@@ -1,6 +1,6 @@
-import { ExecutorContext, logger } from '@nrwl/devkit'
+import { ExecutorContext } from '@nrwl/devkit'
 import type { ExecutorOptions } from '@nrwl/js/src/utils/schema'
-import { tscExecutor as jsTscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
+import { tscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
 import { updateFirebaseDependencies } from './lib'
 
 /**
@@ -11,41 +11,18 @@ export async function* runExecutor(
   options: ExecutorOptions,
   context: ExecutorContext,
 ) {
-  logger.log('running our custom build executor')
-  yield* jsTscExecutor(options, context)
-  logger.log('post yield from jsTscExecutor in our custom build executor')
-
-  // Process Firebase Functions dependencies
-  await updateFirebaseDependencies(context, options.outputPath)
-}
-//export default convertNxExecutor(runExecutor);
-
-export default runExecutor
-
-/*
-import { ExecutorContext } from '@nrwl/devkit'
-import type { NodeExecutorOptions } from '@nrwl/js/src/executors/node/schema'
-import { nodeExecutor as jsNodeExecutor } from '@nrwl/js/src/executors/node/node.impl'
-
-export async function* runExecutor(
-  options: NodeExecutorOptions,
-  context: ExecutorContext,
-) {
-  yield* jsNodeExecutor(options, context)
-}
-
-//export default convertNxExecutor(runExecutor);
-
-export default runExecutor
-*/
-
-/*
-import { BuildExecutorSchema } from './schema'
-
-export default async function runExecutor(options: BuildExecutorSchema) {
-  console.log('Executor ran for Build', options)
-  return {
-    success: true,
+  // iterate the tscExecutor generator until it completes
+  // this approach allows us to add a custom post-compile process
+  // with --watch enabled, this will when the process terminates
+  // https://github.com/nrwl/nx/blob/8bfc0b5527e3ea3acd14e4a11254505f02046d98/packages/js/src/executors/tsc/tsc.impl.ts#L176
+  for await (const output of tscExecutor(options, context)) {
+    if (output.success) {
+      // Process Firebase Functions dependencies
+      await updateFirebaseDependencies(context, options.outputPath)
+    }
+    yield output
   }
 }
-*/
+//export default convertNxExecutor(runExecutor);
+
+export default runExecutor
