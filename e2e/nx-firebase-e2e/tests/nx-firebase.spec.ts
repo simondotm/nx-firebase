@@ -9,6 +9,16 @@ import {
 const JEST_TIMEOUT = 120000
 
 describe('nx-firebase e2e', () => {
+  const appName = 'functions'
+  const libName = 'lib'
+  const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
+  const libGeneratorCommand = 'generate @nrwl/js:lib'
+  const npmScope = '@proj'
+  const pluginName = '@simondotm/nx-firebase'
+  const pluginPath = 'dist/packages/nx-firebase'
+  const compileComplete = 'Done compiling TypeScript files for project'
+  const buildSuccess = 'Successfully ran target build for project'
+
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
   // For this reason, we recommend each suite only
@@ -16,7 +26,7 @@ describe('nx-firebase e2e', () => {
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
   beforeAll(() => {
-    ensureNxProject('@simondotm/nx-firebase', 'dist/packages/nx-firebase')
+    ensureNxProject(pluginName, pluginPath)
   })
 
   afterAll(() => {
@@ -26,14 +36,18 @@ describe('nx-firebase e2e', () => {
   })
 
   it(
-    'should create nx-firebase',
+    'should create nx-firebase app',
     async () => {
-      const project = uniq('nx-firebase')
-      await runNxCommandAsync(
-        `generate @simondotm/nx-firebase:nx-firebase ${project}`,
-      )
+      const project = uniq(appName)
+      await runNxCommandAsync(`${appGeneratorCommand} ${project}`)
+
+      expect(() =>
+        checkFilesExist(`apps/${project}/storage.rules`),
+      ).not.toThrow()
+
       const result = await runNxCommandAsync(`build ${project}`)
-      expect(result.stdout).toContain('Executor ran')
+      expect(result.stdout).toContain(compileComplete)
+      expect(result.stdout).toContain(`${buildSuccess} ${project}`)
     },
     JEST_TIMEOUT,
   )
@@ -42,12 +56,13 @@ describe('nx-firebase e2e', () => {
     it(
       'should create src in the specified directory',
       async () => {
-        const project = uniq('nx-firebase')
+        const project = uniq(appName)
+        const projectDir = 'subdir'
         await runNxCommandAsync(
-          `generate @simondotm/nx-firebase:nx-firebase ${project} --directory subdir`,
+          `${appGeneratorCommand} ${project} --directory ${projectDir}`,
         )
         expect(() =>
-          checkFilesExist(`libs/subdir/${project}/src/index.ts`),
+          checkFilesExist(`apps/${projectDir}/${project}/src/index.ts`),
         ).not.toThrow()
       },
       JEST_TIMEOUT,
@@ -58,12 +73,12 @@ describe('nx-firebase e2e', () => {
     it(
       'should add tags to the project',
       async () => {
-        const projectName = uniq('nx-firebase')
-        ensureNxProject('@simondotm/nx-firebase', 'dist/packages/nx-firebase')
+        const projectName = uniq(appName)
+        //ensureNxProject(pluginName, pluginPath)
         await runNxCommandAsync(
-          `generate @simondotm/nx-firebase:nx-firebase ${projectName} --tags e2etag,e2ePackage`,
+          `${appGeneratorCommand} ${projectName} --tags e2etag,e2ePackage`,
         )
-        const project = readJson(`libs/${projectName}/project.json`)
+        const project = readJson(`apps/${projectName}/project.json`)
         expect(project.tags).toEqual(['e2etag', 'e2ePackage'])
       },
       JEST_TIMEOUT,
@@ -77,9 +92,9 @@ describe('nx-firebase e2e', () => {
   it(
     'should create buildable typescript library',
     async () => {
-      const project = 'lib1' //uniq('functions')
+      const project = uniq(libName)
       await runNxCommandAsync(
-        `generate @nrwl/js:lib ${project} --buildable --importPath="@proj/${project}"`,
+        `${libGeneratorCommand} ${project} --buildable --importPath="${npmScope}/${project}"`,
       )
 
       expect(() =>
@@ -87,28 +102,8 @@ describe('nx-firebase e2e', () => {
       ).not.toThrow()
 
       const result = await runNxCommandAsync(`build ${project}`)
-      expect(result.stdout).toContain(
-        'Done compiling TypeScript files for project',
-      )
-      expect(result.stdout).toContain(
-        `Successfully ran target build for project ${project}`,
-      )
-    },
-    JEST_TIMEOUT,
-  )
-
-  it(
-    'should create nx-firebase application',
-    async () => {
-      const project = 'functions' //uniq('functions')
-      await runNxCommandAsync(`generate @simondotm/nx-firebase:app ${project}`)
-
-      expect(() =>
-        checkFilesExist(`apps/${project}/storage.rules`),
-      ).not.toThrow()
-
-      //const result = await runNxCommandAsync(`build ${project}`)
-      //expect(result.stdout).toContain('Executor ran')
+      expect(result.stdout).toContain(compileComplete)
+      expect(result.stdout).toContain(`${buildSuccess} ${project}`)
     },
     JEST_TIMEOUT,
   )
