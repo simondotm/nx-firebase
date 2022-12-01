@@ -8,18 +8,24 @@ export function normalizeOptions(
   tree: Tree,
   options: ApplicationGeneratorOptions,
 ): NormalizedOptions {
-  const appDirectory = options.directory
-    ? `${names(options.directory).fileName}/${names(options.name).fileName}`
-    : names(options.name).fileName
+  // see https://github.com/nrwl/nx/blob/84cbcb7e105cd2b3bf5b3d84a519e5c52951e0f3/packages/js/src/generators/library/library.ts#L332
+  // for how the project name is derived from options.name and --directory
+  const name = names(options.name).fileName
+  const projectDirectory = options.directory
+    ? `${names(options.directory).fileName}/${name}`
+    : name
 
-  const appProjectRoot = joinPathFragments(
+  const projectRoot = joinPathFragments(
     getWorkspaceLayout(tree).appsDir,
-    appDirectory,
+    projectDirectory,
   )
+
+  const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-')
 
   return {
     ...options,
-    appProjectRoot,
+    projectRoot,
+    projectName,
     linter: options.linter ?? Linter.EsLint,
     unitTestRunner: options.unitTestRunner ?? 'jest',
   }

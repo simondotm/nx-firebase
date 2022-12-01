@@ -1,4 +1,9 @@
-import { joinPathFragments, ProjectConfiguration, Tree } from '@nrwl/devkit'
+import {
+  joinPathFragments,
+  names,
+  ProjectConfiguration,
+  Tree,
+} from '@nrwl/devkit'
 import {
   readProjectConfiguration,
   updateProjectConfiguration,
@@ -67,7 +72,7 @@ export function getServeTarget(project: ProjectConfiguration) {
 }
 
 export function addProject(tree: Tree, options: NormalizedOptions): void {
-  const project = readProjectConfiguration(tree, options.name)
+  const project = readProjectConfiguration(tree, options.projectName)
 
   project.targets.build = getBuildTarget(project)
   project.targets.deploy = getDeployTarget(project)

@@ -9,17 +9,17 @@ import type { NormalizedOptions } from '../schema'
  */
 export function deleteFiles(tree: Tree, options: NormalizedOptions): void {
   const nodeFilesToDelete = [
-    joinPathFragments(options.appProjectRoot, 'src', 'main.ts'),
-    joinPathFragments(options.appProjectRoot, 'src', 'app', '.gitkeep'),
-    joinPathFragments(options.appProjectRoot, 'src', 'assets', '.gitkeep'),
+    joinPathFragments(options.projectRoot, 'src', 'main.ts'),
+    joinPathFragments(options.projectRoot, 'src', 'app', '.gitkeep'),
+    joinPathFragments(options.projectRoot, 'src', 'assets', '.gitkeep'),
     joinPathFragments(
-      options.appProjectRoot,
+      options.projectRoot,
       'src',
       'environments',
       'environment.prod.ts',
     ),
     joinPathFragments(
-      options.appProjectRoot,
+      options.projectRoot,
       'src',
       'environments',
       'environment.ts',

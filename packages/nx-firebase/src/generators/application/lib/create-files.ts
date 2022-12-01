@@ -11,14 +11,14 @@ import type { NormalizedOptions } from '../schema'
 export function createFiles(tree: Tree, options: NormalizedOptions): void {
   const firebaseAppConfig = `firebase.${options.name}.json`
   const firebaseAppConfigPath = joinPathFragments(
-    offsetFromRoot(options.appProjectRoot),
+    offsetFromRoot(options.projectRoot),
     firebaseAppConfig,
   )
 
   const substitutions = {
     tmpl: '',
     name: options.name,
-    root: options.appProjectRoot,
+    root: options.projectRoot,
 
     firebaseAppName: options.name,
     firebaseAppConfig,
@@ -35,7 +35,7 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
   generateFiles(
     tree,
     joinPathFragments(__dirname, '..', 'files'),
-    options.appProjectRoot,
+    options.projectRoot,
     substitutions,
   )
 

@@ -11,7 +11,7 @@ import type { NormalizedOptions } from '../schema'
 export function updateTsConfig(tree: Tree, options: NormalizedOptions): void {
   updateJson(
     tree,
-    joinPathFragments(options.appProjectRoot, 'tsconfig.app.json'),
+    joinPathFragments(options.projectRoot, 'tsconfig.app.json'),
     (json) => {
       json.compilerOptions.emitDecoratorMetadata = true
       json.compilerOptions.target = 'es2015'
