@@ -19,7 +19,7 @@ export async function* runExecutor(
     updateBuildableProjectDepsInPackageJson: true,
     clean: true,
   }
-  console.log(`options to executor are: ${JSON.stringify(options, null, 3)}`)
+
   // iterate the tscExecutor generator until it completes
   // this approach allows us to add a custom post-compile process
   // with --watch enabled, this will when the process terminates
