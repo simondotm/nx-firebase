@@ -19,6 +19,25 @@ describe('nx-firebase e2e', () => {
   const compileComplete = 'Done compiling TypeScript files for project'
   const buildSuccess = 'Successfully ran target build for project'
 
+  function expectedFiles(project: string, projectDir: string = '') {
+    const projectPath = projectDir
+      ? `apps/${projectDir}/${project}`
+      : `apps/${project}`
+    return [
+      `${projectPath}/src/index.ts`,
+      `${projectPath}/public/index.html`,
+      `${projectPath}/package.json`,
+      `${projectPath}/readme.md`,
+      `${projectPath}/database.rules.json`,
+      `${projectPath}/firestore.indexes.json`,
+      `${projectPath}/firestore.rules`,
+      `${projectPath}/storage.rules`,
+      `firebase.json`,
+      `firebase.${project}.json`,
+      `.firebaserc`,
+    ]
+  }
+
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
   // For this reason, we recommend each suite only
@@ -36,18 +55,33 @@ describe('nx-firebase e2e', () => {
   })
 
   it(
-    'should create nx-firebase app',
+    'should create & build nx-firebase app',
     async () => {
       const project = uniq(appName)
       await runNxCommandAsync(`${appGeneratorCommand} ${project}`)
 
-      expect(() =>
-        checkFilesExist(`apps/${project}/storage.rules`),
-      ).not.toThrow()
+      // test generator output
 
+      expect(() => checkFilesExist(...expectedFiles(project))).not.toThrow()
+
+      // test build executor
       const result = await runNxCommandAsync(`build ${project}`)
       expect(result.stdout).toContain(compileComplete)
       expect(result.stdout).toContain(`${buildSuccess} ${project}`)
+      expect(result.stdout).toContain('Updated firebase functions package.json')
+
+      const distPackageFile = `dist/apps/${project}/package.json`
+      expect(() =>
+        checkFilesExist(
+          distPackageFile,
+          `dist/apps/${project}/readme.md`,
+          `dist/apps/${project}/src/index.js`,
+        ),
+      ).not.toThrow()
+
+      const distPackage = readJson(distPackageFile)
+      const deps = distPackage['dependencies']
+      expect(deps).toBeDefined()
     },
     JEST_TIMEOUT,
   )
@@ -62,7 +96,7 @@ describe('nx-firebase e2e', () => {
           `${appGeneratorCommand} ${project} --directory ${projectDir}`,
         )
         expect(() =>
-          checkFilesExist(`apps/${projectDir}/${project}/src/index.ts`),
+          checkFilesExist(...expectedFiles(project, projectDir)),
         ).not.toThrow()
       },
       JEST_TIMEOUT,
@@ -86,7 +120,7 @@ describe('nx-firebase e2e', () => {
   })
 
   //--------------------------------------------------------------------------------------------------
-  // New e2e tests
+  // Library e2e tests
   //--------------------------------------------------------------------------------------------------
 
   it(
@@ -97,6 +131,7 @@ describe('nx-firebase e2e', () => {
         `${libGeneratorCommand} ${project} --buildable --importPath="${npmScope}/${project}"`,
       )
 
+      // no need to test the js library generator, only that it ran ok
       expect(() =>
         checkFilesExist(`libs/${project}/package.json`),
       ).not.toThrow()
