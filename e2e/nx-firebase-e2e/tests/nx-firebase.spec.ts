@@ -62,12 +62,33 @@ describe('nx-firebase e2e', () => {
   it(
     'should create & build nx-firebase app',
     async () => {
-      const project = uniq(appName)
+      // test that generator adds dependencies to workspace package.json
+      // should not be initially set
+      let packageJson = readJson(`package.json`)
+      expect(packageJson.dependencies['firebase']).toBeUndefined()
+      expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
+      expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
+      expect(
+        packageJson.devDependencies['firebase-functions-test'],
+      ).toBeUndefined()
+      expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
+
+      const project = appName //uniq(appName)
       await runNxCommandAsync(`${appGeneratorCommand} ${project}`)
 
       // test generator output
 
       expect(() => checkFilesExist(...expectedFiles(project))).not.toThrow()
+
+      // test that generator adds dependencies to workspace package.json
+      packageJson = readJson(`package.json`)
+      expect(packageJson.dependencies['firebase']).toBeDefined()
+      expect(packageJson.dependencies['firebase-admin']).toBeDefined()
+      expect(packageJson.dependencies['firebase-functions']).toBeDefined()
+      expect(
+        packageJson.devDependencies['firebase-functions-test'],
+      ).toBeDefined()
+      expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
 
       // test build executor
       const result = await runNxCommandAsync(`build ${project}`)
@@ -93,7 +114,7 @@ describe('nx-firebase e2e', () => {
 
   describe('--directory', () => {
     it(
-      'should create src in the specified directory',
+      'should create & build nx-firebase app in the specified directory',
       async () => {
         const projectName = uniq(appName)
         const projectDir = subDir
