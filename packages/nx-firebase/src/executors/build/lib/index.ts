@@ -1,1 +1,1 @@
-export * from './update-dependencies'
+export * from './firebase-build'

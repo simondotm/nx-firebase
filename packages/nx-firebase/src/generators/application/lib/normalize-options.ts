@@ -1,32 +1,32 @@
-import type { Tree } from '@nrwl/devkit';
-import { getWorkspaceLayout, joinPathFragments, names } from '@nrwl/devkit';
-import { Linter } from '@nrwl/linter';
-import type { Schema as NodeApplicationGeneratorOptions } from '@nrwl/node/src/generators/application/schema';
-import type { ApplicationGeneratorOptions, NormalizedOptions } from '../schema';
+import type { Tree } from '@nrwl/devkit'
+import { getWorkspaceLayout, joinPathFragments, names } from '@nrwl/devkit'
+import { Linter } from '@nrwl/linter'
+import type { Schema as NodeApplicationGeneratorOptions } from '@nrwl/node/src/generators/application/schema'
+import type { ApplicationGeneratorOptions, NormalizedOptions } from '../schema'
 
 export function normalizeOptions(
   tree: Tree,
-  options: ApplicationGeneratorOptions
+  options: ApplicationGeneratorOptions,
 ): NormalizedOptions {
   const appDirectory = options.directory
     ? `${names(options.directory).fileName}/${names(options.name).fileName}`
-    : names(options.name).fileName;
+    : names(options.name).fileName
 
   const appProjectRoot = joinPathFragments(
     getWorkspaceLayout(tree).appsDir,
-    appDirectory
-  );
+    appDirectory,
+  )
 
   return {
     ...options,
     appProjectRoot,
     linter: options.linter ?? Linter.EsLint,
     unitTestRunner: options.unitTestRunner ?? 'jest',
-  };
+  }
 }
 
 export function toNodeApplicationGeneratorOptions(
-  options: NormalizedOptions
+  options: NormalizedOptions,
 ): NodeApplicationGeneratorOptions {
   return {
     name: options.name,
@@ -39,5 +39,5 @@ export function toNodeApplicationGeneratorOptions(
     tags: options.tags,
     unitTestRunner: options.unitTestRunner,
     setParserOptionsProject: options.setParserOptionsProject,
-  };
+  }
 }
