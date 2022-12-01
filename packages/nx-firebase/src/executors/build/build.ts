@@ -22,7 +22,7 @@ export async function* runExecutor(
 
   // iterate the tscExecutor generator until it completes
   // this approach allows us to add a custom post-compile process
-  // with --watch enabled, this will when the process terminates
+  // with --watch enabled, this loop will run until the process terminates
   // https://github.com/nrwl/nx/blob/8bfc0b5527e3ea3acd14e4a11254505f02046d98/packages/js/src/executors/tsc/tsc.impl.ts#L176
   for await (const output of tscExecutor(customOptions, context)) {
     if (output.success) {
