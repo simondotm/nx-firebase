@@ -1,8 +1,15 @@
 import type { Tree } from '@nrwl/devkit'
 import * as devkit from '@nrwl/devkit'
 import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { firebaseAdminVersion, firebaseFunctionsTestVersion, firebaseFunctionsVersion, firebaseToolsVersion, firebaseVersion } from '../../utils/versions'
+import {
+  firebaseAdminVersion,
+  firebaseFunctionsTestVersion,
+  firebaseFunctionsVersion,
+  firebaseToolsVersion,
+  firebaseVersion,
+} from '../../utils/versions'
 import { initGenerator } from './init'
+import { gitIgnoreEntries } from './lib'
 
 describe('init generator', () => {
   let tree: Tree
@@ -12,12 +19,20 @@ describe('init generator', () => {
     jest.clearAllMocks()
   })
 
+  it('should add gitignores', async () => {
+    await initGenerator(tree, {})
+    const gitIgnore = tree.read('.gitignore')
+    expect(gitIgnore.toString('utf-8')).toContain(gitIgnoreEntries)
+  })
+
   it('should add dependencies', async () => {
     await initGenerator(tree, {})
 
     const packageJson = devkit.readJson(tree, 'package.json')
     expect(packageJson.dependencies['firebase']).toBe(firebaseVersion)
-    expect(packageJson.dependencies['firebase-admin']).toBe(firebaseAdminVersion)
+    expect(packageJson.dependencies['firebase-admin']).toBe(
+      firebaseAdminVersion,
+    )
     expect(packageJson.dependencies['firebase-functions']).toBe(
       firebaseFunctionsVersion,
     )
@@ -29,7 +44,6 @@ describe('init generator', () => {
     expect(packageJson.devDependencies['firebase-tools']).toBe(
       firebaseToolsVersion,
     )
-
   })
 
   it('should add jest config when unitTestRunner is jest', async () => {
