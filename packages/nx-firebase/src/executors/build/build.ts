@@ -2,7 +2,6 @@ import { ExecutorContext } from '@nrwl/devkit'
 import type { ExecutorOptions } from '@nrwl/js/src/utils/schema'
 import { tscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
 import { firebaseBuildExecutor } from './lib'
-import { debugLog } from './lib/debug'
 
 /**
  * @simondotm/nx-firebase:build executor is a
@@ -12,6 +11,9 @@ export async function* runExecutor(
   options: ExecutorOptions,
   context: ExecutorContext,
 ) {
+  // --updateBuildableProjectDepsInPackageJson is true by default for @nrwl/js:tsc
+  // https://nx.dev/packages/js/executors/tsc
+  // but we havent programmed our executor schema to match yet, so hack them in here.
   const customOptions: ExecutorOptions = {
     ...options,
     updateBuildableProjectDepsInPackageJson: true,
@@ -30,6 +32,7 @@ export async function* runExecutor(
     yield output
   }
 }
-//export default convertNxExecutor(runExecutor);
 
+//SM: no idea what this shenanigans is for
+//export default convertNxExecutor(runExecutor);
 export default runExecutor
