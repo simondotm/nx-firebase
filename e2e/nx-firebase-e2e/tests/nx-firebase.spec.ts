@@ -11,6 +11,11 @@ const JEST_TIMEOUT = 120000
 describe('nx-firebase e2e', () => {
   const appName = 'functions'
   const libName = 'lib'
+  const buildableLibName = 'buildablelib' // uniq(libName)
+  const nonBuildableLibName = 'nonbuildablelib' // uniq(libName)
+  const incompatibleLibName = 'incompatiblelib' // uniq(libName)
+  const subDir = 'subdir'
+
   const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
   const libGeneratorCommand = 'generate @nrwl/js:lib'
   const npmScope = '@proj'
@@ -90,14 +95,19 @@ describe('nx-firebase e2e', () => {
     it(
       'should create src in the specified directory',
       async () => {
-        const project = uniq(appName)
-        const projectDir = 'subdir'
+        const projectName = uniq(appName)
+        const projectDir = subDir
         await runNxCommandAsync(
-          `${appGeneratorCommand} ${project} --directory ${projectDir}`,
+          `${appGeneratorCommand} ${projectName} --directory ${projectDir}`,
         )
         expect(() =>
-          checkFilesExist(...expectedFiles(project, projectDir)),
+          checkFilesExist(...expectedFiles(projectName, projectDir)),
         ).not.toThrow()
+
+        const project = readJson(
+          `apps/${projectDir}/${projectName}/project.json`,
+        )
+        expect(project.name).toEqual(`${projectDir}-${projectName}`)
       },
       JEST_TIMEOUT,
     )
@@ -120,26 +130,64 @@ describe('nx-firebase e2e', () => {
   })
 
   //--------------------------------------------------------------------------------------------------
-  // Library e2e tests
+  // Create Libraries for e2e tests
   //--------------------------------------------------------------------------------------------------
+  describe('libraries', () => {
+    it(
+      'should create buildable typescript library',
+      async () => {
+        const project = buildableLibName
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${project} --buildable --importPath="${npmScope}/${project}"`,
+        )
 
-  it(
-    'should create buildable typescript library',
-    async () => {
-      const project = uniq(libName)
-      await runNxCommandAsync(
-        `${libGeneratorCommand} ${project} --buildable --importPath="${npmScope}/${project}"`,
-      )
+        // no need to test the js library generator, only that it ran ok
+        expect(() =>
+          checkFilesExist(`libs/${project}/package.json`),
+        ).not.toThrow()
 
-      // no need to test the js library generator, only that it ran ok
-      expect(() =>
-        checkFilesExist(`libs/${project}/package.json`),
-      ).not.toThrow()
+        const result = await runNxCommandAsync(`build ${project}`)
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(`${buildSuccess} ${project}`)
+      },
+      JEST_TIMEOUT,
+    )
 
-      const result = await runNxCommandAsync(`build ${project}`)
-      expect(result.stdout).toContain(compileComplete)
-      expect(result.stdout).toContain(`${buildSuccess} ${project}`)
-    },
-    JEST_TIMEOUT,
-  )
+    it(
+      'should create non-buildable typescript library',
+      async () => {
+        const projectName = nonBuildableLibName
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${projectName} --buildable=false --importPath="${npmScope}/${projectName}"`,
+        )
+
+        expect(() =>
+          checkFilesExist(`libs/${projectName}/package.json`),
+        ).toThrow()
+
+        const project = readJson(`libs/${projectName}/project.json`)
+        expect(project.targets.build).not.toBeDefined()
+      },
+      JEST_TIMEOUT,
+    )
+
+    it(
+      'should create incompatible typescript library',
+      async () => {
+        const project = incompatibleLibName
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${project} --directory=${subDir}`,
+        )
+
+        expect(() =>
+          checkFilesExist(`libs/${subDir}/${project}/package.json`),
+        ).not.toThrow()
+
+        const result = await runNxCommandAsync(`build ${subDir}-${project}`)
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(`${buildSuccess} ${subDir}-${project}`)
+      },
+      JEST_TIMEOUT,
+    )
+  })
 })
