@@ -5,7 +5,7 @@ import {
   writeJsonFile,
 } from '@nrwl/devkit'
 import { DependentBuildableProjectNode } from '@nrwl/workspace/src/utilities/buildable-libs-utils'
-import { debugLog } from './debug'
+import { FIREBASE_DEPS_DIR } from './copy-dependencies'
 
 /**
  * rewrite references to library packages in the functions package.json
@@ -19,33 +19,46 @@ export function rewriteFirebasePackage(
 ) {
   const functionsPackageFile = joinPathFragments(outputPath, 'package.json')
 
-  debugLog('- functions PackageFile=' + functionsPackageFile)
+  if (process.env.NX_VERBOSE_LOGGING) {
+    logger.info(`- functions PackageFile '${functionsPackageFile}'`)
+  }
   const functionsPackageJson = readJsonFile(functionsPackageFile)
   const functionsPackageDeps = functionsPackageJson.dependencies
   if (functionsPackageDeps) {
-    debugLog(
-      '- Updating local dependencies for Firebase functions package.json',
-    )
+    if (process.env.NX_VERBOSE_LOGGING) {
+      logger.info(
+        '- Updating local dependencies for Firebase functions package.json',
+      )
+    }
     for (const d in functionsPackageDeps) {
       const localDep = localLibraries[d]
-      debugLog(
-        "- Checking dependency '" +
-          d +
-          "', isLocalDep=" +
-          (localDep !== undefined),
-      )
+      if (process.env.NX_VERBOSE_LOGGING) {
+        logger.info(
+          `- Checking dependency '${d}', isLocalDep=${localDep !== undefined}`,
+        )
+      }
       if (localDep) {
-        const localRef =
-          'file:' + joinPathFragments('.', 'libs', localDep.node.name)
-        debugLog(" - Replacing '" + d + "' with '" + localRef + "'")
+        const localRef = `file:${joinPathFragments(
+          '.',
+          FIREBASE_DEPS_DIR,
+          localDep.node.name,
+        )}`
+        if (process.env.NX_VERBOSE_LOGGING) {
+          logger.info(` - Replacing '${d}' with '${localRef}'`)
+        }
         functionsPackageDeps[d] = localRef
       }
     }
   }
   writeJsonFile(functionsPackageFile, functionsPackageJson)
   logger.log('- Updated firebase functions package.json')
-  debugLog(
-    'functions package deps = ',
-    JSON.stringify(functionsPackageDeps, null, 3),
-  )
+  if (process.env.NX_VERBOSE_LOGGING) {
+    logger.info(
+      `functions package deps = ${JSON.stringify(
+        functionsPackageDeps,
+        null,
+        3,
+      )}`,
+    )
+  }
 }

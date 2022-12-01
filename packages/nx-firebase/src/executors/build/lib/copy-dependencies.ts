@@ -1,7 +1,8 @@
 import { joinPathFragments, logger } from '@nrwl/devkit'
 import { DependentBuildableProjectNode } from '@nrwl/workspace/src/utilities/buildable-libs-utils'
 import { copy } from 'fs-extra'
-import { debugLog } from './debug'
+
+export const FIREBASE_DEPS_DIR = 'libs'
 
 export async function copyFirebaseDependencies(
   outputPath: string,
@@ -19,7 +20,6 @@ export async function copyFirebaseDependencies(
   // - all local code for the functions will be uploaded to GCP without any need to faff with private npm packages
 
   // copy each of their build outputs in dist to a "libs" sub directory in our application dist output folder
-  const depLibsDir = 'libs'
   const localLibraries: Record<string, DependentBuildableProjectNode> = {}
   for (const dep of projectDependencies) {
     const localPackageName = dep.name // the library dependency package name
@@ -29,40 +29,32 @@ export async function copyFirebaseDependencies(
     const outDir = joinPathFragments(
       workspaceRoot,
       outputPath,
-      depLibsDir,
+      FIREBASE_DEPS_DIR,
       localLibraryName,
     )
     // we also copy libraries to node_modules in dist, because the Firebase CLI also runs the entry point script during a deploy to determine the exported functions
     // however, firebase does NOT upload node_modules to GCP, so we have to make two copies of each dependent local library package
     // see: https://firebase.google.com/docs/functions/handle-dependencies
-    const nodeModulesDir = joinPathFragments(
-      workspaceRoot,
-      outputPath,
-      'node_modules',
-      localPackageName,
-    )
+    // SM: Nov'22, this policy has changed - local libs should NOT be in the `node_modules` folder.
+    // https://firebase.google.com/docs/functions/handle-dependencies#including_local_nodejs_modules
+    // const nodeModulesDir = joinPathFragments(
+    //   workspaceRoot,
+    //   outputPath,
+    //   'node_modules',
+    //   localPackageName,
+    // )
     try {
-      debugLog(
-        "- Copying dependent workspace library '" +
-          dep.node.name +
-          "' from '" +
-          srcDir +
-          "' to '" +
-          outDir +
-          "'",
-      )
-      debugLog(
-        "- Copying dependent workspace library '" +
-          dep.node.name +
-          "' from '" +
-          srcDir +
-          "' to '" +
-          nodeModulesDir +
-          "'",
-      )
+      if (process.env.NX_VERBOSE_LOGGING) {
+        logger.info(
+          `- Copying dependent workspace library '${dep.node.name}' from '${srcDir}' to '${outDir}'`,
+        )
+        // logger.info(
+        //   `- Copying dependent workspace library '${dep.node.name}' from '${srcDir}' to '${nodeModulesDir}'`,
+        // )
+      }
       await copy(srcDir, outDir)
-      await copy(srcDir, nodeModulesDir)
-      logger.log(" - Copied 'lib' dependency '" + dep.name + "'")
+      // await copy(srcDir, nodeModulesDir)
+      logger.log(` - Copied 'lib' dependency '${dep.name}}'`)
     } catch (err) {
       logger.error(err.message)
     }

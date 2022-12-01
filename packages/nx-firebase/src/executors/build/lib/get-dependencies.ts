@@ -3,7 +3,6 @@ import {
   calculateProjectDependencies,
   DependentBuildableProjectNode,
 } from '@nrwl/workspace/src/utilities/buildable-libs-utils'
-import { debugLog } from './debug'
 
 export type FirebaseDependencies = {
   projectDependencies: DependentBuildableProjectNode[]
@@ -15,9 +14,7 @@ export function getFirebaseDependencies(
   context: ExecutorContext,
 ): FirebaseDependencies {
   logger.log(
-    "- Processing dependencies for firebase functions app '" +
-      context.projectName +
-      "':",
+    `- Processing dependencies for firebase functions app '${context.projectName}':`,
   )
 
   const {
@@ -33,15 +30,19 @@ export function getFirebaseDependencies(
     context.configurationName,
   )
 
-  debugLog('calculated dependencies=' + JSON.stringify(dependencies, null, 3))
-  debugLog('target=' + JSON.stringify(target, null, 3))
-  debugLog(
-    'nonBuildableDependencies=' +
-      JSON.stringify(nonBuildableDependencies, null, 3),
-  )
-  debugLog(
-    'topLevelDependencies=' + JSON.stringify(topLevelDependencies, null, 3),
-  )
+  if (process.env.NX_VERBOSE_LOGGING) {
+    logger.info(
+      'calculated dependencies=' + JSON.stringify(dependencies, null, 3),
+    )
+    logger.info('target=' + JSON.stringify(target, null, 3))
+    logger.info(
+      'nonBuildableDependencies=' +
+        JSON.stringify(nonBuildableDependencies, null, 3),
+    )
+    logger.info(
+      'topLevelDependencies=' + JSON.stringify(topLevelDependencies, null, 3),
+    )
+  }
 
   // filter dependencies that are nx workspace libraries, sorted alphabetically
   const projectDependencies = dependencies
@@ -72,6 +73,7 @@ export function getFirebaseDependencies(
   for (const dep of projectDependencies) {
     const name = dep.name
     if (name.split('/').length > 2) {
+      // TODO: check this is platform independent
       incompatibleNestedDependencies.push(name)
     }
   }
@@ -90,17 +92,13 @@ export function getFirebaseDependencies(
     // than ignore it and allow wierd side-effects to happen if we proceed.
     for (const dep of nonBuildableDependencies) {
       logger.error(
-        "ERROR: Found non-buildable library dependency '" +
-          dep +
-          "' in Firebase Application. Imported libraries must be created with `--buildable`.",
+        `ERROR: Found non-buildable library dependency '${dep}' in Firebase Application. Imported libraries must be created with '--buildable'.`,
       )
     }
 
     for (const dep of incompatibleNestedDependencies) {
       logger.error(
-        "ERROR: Found incompatible nested library dependency '" +
-          dep +
-          "' in Firebase Application. Imported nested libraries must be created with `--importPath`.",
+        `ERROR: Found incompatible nested library dependency '${dep}' in Firebase Application. Imported nested libraries must be created with '--importPath'.`,
       )
     }
     throw new Error(
@@ -110,7 +108,7 @@ export function getFirebaseDependencies(
 
   for (const d of npmDependencies) {
     const type = d.node.type
-    logger.log(" -  Added '" + type + "' dependency '" + d.name + "'")
+    logger.log(` -  Added '${type}' dependency '${d.name}'`)
   }
 
   return {
