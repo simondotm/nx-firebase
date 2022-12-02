@@ -54,7 +54,7 @@ export async function copyFirebaseDependencies(
       }
       await copy(srcDir, outDir)
       // await copy(srcDir, nodeModulesDir)
-      logger.log(` - Copied 'lib' dependency '${dep.name}}'`)
+      logger.log(` - Copied 'lib' dependency '${dep.name}'`)
     } catch (err) {
       logger.error(err.message)
     }
