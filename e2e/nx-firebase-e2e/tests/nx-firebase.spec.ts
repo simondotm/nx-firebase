@@ -60,11 +60,11 @@ describe('nx-firebase e2e', () => {
   })
 
   it(
-    'should create & build nx-firebase app',
+    'should create workspace without firebase dependencies',
     async () => {
       // test that generator adds dependencies to workspace package.json
       // should not be initially set
-      let packageJson = readJson(`package.json`)
+      const packageJson = readJson(`package.json`)
       expect(packageJson.dependencies['firebase']).toBeUndefined()
       expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
       expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
@@ -72,16 +72,26 @@ describe('nx-firebase e2e', () => {
         packageJson.devDependencies['firebase-functions-test'],
       ).toBeUndefined()
       expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
+    },
+    JEST_TIMEOUT,
+  )
 
+  it(
+    'should create nx-firebase app',
+    async () => {
       const project = appName //uniq(appName)
       await runNxCommandAsync(`${appGeneratorCommand} ${project}`)
-
       // test generator output
-
       expect(() => checkFilesExist(...expectedFiles(project))).not.toThrow()
+    },
+    JEST_TIMEOUT,
+  )
 
+  it(
+    'should run nx-firebase init',
+    async () => {
       // test that generator adds dependencies to workspace package.json
-      packageJson = readJson(`package.json`)
+      const packageJson = readJson(`package.json`)
       expect(packageJson.dependencies['firebase']).toBeDefined()
       expect(packageJson.dependencies['firebase-admin']).toBeDefined()
       expect(packageJson.dependencies['firebase-functions']).toBeDefined()
@@ -89,7 +99,14 @@ describe('nx-firebase e2e', () => {
         packageJson.devDependencies['firebase-functions-test'],
       ).toBeDefined()
       expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
+    },
+    JEST_TIMEOUT,
+  )
 
+  it(
+    'should build nx-firebase app',
+    async () => {
+      const project = appName
       // test build executor
       const result = await runNxCommandAsync(`build ${project}`)
       expect(result.stdout).toContain(compileComplete)
@@ -104,7 +121,15 @@ describe('nx-firebase e2e', () => {
           `dist/apps/${project}/src/index.js`,
         ),
       ).not.toThrow()
+    },
+    JEST_TIMEOUT,
+  )
 
+  it(
+    'should add firebase dependencies to output nx-firebase app',
+    async () => {
+      const project = appName
+      const distPackageFile = `dist/apps/${project}/package.json`
       const distPackage = readJson(distPackageFile)
       const deps = distPackage['dependencies']
       expect(deps).toBeDefined()
