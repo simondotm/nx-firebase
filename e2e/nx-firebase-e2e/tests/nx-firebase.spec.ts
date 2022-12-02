@@ -1,16 +1,18 @@
 import {
   checkFilesExist,
   ensureNxProject,
+  readFile,
   readJson,
   runNxCommandAsync,
   uniq,
+  updateFile,
 } from '@nrwl/nx-plugin/testing'
 
 const JEST_TIMEOUT = 120000
 
 describe('nx-firebase e2e', () => {
   const appName = 'functions'
-  const libName = 'lib'
+  // const libName = 'lib'
   const buildableLibName = 'buildablelib' // uniq(libName)
   const nonBuildableLibName = 'nonbuildablelib' // uniq(libName)
   const incompatibleLibName = 'incompatiblelib' // uniq(libName)
@@ -23,6 +25,13 @@ describe('nx-firebase e2e', () => {
   const pluginPath = 'dist/packages/nx-firebase'
   const compileComplete = 'Done compiling TypeScript files for project'
   const buildSuccess = 'Successfully ran target build for project'
+
+  const distDir = `dist/apps/${appName}`
+  const buildableLibDir = `${distDir}/libs/${buildableLibName}`
+
+  const indexTs = `apps/${appName}/src/index.ts`
+  const indexTsFile = readFile(indexTs)
+  const importMatch = `import * as functions from 'firebase-functions';`
 
   function expectedFiles(project: string, projectDir: string = '') {
     const projectPath = projectDir
@@ -41,6 +50,25 @@ describe('nx-firebase e2e', () => {
       `firebase.${project}.json`,
       `.firebaserc`,
     ]
+  }
+
+  /**
+   * Replace content in the application `index.ts` that matches `importMatch` with `importAddition`
+   * @param match - string to match in the index.ts
+   * @param addition - string to add after the matched line in the index.ts
+   */
+  function addContentToIndexTs(match: string, addition: string) {
+    updateFile(indexTs, (content: string) => {
+      const replaced = content.replace(importMatch, `${match}\n${addition}`)
+      return replaced
+    })
+  }
+
+  /**
+   * Restore the application index.ts to initial state
+   */
+  function resetIndexTs() {
+    updateFile(indexTs, indexTsFile)
   }
 
   // Setting up individual workspaces per
@@ -232,6 +260,78 @@ describe('nx-firebase e2e', () => {
         const result = await runNxCommandAsync(`build ${subDir}-${project}`)
         expect(result.stdout).toContain(compileComplete)
         expect(result.stdout).toContain(`${buildSuccess} ${subDir}-${project}`)
+      },
+      JEST_TIMEOUT,
+    )
+  })
+
+  //--------------------------------------------------------------------------------------------------
+  // Test import & dependency handling
+  //--------------------------------------------------------------------------------------------------
+
+  describe('nx-firebase dependencies', () => {
+    // add our new nodelib as an imported dependency
+    it(
+      'should add buildable library as an index.ts dependency',
+      async () => {
+        const importAddition = `import { ${buildableLibName} } from '@proj/${buildableLibName}'\nconsole.log(${buildableLibName}())\n`
+        expect(indexTsFile).toContain(importMatch)
+        addContentToIndexTs(importMatch, importAddition)
+        expect(readFile(indexTs)).toContain(importAddition)
+      },
+      JEST_TIMEOUT,
+    )
+
+    // rebuild app with deps
+    it(
+      'should build nx-firebase:app with buildable library dependency',
+      async () => {
+        const result = await runNxCommandAsync(`build ${appName}`)
+        expect(result.stdout).toContain('Done compiling TypeScript files')
+        expect(result.stdout).toContain(
+          `Added 'npm' dependency 'firebase-admin'`,
+        )
+        expect(result.stdout).toContain(
+          `Added 'npm' dependency 'firebase-functions'`,
+        )
+        expect(result.stdout).toContain(
+          `Copied 'lib' dependency '@proj/buildablelib'`,
+        )
+        expect(result.stdout).toContain(
+          `Updated firebase functions package.json`,
+        )
+      },
+      JEST_TIMEOUT,
+    )
+
+    // rebuild app with deps
+    it(
+      'should copy dependent buildable libraries',
+      async () => {
+        const result = await runNxCommandAsync(`build ${appName}`)
+        expect(result.stdout).toContain('Done compiling TypeScript files')
+
+        expect(() =>
+          checkFilesExist(
+            `${buildableLibDir}/package.json`,
+            `${buildableLibDir}/README.md`,
+            `${buildableLibDir}/src/index.js`,
+            `${buildableLibDir}/src/index.d.ts`,
+            `${buildableLibDir}/src/lib/buildablelib.js`,
+            `${buildableLibDir}/src/lib/buildablelib.d.ts`,
+          ),
+        ).not.toThrow()
+
+        const distPackageFile = `${distDir}/package.json`
+        const distPackage = readJson(distPackageFile)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+
+        expect(deps['@proj/buildablelib']).toEqual(
+          `file:libs/${buildableLibName}`,
+        )
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()
       },
       JEST_TIMEOUT,
     )
