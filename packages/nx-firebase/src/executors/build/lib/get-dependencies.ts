@@ -98,7 +98,7 @@ export function getFirebaseDependencies(
 
     for (const dep of incompatibleNestedDependencies) {
       logger.error(
-        `ERROR: Found incompatible nested library dependency '${dep}' in Firebase Application. Imported nested libraries must be created with '--importPath'.`,
+        `ERROR: Found incompatible nested library dependency '${dep}' in Firebase Application. Imported nested libraries must be created with npm compatible '--importPath'.`,
       )
     }
     throw new Error(

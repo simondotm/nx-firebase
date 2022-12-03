@@ -311,7 +311,7 @@ describe('nx-firebase e2e', () => {
         expect(indexTsFile).toContain(importMatch)
         addContentToIndexTs(importMatch, importAddition)
         expect(readFile(indexTs)).toContain(importAddition)
-        const result = await runNxCommandAsync(`build ${appName}`, {
+        const result = await runNxCommandAsync(`build ${appName} --verbose`, {
           silenceError: true,
         })
         expect(result.stdout).not.toContain(compileComplete)
@@ -330,16 +330,16 @@ describe('nx-firebase e2e', () => {
         resetIndexTs()
         const libName = incompatibleLibName
         const libFuncName = 'subdirIncompatiblelib'
-        const importAddition = `import { ${libFuncName} } from '@proj/${subDir}/${libName}'\nconsole.log(${libFuncName}())\n`
+        const importAddition = `import { subdirIncompatiblelib } from '@proj/${subDir}/${libName}'\nconsole.log(subdirIncompatiblelib())\n`
         expect(indexTsFile).toContain(importMatch)
         addContentToIndexTs(importMatch, importAddition)
         expect(readFile(indexTs)).toContain(importAddition)
-        const result = await runNxCommandAsync(`build ${appName}`, {
+        const result = await runNxCommandAsync(`build ${appName} --verbose`, {
           silenceError: true,
         })
         expect(result.stdout).toContain(compileComplete)
-        expect(result.stdout).toContain(
-          'ERROR: Firebase Application contains references to non-buildable or incompatible nested libraries',
+        expect(result.stderr).toContain(
+          'ERROR: Found incompatible nested library dependency',
         )
       },
       JEST_TIMEOUT,
@@ -358,7 +358,7 @@ describe('nx-firebase e2e', () => {
         expect(readFile(indexTs)).toContain(importAddition)
 
         // build project
-        const result = await runNxCommandAsync(`build ${appName}`)
+        const result = await runNxCommandAsync(`build ${appName} --verbose`)
         expect(result.stdout).toContain('Done compiling TypeScript files')
 
         // check console output
