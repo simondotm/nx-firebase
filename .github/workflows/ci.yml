@@ -1,3 +1,6 @@
+# Build, Test, Lint & e2e pushes.
+# TODO: use the .nvmrc for node versions
+# https://github.com/actions/setup-node/issues/32
 name: CI
 
 on:
@@ -16,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [19.1.0]
 
     steps:
       # Setup steps
@@ -43,7 +46,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [19.1.0]
 
     steps:
       - uses: actions/checkout@v2
@@ -68,7 +71,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [19.1.0]
 
     steps:
       - uses: actions/checkout@v2
@@ -93,7 +96,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [19.1.0]
 
     steps:
       - uses: actions/checkout@v2
@@ -118,7 +121,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [19.1.0]
 
     steps:
       - uses: actions/checkout@v2
