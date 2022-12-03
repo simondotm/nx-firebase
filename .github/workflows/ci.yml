@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  # support manual trigger of this workflow
+  workflow_dispatch:
+
+  push:
+    # only run this build action if not pushed to release or main branches
+    branches-ignore: ['release*'] #, 'main']
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      # Setup steps
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install npm
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm install
+
+  build:
+    needs: [setup]
+
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Build
+        run: npx nx run-many --all --target=build --parallel --maxParallel=10
+
+  lint:
+    needs: [setup]
+
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Lint Affected Apps
+        run: npx nx run-many --all --target=lint --parallel --maxParallel=10
+
+  test:
+    needs: [setup]
+
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npx nx run-many --all --target=test --parallel --maxParallel=10
+
+  # e2e might be too much work todo for every push, lets see.
+  e2e:
+    needs: [setup]
+
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache node modules
+        id: cache-node-modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npm run e2e
