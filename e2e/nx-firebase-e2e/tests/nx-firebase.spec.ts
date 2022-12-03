@@ -29,8 +29,18 @@ describe('nx-firebase e2e', () => {
   const distDir = `dist/apps/${appName}`
   const buildableLibDir = `${distDir}/libs/${buildableLibName}`
 
+  const subDirBuildableLibName = `${subDir}-${buildableLibName}`
+  const subDirBuildableLibDir = `libs/${subDir}/${buildableLibName}`
+  const subDirBuildableLibDistDir = `${distDir}/${subDirBuildableLibDir}`
+  const subDirBuildableLibScope = `${npmScope}/${subDirBuildableLibName}`
+  const subDirBuildableLibFunction = `${subDir}${
+    buildableLibName[0].toUpperCase() + buildableLibName.substring(1)
+  }`
+  const subDirBuildableLibFunctionsDistDir = `${distDir}/libs/${subDirBuildableLibName}`
+  const buildableLibFunctionsDistDir = `${distDir}/libs/${buildableLibName}`
+
   const indexTs = `apps/${appName}/src/index.ts`
-  const indexTsFile = readFile(indexTs)
+  let indexTsFile
   const importMatch = `import * as functions from 'firebase-functions';`
 
   function expectedFiles(project: string, projectDir: string = '') {
@@ -111,6 +121,8 @@ describe('nx-firebase e2e', () => {
       await runNxCommandAsync(`${appGeneratorCommand} ${project}`)
       // test generator output
       expect(() => checkFilesExist(...expectedFiles(project))).not.toThrow()
+      // stash a copy of the default index.ts
+      indexTsFile = readFile(indexTs)
     },
     JEST_TIMEOUT,
   )
@@ -228,6 +240,26 @@ describe('nx-firebase e2e', () => {
     )
 
     it(
+      'should create buildable typescript library in subdir',
+      async () => {
+        const project = buildableLibName
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${project} --buildable --directory ${subDir} --importPath="${npmScope}/subdir-${project}"`,
+        )
+
+        // no need to test the js library generator, only that it ran ok
+        expect(() =>
+          checkFilesExist(`libs/${project}/package.json`),
+        ).not.toThrow()
+
+        const result = await runNxCommandAsync(`build ${project}`)
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(`${buildSuccess} ${project}`)
+      },
+      JEST_TIMEOUT,
+    )
+
+    it(
       'should create non-buildable typescript library',
       async () => {
         const projectName = nonBuildableLibName
@@ -270,24 +302,123 @@ describe('nx-firebase e2e', () => {
   //--------------------------------------------------------------------------------------------------
 
   describe('nx-firebase dependencies', () => {
-    // add our new nodelib as an imported dependency
+    // add non-buildable lib as an imported dependency & check error handling
     it(
-      'should add buildable library as an index.ts dependency',
+      'should report non-buildable library imports as unsupported',
       async () => {
-        const importAddition = `import { ${buildableLibName} } from '@proj/${buildableLibName}'\nconsole.log(${buildableLibName}())\n`
+        const libName = nonBuildableLibName
+        const importAddition = `import { ${libName} } from '@proj/${libName}'\nconsole.log(${libName}())\n`
         expect(indexTsFile).toContain(importMatch)
         addContentToIndexTs(importMatch, importAddition)
         expect(readFile(indexTs)).toContain(importAddition)
+        const result = await runNxCommandAsync(`build ${appName}`, {
+          silenceError: true,
+        })
+        expect(result.stdout).not.toContain(compileComplete)
+        // We cant check output for this test scenario since
+        // importing a non buildable library will fail tsc with not in rootDir errors before the firebase plugin can report these issues
+        // expect(result.stdout).toContain(
+        //   `ERROR: Found non-buildable library dependency '@proj/${buildableLibName}'`,
+        // )
       },
       JEST_TIMEOUT,
     )
 
-    // rebuild app with deps
     it(
-      'should build nx-firebase:app with buildable library dependency',
+      'should report incompatible library imports as unsupported',
       async () => {
+        resetIndexTs()
+        const libName = incompatibleLibName
+        const libFuncName = 'subdirIncompatiblelib'
+        const importAddition = `import { ${libFuncName} } from '@proj/${subDir}/${libName}'\nconsole.log(${libFuncName}())\n`
+        expect(indexTsFile).toContain(importMatch)
+        addContentToIndexTs(importMatch, importAddition)
+        expect(readFile(indexTs)).toContain(importAddition)
+        const result = await runNxCommandAsync(`build ${appName}`, {
+          silenceError: true,
+        })
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(
+          'ERROR: Firebase Application contains references to non-buildable or incompatible nested libraries',
+        )
+      },
+      JEST_TIMEOUT,
+    )
+
+    // check buildable lib from subdir
+    it(
+      'should support buildable subdir library as a dependency',
+      async () => {
+        resetIndexTs()
+        // add dependency
+        const importAddition = `import { ${subDirBuildableLibFunction} } from '${subDirBuildableLibScope}'\nconsole.log(${subDirBuildableLibFunction}())\n`
+        expect(readFile(indexTs)).toContain(importMatch)
+        expect(readFile(indexTs)).toMatch(indexTsFile)
+        addContentToIndexTs(importMatch, importAddition)
+        expect(readFile(indexTs)).toContain(importAddition)
+
+        // build project
         const result = await runNxCommandAsync(`build ${appName}`)
         expect(result.stdout).toContain('Done compiling TypeScript files')
+
+        // check console output
+        expect(result.stdout).toContain(
+          `Added 'npm' dependency 'firebase-admin'`,
+        )
+        expect(result.stdout).toContain(
+          `Added 'npm' dependency 'firebase-functions'`,
+        )
+        expect(result.stdout).toContain(
+          `Copied 'lib' dependency '@proj/subdir-buildablelib'`,
+        )
+        expect(result.stdout).toContain(
+          `Updated firebase functions package.json`,
+        )
+
+        // check dist outputs - expect copies of the dependent library
+        expect(() =>
+          checkFilesExist(
+            `${subDirBuildableLibFunctionsDistDir}/package.json`,
+            `${subDirBuildableLibFunctionsDistDir}/README.md`,
+            `${subDirBuildableLibFunctionsDistDir}/src/index.js`,
+            `${subDirBuildableLibFunctionsDistDir}/src/index.d.ts`,
+            `${subDirBuildableLibFunctionsDistDir}/src/lib/${subDirBuildableLibName}.js`,
+            `${subDirBuildableLibFunctionsDistDir}/src/lib/${subDirBuildableLibName}.d.ts`,
+          ),
+        ).not.toThrow()
+
+        // check dist package
+        const distPackageFile = `${distDir}/package.json`
+        const distPackage = readJson(distPackageFile)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+
+        expect(deps[subDirBuildableLibScope]).toEqual(
+          `file:libs/${subDirBuildableLibName}`,
+        )
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()
+      },
+      JEST_TIMEOUT,
+    )
+
+    // check buildable lib as an imported dependency
+    it(
+      'should support buildable library as a dependency',
+      async () => {
+        // add dependency
+        resetIndexTs()
+        const importAddition = `import { ${buildableLibName} } from '@proj/${buildableLibName}'\nconsole.log(${buildableLibName}())\n`
+        expect(readFile(indexTs)).toContain(importMatch)
+        expect(readFile(indexTs)).toMatch(indexTsFile)
+        addContentToIndexTs(importMatch, importAddition)
+        expect(readFile(indexTs)).toContain(importAddition)
+
+        // build project
+        const result = await runNxCommandAsync(`build ${appName}`)
+        expect(result.stdout).toContain('Done compiling TypeScript files')
+
+        // check console output
         expect(result.stdout).toContain(
           `Added 'npm' dependency 'firebase-admin'`,
         )
@@ -300,25 +431,16 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).toContain(
           `Updated firebase functions package.json`,
         )
-      },
-      JEST_TIMEOUT,
-    )
 
-    // rebuild app with deps
-    it(
-      'should copy dependent buildable libraries',
-      async () => {
-        const result = await runNxCommandAsync(`build ${appName}`)
-        expect(result.stdout).toContain('Done compiling TypeScript files')
-
+        // check dist outputs
         expect(() =>
           checkFilesExist(
-            `${buildableLibDir}/package.json`,
-            `${buildableLibDir}/README.md`,
-            `${buildableLibDir}/src/index.js`,
-            `${buildableLibDir}/src/index.d.ts`,
-            `${buildableLibDir}/src/lib/buildablelib.js`,
-            `${buildableLibDir}/src/lib/buildablelib.d.ts`,
+            `${buildableLibFunctionsDistDir}/package.json`,
+            `${buildableLibFunctionsDistDir}/README.md`,
+            `${buildableLibFunctionsDistDir}/src/index.js`,
+            `${buildableLibFunctionsDistDir}/src/index.d.ts`,
+            `${buildableLibFunctionsDistDir}/src/lib/buildablelib.js`,
+            `${buildableLibFunctionsDistDir}/src/lib/buildablelib.d.ts`,
           ),
         ).not.toThrow()
 
