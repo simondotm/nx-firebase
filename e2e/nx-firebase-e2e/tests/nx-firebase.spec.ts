@@ -302,6 +302,7 @@ describe('nx-firebase e2e', () => {
   //--------------------------------------------------------------------------------------------------
 
   describe('nx-firebase dependencies', () => {
+    /*
     // add non-buildable lib as an imported dependency & check error handling
     it(
       'should report non-buildable library imports as unsupported',
@@ -401,7 +402,7 @@ describe('nx-firebase e2e', () => {
       },
       JEST_TIMEOUT,
     )
-
+*/
     // check buildable lib as an imported dependency
     it(
       'should support buildable library as a dependency',
