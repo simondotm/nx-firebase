@@ -116,8 +116,8 @@ jobs:
     needs: [setup]
 
     runs-on: ubuntu-latest
-    env:
-      CI: true
+    #env:
+    #  CI: true
 
     strategy:
       matrix:
