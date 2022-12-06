@@ -1,9 +1,11 @@
+import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
   readFile,
   readJson,
   runNxCommandAsync,
+  tmpProjPath,
   uniq,
   updateFile,
 } from '@nrwl/nx-plugin/testing'
@@ -89,6 +91,15 @@ describe('nx-firebase e2e', () => {
   // are not dependant on one another.
   beforeAll(() => {
     ensureNxProject(pluginName, pluginPath)
+
+    const nxJsonFile = tmpProjPath('nx.json')
+    const nxJson = readJsonFile(nxJsonFile)
+    nxJson['pluginsConfig'] = {
+      '@nrwl/js': {
+        analyzeSourceFiles: true,
+      },
+    }
+    writeJsonFile(nxJsonFile, nxJson)
   })
 
   afterAll(() => {
