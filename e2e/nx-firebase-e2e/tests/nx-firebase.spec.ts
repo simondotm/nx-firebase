@@ -408,11 +408,17 @@ describe('nx-firebase e2e', () => {
       'should support buildable library as a dependency',
       async () => {
         // add dependency
-        resetIndexTs()
+        // resetIndexTs()
+        // build project
+        const result1 = await runNxCommandAsync(`build ${appName}`)
+        expect(result1.stdout).toContain('Done compiling TypeScript files')
+
         const importAddition = `import { ${buildableLibName} } from '@proj/${buildableLibName}'\nconsole.log(${buildableLibName}())\n`
         expect(readFile(indexTs)).toContain(importMatch)
         expect(readFile(indexTs)).toMatch(indexTsFile)
         addContentToIndexTs(importMatch, importAddition)
+
+        await new Promise((r) => setTimeout(r, 5000))
         expect(readFile(indexTs)).toContain(importAddition)
 
         // build project
