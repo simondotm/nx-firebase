@@ -89,7 +89,7 @@ describe('nx-firebase e2e', () => {
   // consumes 1 workspace. The tests should each operate
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
-  beforeAll(() => {
+  beforeAll(async () => {
     ensureNxProject(pluginName, pluginPath)
 
     const nxJsonFile = tmpProjPath('nx.json')
@@ -99,8 +99,11 @@ describe('nx-firebase e2e', () => {
         analyzeSourceFiles: true,
       },
     }
+    // force local e2e tests to use same setup as CI environment
+    nxJson.tasksRunnerOptions.default.options.useDaemonProcess = false
     writeJsonFile(nxJsonFile, nxJson)
-  })
+    await runNxCommandAsync('reset')
+  }, JEST_TIMEOUT)
 
   afterAll(() => {
     // `nx reset` kills the daemon, and performs
