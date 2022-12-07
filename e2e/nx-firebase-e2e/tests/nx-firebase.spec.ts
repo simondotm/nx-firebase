@@ -12,77 +12,77 @@ import {
 
 const JEST_TIMEOUT = 120000
 
+const appName = 'functions'
+// const libName = 'lib'
+const buildableLibName = 'buildablelib' // uniq(libName)
+const nonBuildableLibName = 'nonbuildablelib' // uniq(libName)
+const incompatibleLibName = 'incompatiblelib' // uniq(libName)
+const subDir = 'subdir'
+
+const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
+const libGeneratorCommand = 'generate @nrwl/js:lib'
+const npmScope = '@proj'
+const pluginName = '@simondotm/nx-firebase'
+const pluginPath = 'dist/packages/nx-firebase'
+const compileComplete = 'Done compiling TypeScript files for project'
+const buildSuccess = 'Successfully ran target build for project'
+
+const distDir = `dist/apps/${appName}`
+const buildableLibDir = `${distDir}/libs/${buildableLibName}`
+
+const subDirBuildableLibName = `${subDir}-${buildableLibName}`
+const subDirBuildableLibDir = `libs/${subDir}/${buildableLibName}`
+const subDirBuildableLibDistDir = `${distDir}/${subDirBuildableLibDir}`
+const subDirBuildableLibScope = `${npmScope}/${subDirBuildableLibName}`
+const subDirBuildableLibFunction = `${subDir}${
+  buildableLibName[0].toUpperCase() + buildableLibName.substring(1)
+}`
+const subDirBuildableLibFunctionsDistDir = `${distDir}/libs/${subDirBuildableLibName}`
+const buildableLibFunctionsDistDir = `${distDir}/libs/${buildableLibName}`
+
+const indexTs = `apps/${appName}/src/index.ts`
+let indexTsFile
+const importMatch = `import * as functions from 'firebase-functions';`
+
+function expectedFiles(project: string, projectDir: string = '') {
+  const projectPath = projectDir
+    ? `apps/${projectDir}/${project}`
+    : `apps/${project}`
+  return [
+    `${projectPath}/src/index.ts`,
+    `${projectPath}/public/index.html`,
+    `${projectPath}/package.json`,
+    `${projectPath}/readme.md`,
+    `${projectPath}/database.rules.json`,
+    `${projectPath}/firestore.indexes.json`,
+    `${projectPath}/firestore.rules`,
+    `${projectPath}/storage.rules`,
+    `firebase.json`,
+    `firebase.${project}.json`,
+    `.firebaserc`,
+  ]
+}
+
+/**
+ * Replace content in the application `index.ts` that matches `importMatch` with `importAddition`
+ * @param match - string to match in the index.ts
+ * @param addition - string to add after the matched line in the index.ts
+ */
+function addContentToIndexTs(match: string, addition: string) {
+  updateFile(indexTs, (content: string) => {
+    const replaced = content.replace(importMatch, `${match}\n${addition}`)
+    return replaced
+  })
+}
+
+/**
+ * Restore the application index.ts to initial state
+ */
+function resetIndexTs() {
+  updateFile(indexTs, indexTsFile)
+}
+
 describe('nx-firebase e2e', () => {
-  const appName = 'functions'
-  // const libName = 'lib'
-  const buildableLibName = 'buildablelib' // uniq(libName)
-  const nonBuildableLibName = 'nonbuildablelib' // uniq(libName)
-  const incompatibleLibName = 'incompatiblelib' // uniq(libName)
-  const subDir = 'subdir'
-
-  const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
-  const libGeneratorCommand = 'generate @nrwl/js:lib'
-  const npmScope = '@proj'
-  const pluginName = '@simondotm/nx-firebase'
-  const pluginPath = 'dist/packages/nx-firebase'
-  const compileComplete = 'Done compiling TypeScript files for project'
-  const buildSuccess = 'Successfully ran target build for project'
-
-  const distDir = `dist/apps/${appName}`
-  const buildableLibDir = `${distDir}/libs/${buildableLibName}`
-
-  const subDirBuildableLibName = `${subDir}-${buildableLibName}`
-  const subDirBuildableLibDir = `libs/${subDir}/${buildableLibName}`
-  const subDirBuildableLibDistDir = `${distDir}/${subDirBuildableLibDir}`
-  const subDirBuildableLibScope = `${npmScope}/${subDirBuildableLibName}`
-  const subDirBuildableLibFunction = `${subDir}${
-    buildableLibName[0].toUpperCase() + buildableLibName.substring(1)
-  }`
-  const subDirBuildableLibFunctionsDistDir = `${distDir}/libs/${subDirBuildableLibName}`
-  const buildableLibFunctionsDistDir = `${distDir}/libs/${buildableLibName}`
-
-  const indexTs = `apps/${appName}/src/index.ts`
-  let indexTsFile
-  const importMatch = `import * as functions from 'firebase-functions';`
-
-  function expectedFiles(project: string, projectDir: string = '') {
-    const projectPath = projectDir
-      ? `apps/${projectDir}/${project}`
-      : `apps/${project}`
-    return [
-      `${projectPath}/src/index.ts`,
-      `${projectPath}/public/index.html`,
-      `${projectPath}/package.json`,
-      `${projectPath}/readme.md`,
-      `${projectPath}/database.rules.json`,
-      `${projectPath}/firestore.indexes.json`,
-      `${projectPath}/firestore.rules`,
-      `${projectPath}/storage.rules`,
-      `firebase.json`,
-      `firebase.${project}.json`,
-      `.firebaserc`,
-    ]
-  }
-
-  /**
-   * Replace content in the application `index.ts` that matches `importMatch` with `importAddition`
-   * @param match - string to match in the index.ts
-   * @param addition - string to add after the matched line in the index.ts
-   */
-  function addContentToIndexTs(match: string, addition: string) {
-    updateFile(indexTs, (content: string) => {
-      const replaced = content.replace(importMatch, `${match}\n${addition}`)
-      return replaced
-    })
-  }
-
-  /**
-   * Restore the application index.ts to initial state
-   */
-  function resetIndexTs() {
-    updateFile(indexTs, indexTsFile)
-  }
-
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
   // For this reason, we recommend each suite only
