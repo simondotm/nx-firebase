@@ -9,7 +9,8 @@ import type { NormalizedOptions } from '../schema'
  * @param options
  */
 export function createFiles(tree: Tree, options: NormalizedOptions): void {
-  const firebaseAppConfig = `firebase.${options.name}.json`
+  const projectName = options.projectName
+  const firebaseAppConfig = `firebase.${projectName}.json`
   const firebaseAppConfigPath = joinPathFragments(
     offsetFromRoot(options.projectRoot),
     firebaseAppConfig,
@@ -17,7 +18,7 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
 
   const substitutions = {
     tmpl: '',
-    name: options.name,
+    name: options.projectName,
     root: options.projectRoot,
 
     firebaseAppName: options.name,
