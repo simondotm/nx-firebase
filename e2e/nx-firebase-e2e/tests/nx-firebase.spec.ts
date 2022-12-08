@@ -352,6 +352,87 @@ describe('nx-firebase e2e', () => {
   //--------------------------------------------------------------------------------------------------
 
   describe('nx-firebase dependencies', () => {
+    it(
+      'should support buildable library as a dependency - new test',
+      async () => {
+        // ensureNxProject(pluginName, pluginPath)
+
+        const libData = getLibDirectories(uniq('buildable'))
+        const appData = getAppDirectories(uniq('functions'))
+
+        // generate a buildable library
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${libData.name} --buildable --importPath="${libData.npmScope}"`,
+        )
+        // generate an application
+        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+
+        // add dependency
+        const importAddition = `import { ${libData.functionName} } from '${libData.npmScope}'\nconsole.log(${libData.functionName}())\n`
+        const indexTs = readFile(appData.indexTsPath)
+        expect(indexTs).toContain(importMatch)
+        expect(indexTs).toMatch(indexTsFile)
+        addContentToIndexTs(appData.indexTsPath, importMatch, importAddition)
+        expect(readFile(appData.indexTsPath)).toContain(importAddition)
+
+        // build project
+        const result3 = await runNxCommandAsync(`build ${appData.projectName}`)
+        //        expect(result.stdout).toContain('Done compiling TypeScript files')
+
+        // take it out
+        resetIndexTs(appData.indexTsPath, indexTs)
+
+        // build again
+        const result2 = await runNxCommandAsync(`build ${appData.projectName}`)
+
+        // add it back
+        addContentToIndexTs(appData.indexTsPath, importMatch, importAddition)
+
+        // build again
+        const result = await runNxCommandAsync(`build ${appData.projectName}`)
+
+        // check console output
+        expect(result.stdout).toContain(
+          `Added 'npm' dependency 'firebase-admin'`,
+        )
+        expect(result.stdout).toContain(
+          `Added 'npm' dependency 'firebase-functions'`,
+        )
+        expect(result.stdout).toContain(
+          `Copied 'lib' dependency '${libData.npmScope}'`,
+        )
+        expect(result.stdout).toContain(
+          `Updated firebase functions package.json`,
+        )
+
+        // check dist outputs
+        const functionsDistDir = `${appData.distDir}/${appData.functionLibsDir}/${libData.projectName}`
+        expect(() =>
+          checkFilesExist(
+            `${functionsDistDir}/package.json`,
+            `${functionsDistDir}/README.md`,
+            `${functionsDistDir}/src/index.js`,
+            `${functionsDistDir}/src/index.d.ts`,
+            `${functionsDistDir}/src/lib/buildablelib.js`,
+            `${functionsDistDir}/src/lib/buildablelib.d.ts`,
+          ),
+        ).not.toThrow()
+
+        // ceheck package dependencies
+        const distPackageFile = `${appData.distDir}/package.json`
+        const distPackage = readJson(distPackageFile)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+
+        expect(deps[buildableLibData.npmScope]).toEqual(
+          `file:${appData.functionLibsDir}/${buildableLibData.projectName}`,
+        )
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()
+      },
+      JEST_TIMEOUT,
+    )
+
     /*
     // add non-buildable lib as an imported dependency & check error handling
     it(
@@ -453,6 +534,8 @@ describe('nx-firebase e2e', () => {
       JEST_TIMEOUT,
     )
 */
+
+    /*
     // check buildable lib as an imported dependency
     it(
       'should support buildable library as a dependency',
@@ -524,5 +607,7 @@ describe('nx-firebase e2e', () => {
       },
       JEST_TIMEOUT,
     )
+
+    */
   })
 })
