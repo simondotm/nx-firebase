@@ -1,4 +1,4 @@
-import { ExecutorContext } from '@nrwl/devkit'
+import { ExecutorContext, logger } from '@nrwl/devkit'
 import type { ExecutorOptions } from '@nrwl/js/src/utils/schema'
 import { tscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
 import { firebaseBuildExecutor } from './lib'
@@ -11,6 +11,7 @@ export async function* runExecutor(
   options: ExecutorOptions,
   context: ExecutorContext,
 ) {
+  /*
   // --updateBuildableProjectDepsInPackageJson is true by default for @nrwl/js:tsc
   // https://nx.dev/packages/js/executors/tsc
   // but we havent programmed our executor schema to match yet, so hack them in here.
@@ -19,16 +20,20 @@ export async function* runExecutor(
     updateBuildableProjectDepsInPackageJson: true,
     clean: true,
   }
+  */
+  if (process.env.NX_VERBOSE_LOGGING) {
+    logger.info(`options=${JSON.stringify(options, null, 3)}`)
+  }
 
   // iterate the tscExecutor generator until it completes
   // this approach allows us to add a custom post-compile process.
   //
   // with --watch enabled, this loop will run until the process terminates
   // https://github.com/nrwl/nx/blob/8bfc0b5527e3ea3acd14e4a11254505f02046d98/packages/js/src/executors/tsc/tsc.impl.ts#L176
-  for await (const output of tscExecutor(customOptions, context)) {
+  for await (const output of tscExecutor(options, context)) {
     if (output.success) {
       // Post-process Firebase Functions dependencies if compilation succeeded
-      await firebaseBuildExecutor(context, customOptions.outputPath)
+      await firebaseBuildExecutor(context, options.outputPath)
     }
     yield output
   }
