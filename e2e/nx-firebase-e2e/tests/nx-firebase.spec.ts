@@ -88,9 +88,17 @@ function expectedAppFiles(directoryData: AppDirectoryData) {
     `${projectPath}/firestore.rules`,
     `${projectPath}/storage.rules`,
     `firebase.json`,
-    `firebase.${directoryData.projectName}.json`,
     `.firebaserc`,
   ]
+}
+
+function expectedConfigFiles(
+  directoryData: AppDirectoryData,
+  firstProject: boolean = false,
+) {
+  return firstProject
+    ? ['firebase.json']
+    : [`firebase.${directoryData.projectName}.json`]
 }
 
 /**
@@ -203,8 +211,13 @@ describe('nx-firebase e2e', () => {
       await runNxCommandAsync(`${appGeneratorCommand} ${projectData.name}`)
       // test generator output
       expect(() =>
-        checkFilesExist(...expectedAppFiles(projectData)),
+        checkFilesExist(
+          ...expectedAppFiles(projectData).concat(
+            expectedConfigFiles(projectData, true),
+          ),
+        ),
       ).not.toThrow()
+
       // stash a copy of the default index.ts
       indexTsFile = readFile(projectData.indexTsPath)
     },
@@ -273,7 +286,11 @@ describe('nx-firebase e2e', () => {
           `${appGeneratorCommand} ${projectData.name} --directory ${projectData.dir}`,
         )
         expect(() =>
-          checkFilesExist(...expectedAppFiles(projectData)),
+          checkFilesExist(
+            ...expectedAppFiles(projectData).concat(
+              expectedConfigFiles(projectData),
+            ),
+          ),
         ).not.toThrow()
 
         const project = readJson(`${projectData.projectDir}/project.json`)
