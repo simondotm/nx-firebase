@@ -1,9 +1,4 @@
-import {
-  joinPathFragments,
-  names,
-  ProjectConfiguration,
-  Tree,
-} from '@nrwl/devkit'
+import { joinPathFragments, ProjectConfiguration, Tree } from '@nrwl/devkit'
 import {
   readProjectConfiguration,
   updateProjectConfiguration,
@@ -27,29 +22,32 @@ export function getBuildTarget(project: ProjectConfiguration) {
   }
 }
 
-export function getDeployTarget(project: ProjectConfiguration) {
+export function getDeployTarget(options: NormalizedOptions) {
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      command: `firebase deploy --config firebase.${project.name}.json`,
+      command: `firebase deploy --config ${options.firebaseConfigName}`,
     },
   }
 }
 
-export function getConfigTarget(project: ProjectConfiguration) {
+export function getConfigTarget(
+  project: ProjectConfiguration,
+  options: NormalizedOptions,
+) {
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      command: `firebase functions:config:get --config firebase.${project.name}.json > ${project.root}/.runtimeconfig.json`,
+      command: `firebase functions:config:get --config ${options.firebaseConfigName} > ${project.root}/.runtimeconfig.json`,
     },
   }
 }
 
-export function getEmulateTarget(project: ProjectConfiguration) {
+export function getEmulateTarget(options: NormalizedOptions) {
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      command: `firebase emulators:start --config firebase.${project.name}.json`,
+      command: `firebase emulators:start --config ${options.firebaseConfigName}`,
     },
   }
 }
@@ -75,9 +73,9 @@ export function addProject(tree: Tree, options: NormalizedOptions): void {
   const project = readProjectConfiguration(tree, options.projectName)
 
   project.targets.build = getBuildTarget(project)
-  project.targets.deploy = getDeployTarget(project)
-  project.targets.getconfig = getConfigTarget(project)
-  project.targets.emulate = getEmulateTarget(project)
+  project.targets.deploy = getDeployTarget(options)
+  project.targets.getconfig = getConfigTarget(project, options)
+  project.targets.emulate = getEmulateTarget(options)
   project.targets.serve = getServeTarget(project)
 
   updateProjectConfiguration(tree, options.name, project)
