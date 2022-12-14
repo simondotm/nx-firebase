@@ -1,4 +1,9 @@
-import { ExecutorContext, logger, ProjectGraphProjectNode } from '@nrwl/devkit'
+import {
+  createProjectGraphAsync,
+  ExecutorContext,
+  logger,
+  ProjectGraphProjectNode,
+} from '@nrwl/devkit'
 import {
   calculateProjectDependencies,
   DependentBuildableProjectNode,
@@ -10,12 +15,16 @@ export type FirebaseDependencies = {
   target: ProjectGraphProjectNode<unknown>
 }
 
-export function getFirebaseDependencies(
+export async function getFirebaseDependencies(
   context: ExecutorContext,
-): FirebaseDependencies {
+): Promise<FirebaseDependencies> {
   logger.log(
     `- Processing dependencies for firebase functions app '${context.projectName}':`,
   )
+
+  // SM: recompute the project graph on every iteration so that --watch will work,
+  //  since the context.projectGraph is only a snapshot
+  const projectGraph = await createProjectGraphAsync()
 
   const {
     target,
@@ -23,7 +32,7 @@ export function getFirebaseDependencies(
     nonBuildableDependencies,
     topLevelDependencies,
   } = calculateProjectDependencies(
-    context.projectGraph,
+    projectGraph, // context.projectGraph,
     context.root,
     context.projectName,
     context.targetName,

@@ -8,7 +8,7 @@ export async function firebaseBuildExecutor(
   context: ExecutorContext,
   outputPath: string,
 ) {
-  const firebaseDependencies = getFirebaseDependencies(context)
+  const firebaseDependencies = await getFirebaseDependencies(context)
   const localLibraries = await copyFirebaseDependencies(
     outputPath,
     context.root,
