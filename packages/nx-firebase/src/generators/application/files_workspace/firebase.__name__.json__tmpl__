@@ -23,13 +23,15 @@
   "storage": {
       "rules": "<%= root %>/storage.rules"
   },
-  "functions": {
-    "predeploy": [
-      "npx nx build <%= name %>",
-      "npx nx lint <%= name %>"
-    ],
-    "source": "dist/<%= root %>"
-  },
+  "functions": [
+    {
+      "predeploy": [
+        "npx nx build <%= name %>",
+        "npx nx lint <%= name %>"
+      ],
+      "source": "dist/<%= root %>"
+    }
+  ],
   "emulators": {
     "functions": {
       "port": 5001

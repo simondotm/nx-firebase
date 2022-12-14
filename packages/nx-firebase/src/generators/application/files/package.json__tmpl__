@@ -4,10 +4,10 @@
   "scripts": {
     "lint": "nx lint <%= name %>",
     "build": "nx build <%= name %>",
-    "serve": "npm run build && firebase emulators:start --only functions --config <%= firebaseAppConfigPath %>",
+    "serve": "npm run build && firebase emulators:start --only functions --config <%= firebaseAppConfig %>",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "deploy": "firebase deploy --only functions --config <%= firebaseAppConfigPath %>",
+    "deploy": "firebase deploy --only functions --config <%= firebaseAppConfig %>",
     "logs": "firebase functions:log"
   },
   "engines": {

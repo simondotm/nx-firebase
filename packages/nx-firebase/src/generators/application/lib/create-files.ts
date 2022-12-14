@@ -9,8 +9,7 @@ import type { NormalizedOptions } from '../schema'
  * @param options
  */
 export function createFiles(tree: Tree, options: NormalizedOptions): void {
-  const projectName = options.projectName
-  const firebaseAppConfig = `firebase.${projectName}.json`
+  const firebaseAppConfig = options.firebaseConfigName
   const firebaseAppConfigPath = joinPathFragments(
     offsetFromRoot(options.projectRoot),
     firebaseAppConfig,
@@ -32,7 +31,7 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
   //
   // Rules and index files also get generated in the application folder;
   // 1. so that they dont clutter up the root workspace
-  // 2. so that they are located cwithin the nx firebase application project they relate to
+  // 2. so that they are located within the nx firebase application project they relate to
   generateFiles(
     tree,
     joinPathFragments(__dirname, '..', 'files'),
@@ -40,27 +39,20 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
     substitutions,
   )
 
-  // create firebase.<__name__>.json config file in the root of the workspace.
   // app project, so that it can be easily located with the cli command, and also enables nx workspaces
   // to contain multiple firebase projects
   // firebase.*.json files have to go in the root of the workspace, because firebase function deployment only allows
   //  the deployed package for functions to exist in a sub directory from where the firebase.json config is located
   // In principle for users that are not using the firebase functions feature, they could put this firebase.json config
   //  inside their app folder, but it's better to have consistent behaviour for every workspace
-  generateFiles(
-    tree,
-    joinPathFragments(__dirname, '..', 'files_workspace'),
-    '', // SM: this is a tree path, not a file system path
-    substitutions,
-  )
 
   // generate these firebase files in the root workspace only if they dont already exist
   // ( since we dont want to overwrite any existing configs)
-  // For a fresh workspace, the firebase CLI needs at least an empty firebase.json and an empty .firebaserc
-  //  in order to use commands like 'firebase use --add'
-  // firebase.json is an annoying artefact of this requirement, as it isn't actually used by our firebase apps
-  //  which each have their own firebase.<appname>.json config
-  if (!tree.isFile('firebase.json')) {
+
+  // create firebase config file in the root of the workspace.
+  // use `firebase.json` as the first firebase project config
+  // use `firebase.<project-name>.json` for subsequent project configs
+  if (!tree.exists('firebase.json')) {
     generateFiles(
       tree,
       joinPathFragments(__dirname, '..', 'files_firebase'),
@@ -68,8 +60,16 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
       substitutions,
     )
   } else {
-    logger.log('✓ firebase.json already exists in this workspace')
+    generateFiles(
+      tree,
+      joinPathFragments(__dirname, '..', 'files_workspace'),
+      '', // SM: this is a tree path, not a file system path
+      substitutions,
+    )
   }
+
+  // For a fresh workspace, the firebase CLI needs at least a firebase.json and an empty .firebaserc
+  //  in order to use commands like 'firebase use --add'
   if (!tree.exists('.firebaserc')) {
     generateFiles(
       tree,

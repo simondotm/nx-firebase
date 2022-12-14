@@ -22,6 +22,12 @@ describe('application generator', () => {
     jest.clearAllMocks()
   })
 
+  it('should generate workspace', async () => {
+    expect(tree.exists(`firebase.json`)).toBeFalsy()
+    expect(tree.exists(`.firebaserc`)).toBeFalsy()
+    expect(tree.isFile(`package.json`)).toBeTruthy()
+  })
+
   it('should generate files', async () => {
     await applicationGenerator(tree, { name: appName })
 
@@ -40,10 +46,7 @@ describe('application generator', () => {
     // workspace firebase configs
     expect(tree.isFile(`package.json`)).toBeTruthy()
     expect(tree.isFile(`firebase.json`)).toBeTruthy()
-
-    expect(tree.exists(`firebase.${appName}.json`)).toBeTruthy()
-    expect(tree.exists(`firebase.json`)).toBeTruthy()
-    expect(tree.exists(`.firebaserc`)).toBeTruthy()
+    expect(tree.isFile(`.firebaserc`)).toBeTruthy()
   })
 
   it('should configure tsconfig correctly', async () => {
@@ -85,6 +88,15 @@ describe('application generator', () => {
     // assume @nrwl/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()
     expect(project.targets.test).toBeDefined()
+  })
+
+  it('should generate multiple firebase configurations', async () => {
+    const appName1 = `${appName}1`
+    const appName2 = `${appName}2`
+    await applicationGenerator(tree, { name: appName1 })
+    await applicationGenerator(tree, { name: appName2 })
+    expect(tree.isFile(`firebase.json`)).toBeTruthy()
+    expect(tree.isFile(`firebase.${appName2}.json`)).toBeTruthy()
   })
 
   describe('--skipFormat', () => {

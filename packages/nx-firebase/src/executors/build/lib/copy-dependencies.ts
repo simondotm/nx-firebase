@@ -37,23 +37,27 @@ export async function copyFirebaseDependencies(
     // see: https://firebase.google.com/docs/functions/handle-dependencies
     // SM: Nov'22, this policy has changed - local libs should NOT be in the `node_modules` folder.
     // https://firebase.google.com/docs/functions/handle-dependencies#including_local_nodejs_modules
-    // const nodeModulesDir = joinPathFragments(
-    //   workspaceRoot,
-    //   outputPath,
-    //   'node_modules',
-    //   localPackageName,
-    // )
+    // SM: Dec'22, this is not correct, we DO need to copy to `node_modules` also, because the firebase CLI script
+    // uses `require(distDir)` to determine the entry point, and nodeJS require has to be able to resolve our libs to the local node_modules
+    // however, for external deps like `firebase-functions` nodeJS will not find it here, but will move up a folder until it hits our nx root node_modules
+
+    const nodeModulesDir = joinPathFragments(
+      workspaceRoot,
+      outputPath,
+      'node_modules',
+      localPackageName,
+    )
     try {
       if (process.env.NX_VERBOSE_LOGGING) {
         logger.info(
           `- Copying dependent workspace library '${dep.node.name}' from '${srcDir}' to '${outDir}'`,
         )
-        // logger.info(
-        //   `- Copying dependent workspace library '${dep.node.name}' from '${srcDir}' to '${nodeModulesDir}'`,
-        // )
+        logger.info(
+          `- Copying dependent workspace library '${dep.node.name}' from '${srcDir}' to '${nodeModulesDir}'`,
+        )
       }
       await copy(srcDir, outDir)
-      // await copy(srcDir, nodeModulesDir)
+      await copy(srcDir, nodeModulesDir)
       logger.log(` - Copied 'lib' dependency '${dep.name}'`)
     } catch (err) {
       logger.error(err.message)

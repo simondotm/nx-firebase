@@ -22,10 +22,23 @@ export function normalizeOptions(
 
   const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-')
 
+  const firebaseConfigName = tree.exists('firebase.json')
+    ? `firebase.${projectName}.json`
+    : 'firebase.json'
+
+  // make sure this firebase config name is unique.
+  // shouldn't happen as nx already enforces unique project names
+  if (tree.exists(firebaseConfigName)) {
+    throw Error(
+      `There is already a firebase configuration called '${firebaseConfigName}' in this workspace. Please try a different project name.`,
+    )
+  }
+
   return {
     ...options,
     projectRoot,
     projectName,
+    firebaseConfigName,
     linter: options.linter ?? Linter.EsLint,
     unitTestRunner: options.unitTestRunner ?? 'jest',
   }

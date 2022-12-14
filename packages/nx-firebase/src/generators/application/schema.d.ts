@@ -17,4 +17,5 @@ export interface ApplicationGeneratorOptions {
 interface NormalizedOptions extends ApplicationGeneratorOptions {
   projectRoot: Path
   projectName: string
+  firebaseConfigName: string
 }
