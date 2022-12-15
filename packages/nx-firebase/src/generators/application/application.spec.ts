@@ -79,10 +79,15 @@ describe('application generator', () => {
     )
 
     // validate the custom targets for nx-firebase apps
+    const firebaseConfigName = `firebase.json`
     expect(project.targets.build).toEqual(getBuildTarget(project))
-    expect(project.targets.deploy).toEqual(getDeployTarget(project))
-    expect(project.targets.getconfig).toEqual(getConfigTarget(project))
-    expect(project.targets.emulate).toEqual(getEmulateTarget(project))
+    expect(project.targets.deploy).toEqual(getDeployTarget(firebaseConfigName))
+    expect(project.targets.getconfig).toEqual(
+      getConfigTarget(project.root, firebaseConfigName),
+    )
+    expect(project.targets.emulate).toEqual(
+      getEmulateTarget(firebaseConfigName),
+    )
     expect(project.targets.serve).toEqual(getServeTarget(project))
 
     // assume @nrwl/node is working, we dont need to validate these objects

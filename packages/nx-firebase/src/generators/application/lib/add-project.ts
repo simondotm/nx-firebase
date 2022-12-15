@@ -22,32 +22,32 @@ export function getBuildTarget(project: ProjectConfiguration) {
   }
 }
 
-export function getDeployTarget(options: NormalizedOptions) {
+export function getDeployTarget(firebaseConfigName: string) {
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      command: `firebase deploy --config ${options.firebaseConfigName}`,
+      command: `firebase deploy --config ${firebaseConfigName}`,
     },
   }
 }
 
 export function getConfigTarget(
-  project: ProjectConfiguration,
-  options: NormalizedOptions,
+  projectRoot: string,
+  firebaseConfigName: string,
 ) {
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      command: `firebase functions:config:get --config ${options.firebaseConfigName} > ${project.root}/.runtimeconfig.json`,
+      command: `firebase functions:config:get --config ${firebaseConfigName} > ${projectRoot}/.runtimeconfig.json`,
     },
   }
 }
 
-export function getEmulateTarget(options: NormalizedOptions) {
+export function getEmulateTarget(firebaseConfigName: string) {
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      command: `firebase emulators:start --config ${options.firebaseConfigName}`,
+      command: `firebase emulators:start --config ${firebaseConfigName}`,
     },
   }
 }
@@ -58,7 +58,7 @@ export function getServeTarget(project: ProjectConfiguration) {
     options: {
       commands: [
         {
-          command: `nx run ${project.name}:build && nx run ${project.name}:build --watch`,
+          command: `nx run ${project.name}:build --watch`,
         },
         {
           command: `nx run ${project.name}:emulate`,
@@ -73,9 +73,12 @@ export function addProject(tree: Tree, options: NormalizedOptions): void {
   const project = readProjectConfiguration(tree, options.projectName)
 
   project.targets.build = getBuildTarget(project)
-  project.targets.deploy = getDeployTarget(options)
-  project.targets.getconfig = getConfigTarget(project, options)
-  project.targets.emulate = getEmulateTarget(options)
+  project.targets.deploy = getDeployTarget(options.firebaseConfigName)
+  project.targets.getconfig = getConfigTarget(
+    project.root,
+    options.firebaseConfigName,
+  )
+  project.targets.emulate = getEmulateTarget(options.firebaseConfigName)
   project.targets.serve = getServeTarget(project)
 
   updateProjectConfiguration(tree, options.name, project)
