@@ -1,5 +1,6 @@
 import { offsetFromRoot, Tree } from '@nrwl/devkit'
 import { generateFiles, joinPathFragments, logger } from '@nrwl/devkit'
+import { firebaseNodeEngine, firebaseNodeRuntime } from '../../../utils'
 import type { NormalizedOptions } from '../schema'
 
 /**
@@ -23,6 +24,9 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
     firebaseAppName: options.name,
     firebaseAppConfig,
     firebaseAppConfigPath,
+
+    firebaseNodeRuntime,
+    firebaseNodeEngine,
   }
 
   // The default functions package.json & templated typescript source files are added here

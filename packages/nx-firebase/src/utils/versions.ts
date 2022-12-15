@@ -7,3 +7,5 @@ export const firebaseToolsVersion = '^11.16.1'
 export const firebaseVersion = '^9.14.0'
 export const firebaseFunctionsTestVersion = '^0.2.0'
 
+export const firebaseNodeEngine = '16'
+export const firebaseNodeRuntime = 'nodejs16'

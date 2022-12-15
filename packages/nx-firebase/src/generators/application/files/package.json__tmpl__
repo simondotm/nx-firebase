@@ -11,7 +11,7 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "16"
+    "node": " <%= firebaseNodeEngine %>"
   },
   "main": "src/index.js",
   "dependencies": {

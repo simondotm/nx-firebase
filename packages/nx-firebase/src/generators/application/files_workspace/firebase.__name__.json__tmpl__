@@ -29,6 +29,7 @@
         "npx nx build <%= name %>",
         "npx nx lint <%= name %>"
       ],
+      "runtime": "<%= firebaseNodeRuntime %>",
       "source": "dist/<%= root %>"
     }
   ],
