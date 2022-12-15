@@ -25,6 +25,7 @@
   },
   "functions": [
     {
+      "codebase": "<%= name %>",
       "predeploy": [
         "npx nx build <%= name %>",
         "npx nx lint <%= name %>"
