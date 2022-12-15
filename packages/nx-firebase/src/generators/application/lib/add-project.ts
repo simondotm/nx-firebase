@@ -24,7 +24,7 @@ export function getBuildTarget(project: ProjectConfiguration) {
 
 export function getDeployTarget(firebaseConfigName: string) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: 'nx:run-commands',
     options: {
       command: `firebase deploy --config ${firebaseConfigName}`,
     },
@@ -36,7 +36,7 @@ export function getConfigTarget(
   firebaseConfigName: string,
 ) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: 'nx:run-commands',
     options: {
       command: `firebase functions:config:get --config ${firebaseConfigName} > ${projectRoot}/.runtimeconfig.json`,
     },
@@ -45,7 +45,7 @@ export function getConfigTarget(
 
 export function getEmulateTarget(firebaseConfigName: string) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: 'nx:run-commands',
     options: {
       command: `firebase emulators:start --config ${firebaseConfigName}`,
     },
@@ -54,17 +54,12 @@ export function getEmulateTarget(firebaseConfigName: string) {
 
 export function getServeTarget(project: ProjectConfiguration) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: 'nx:run-commands',
     options: {
       commands: [
-        {
-          command: `nx run ${project.name}:build --watch`,
-        },
-        {
-          command: `nx run ${project.name}:emulate`,
-        },
+        `nx run ${project.name}:build --watch`,
+        `nx run ${project.name}:emulate`,
       ],
-      parallel: true,
     },
   }
 }
