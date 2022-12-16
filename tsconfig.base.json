@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "simondotm/nx-firebase": ["packages/nx-firebase/src/index.ts"]
+      "@simondotm/nx-firebase": ["packages/nx-firebase/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

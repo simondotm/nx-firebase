@@ -19,11 +19,5 @@
   ],
   "main": "src/index.js",
   "generators": "./generators.json",
-  "executors": "./executors.json",
-  "peerDependencies": {
-    "@nrwl/devkit": ">= 12.1.1",
-    "@nrwl/workspace": ">= 12.1.1",
-    "@nrwl/linter": ">= 12.1.1",
-    "@nrwl/jest": ">= 12.1.1"
-  }
+  "executors": "./executors.json"
 }
