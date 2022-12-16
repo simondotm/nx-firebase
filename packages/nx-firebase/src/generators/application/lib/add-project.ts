@@ -47,7 +47,11 @@ export function getEmulateTarget(firebaseConfigName: string) {
   return {
     executor: 'nx:run-commands',
     options: {
-      command: `firebase emulators:start --config ${firebaseConfigName}`,
+      commands: [
+        `npx kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299`,
+        `firebase emulators:start --config ${firebaseConfigName}`,
+      ],
+      parallel: false,
     },
   }
 }

@@ -13,7 +13,7 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   return addDependenciesToPackageJson(
     tree,
     {
-      'firebase': firebaseVersion,
+      firebase: firebaseVersion,
       'firebase-admin': firebaseAdminVersion,
       'firebase-functions': firebaseFunctionsVersion,
       tslib: tsLibVersion,
@@ -21,6 +21,7 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     {
       'firebase-tools': firebaseToolsVersion,
       'firebase-functions-test': firebaseFunctionsTestVersion,
+      'kill-port': 'latest',
     },
   )
 }
