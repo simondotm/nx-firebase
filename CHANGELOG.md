@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.4
+
+Interim release fixes for nx version 13.0.2+ where `createProjectGraph` was deprecated.
+
 ## v0.3.3
 
 **General changes**
