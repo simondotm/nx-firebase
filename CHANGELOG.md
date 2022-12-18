@@ -1,21 +1,28 @@
 # @simondotm/nx-firebase Changelog
+
 All notable changes to this project will be documented in this file.
+
+## v0.3.4
+
+Interim release fixes for nx version 13.0.2+ where `createProjectGraph` was deprecated.
 
 ## v0.3.3
 
 **General changes**
+
 - Improved listing of firebase functions dependencies; now ordered by npm module libraries first, then local libraries, sorted alphabetically.
 
 **Enhanced Support for Firebase Emulators**
 
 `nx g @simondotm/nx-firebase:app` generator now additionally:
 
-- Adds default `auth` and `pubsub` settings to `"emulators": {...}` config in `firebase.<appname>.json` so that these services are also emulated by default. 
+- Adds default `auth` and `pubsub` settings to `"emulators": {...}` config in `firebase.<appname>.json` so that these services are also emulated by default.
 
 - Adds a new `getconfig` target to firebase functions app, where:
-    * `nx getconfig <firebaseappname>` will fetch the [functions configuration variables](https://firebase.google.com/docs/functions/local-emulator#set_up_functions_configuration_optional) from the server and store it locally as `.runtimeconfig.json` 
 
-- Adds `.runtimeconfig.json` to asset list to be copied (if it exists) from app directory to output `dist` directory when built, so that the function emulators will now run if the functions being emulated access variables from the functions config. 
+  - `nx getconfig <firebaseappname>` will fetch the [functions configuration variables](https://firebase.google.com/docs/functions/local-emulator#set_up_functions_configuration_optional) from the server and store it locally as `.runtimeconfig.json`
+
+- Adds `.runtimeconfig.json` to asset list to be copied (if it exists) from app directory to output `dist` directory when built, so that the function emulators will now run if the functions being emulated access variables from the functions config.
 
 - Adds `.runtimeconfig.json` to the Nx workspace root `.gitignore` file (if not already added), since these files should not be version controlled
 
@@ -23,10 +30,10 @@ All notable changes to this project will be documented in this file.
 
 **Plugin maintenance**
 
-  * Executors use workspace logger routines instead of console
-  * Fixed minor issues in e2e tests 
-  * Removed redundant/legacy firebase target
-  * Replaced plugin use of node `join` with workspace `joinPathFragments`
+- Executors use workspace logger routines instead of console
+- Fixed minor issues in e2e tests
+- Removed redundant/legacy firebase target
+- Replaced plugin use of node `join` with workspace `joinPathFragments`
 
 **Migration from v0.3.2**
 
@@ -49,7 +56,9 @@ In your `angular.json` or `workspace.json` file, for each `nx-firebase` app proj
           }
         },
 ```
+
 2. Add the new `emulate` target to your app:
+
 ```
       "targets": {
         ...
@@ -60,7 +69,9 @@ In your `angular.json` or `workspace.json` file, for each `nx-firebase` app proj
           }
         },
 ```
+
 3. Modify the `serve` target to:
+
 ```
       "targets": {
         ...
@@ -79,7 +90,9 @@ In your `angular.json` or `workspace.json` file, for each `nx-firebase` app proj
           }
         },
 ```
+
 4. Add the new `getconfig` target:
+
 ```
       "targets": {
         ...
@@ -102,16 +115,9 @@ And in your `firebase.<appname>.json` config settings for `"emulators"` add `"au
         },
         "pubsub": {
             "port": 8085
-        }    
+        }
     }
 ```
-
-
-
-
-
-
-
 
 ## v0.3.2
 
@@ -145,7 +151,6 @@ If you have already generated NxFirebase applications using `@simondotm/nxfireba
 ## v0.2.3
 
 Built against Nx 12.3.4
-
 
 **Updates**
 
@@ -196,9 +201,7 @@ v0.2.3 adds these targets to your `workspace.json` or `angular.json`, so for use
                         "command": "firebase deploy --config firebase.<appname>.json"
                     }
                 },
-   ```
-
-
+```
 
 ## v0.2.2 - Initial Release
 
