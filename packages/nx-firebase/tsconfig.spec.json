@@ -6,10 +6,10 @@
     "types": ["jest", "node"]
   },
   "include": [
+    "jest.config.ts",
+    "**/*.test.ts",
     "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/*.spec.js",
-    "**/*.spec.jsx",
-    "**/*.d.ts"
+    "**/*.d.ts",
+    "../archived-nx-firebase/src/generators/init/generator.spec.ts"
   ]
 }

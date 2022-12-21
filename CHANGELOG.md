@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## v0.3.4
 
 Interim release fixes for nx version 13.0.2+ where `createProjectGraph` was deprecated.
+
 As of Nx v13.10.x, `copyAssets` was also broken in v0.3.4 of the plugin, but now fixed thanks to contributors.
 
 **Migration Recommendations**

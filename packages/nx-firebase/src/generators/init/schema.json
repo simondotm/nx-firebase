@@ -1,21 +1,23 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "NxFirebaseInit",
-  "title": "Init NxFirebase Plugin",
+  "$id": "NxFirebaseInitGenerator",
+  "title": "Init Firebase Plugin",
+  "description": "Init Firebase Plugin.",
   "cli": "nx",
   "type": "object",
   "properties": {
     "unitTestRunner": {
-      "description": "Adds the specified unit test runner",
+      "description": "Adds the specified unit test runner.",
       "type": "string",
       "enum": ["jest", "none"],
-      "default": "jest"
+      "default": "none"
     },
     "skipFormat": {
-      "description": "Skip formatting files",
+      "description": "Skip formatting files.",
       "type": "boolean",
-      "default": false
-    }      
+      "default": true
+    }
   },
+  "additionalProperties": false,
   "required": []
 }

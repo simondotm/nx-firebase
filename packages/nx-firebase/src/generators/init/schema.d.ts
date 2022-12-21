@@ -1,4 +1,6 @@
-export interface Schema {
-  unitTestRunner?: 'jest' | 'none';
-  skipFormat?: boolean;  
+import { UnitTestRunner } from '../../utils'
+
+export interface InitGeneratorOptions {
+  skipFormat?: boolean
+  unitTestRunner?: UnitTestRunner
 }
