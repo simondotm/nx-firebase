@@ -27,8 +27,7 @@
     {
       "codebase": "<%= name %>",
       "predeploy": [
-        "npx nx build <%= name %>",
-        "npx nx lint <%= name %>"
+        "npx nx build <%= name %>"
       ],
       "runtime": "<%= firebaseNodeRuntime %>",
       "source": "dist/<%= root %>"
