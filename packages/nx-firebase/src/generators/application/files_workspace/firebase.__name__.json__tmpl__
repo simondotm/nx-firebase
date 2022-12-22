@@ -23,17 +23,14 @@
   "storage": {
       "rules": "<%= root %>/storage.rules"
   },
-  "functions": [
-    {
-      "codebase": "<%= name %>",
-      "predeploy": [
-        "npx nx build <%= name %>",
-        "npx nx lint <%= name %>"
-      ],
-      "runtime": "<%= firebaseNodeRuntime %>",
-      "source": "dist/<%= root %>"
-    }
-  ],
+  "functions": {
+    "codebase": "<%= name %>",
+    "predeploy": [
+      "npx nx build <%= name %>"
+    ],
+    "runtime": "<%= firebaseNodeRuntime %>",
+    "source": "dist/<%= root %>"
+  },
   "emulators": {
     "auth": {
       "port": 9099
