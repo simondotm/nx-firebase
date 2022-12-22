@@ -61,7 +61,7 @@
     "project": {
       "type": "string",
       "description": "The firebase project that should be associated with this application",
-      "default": false
+      "default": ""
     }
   },
   "additionalProperties": false,
