@@ -23,19 +23,19 @@ jobs:
 
     steps:
       # Setup steps
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install npm
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm install
+        run: npm ci
 
   build:
     needs: [setup]
@@ -49,18 +49,18 @@ jobs:
         node-version: [19.1.0]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
       - name: Build
-        run: npx nx run-many --all --target=build --parallel --maxParallel=10
+        run: npm run build
 
   lint:
     needs: [setup]
@@ -74,18 +74,18 @@ jobs:
         node-version: [19.1.0]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
       - name: Lint Affected Apps
-        run: npx nx run-many --all --target=lint --parallel --maxParallel=10
+        run: npm run lint
 
   test:
     needs: [setup]
@@ -99,17 +99,17 @@ jobs:
         node-version: [19.1.0]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - run: npx nx run-many --all --target=test --parallel --maxParallel=10
+      - run: npm run test
 
   # e2e might be too much work todo for every push, lets see.
   e2e:
@@ -124,13 +124,13 @@ jobs:
         node-version: [19.1.0]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}

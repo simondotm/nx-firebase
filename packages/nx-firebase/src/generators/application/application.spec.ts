@@ -9,6 +9,7 @@ import {
   getEmulateTarget,
   getServeTarget,
 } from './lib'
+import { NormalizedOptions } from './schema'
 
 describe('application generator', () => {
   let tree: Tree
@@ -80,14 +81,55 @@ describe('application generator', () => {
 
     // validate the custom targets for nx-firebase apps
     const firebaseConfigName = `firebase.json`
+    const options: NormalizedOptions = {
+      name: appName,
+      projectRoot: project.root,
+      projectName: project.name,
+      firebaseConfigName,
+    }
+
     expect(project.targets.build).toEqual(getBuildTarget(project))
-    expect(project.targets.deploy).toEqual(getDeployTarget(firebaseConfigName))
+    expect(project.targets.deploy).toEqual(getDeployTarget(options))
     expect(project.targets.getconfig).toEqual(
-      getConfigTarget(project.root, firebaseConfigName),
+      getConfigTarget(project.root, options),
     )
-    expect(project.targets.emulate).toEqual(
-      getEmulateTarget(firebaseConfigName),
+    expect(project.targets.emulate).toEqual(getEmulateTarget(options))
+    expect(project.targets.serve).toEqual(getServeTarget(project))
+
+    // assume @nrwl/node is working, we dont need to validate these objects
+    expect(project.targets.lint).toBeDefined()
+    expect(project.targets.test).toBeDefined()
+  })
+
+  it('should update project configuration with --project', async () => {
+    await applicationGenerator(tree, { name: appName, project: 'fb-proj' })
+
+    const project = devkit.readProjectConfiguration(tree, appName)
+
+    //const workspaceJson = devkit.readJson(tree, '/workspace.json');
+    expect(project.root).toEqual(
+      devkit.joinPathFragments(
+        devkit.getWorkspaceLayout(tree).appsDir,
+        appName,
+      ),
     )
+
+    // validate the custom targets for nx-firebase apps
+    const firebaseConfigName = `firebase.json`
+    const options: NormalizedOptions = {
+      name: appName,
+      projectRoot: project.root,
+      projectName: project.name,
+      firebaseConfigName,
+      project: 'fb-proj',
+    }
+
+    expect(project.targets.build).toEqual(getBuildTarget(project))
+    expect(project.targets.deploy).toEqual(getDeployTarget(options))
+    expect(project.targets.getconfig).toEqual(
+      getConfigTarget(project.root, options),
+    )
+    expect(project.targets.emulate).toEqual(getEmulateTarget(options))
     expect(project.targets.serve).toEqual(getServeTarget(project))
 
     // assume @nrwl/node is working, we dont need to validate these objects

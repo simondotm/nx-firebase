@@ -5,6 +5,20 @@ import {
 } from '@nrwl/devkit'
 import type { NormalizedOptions } from '../schema'
 
+function getFirebaseProject(options: NormalizedOptions) {
+  if (options.project) {
+    return ` --project ${options.project}`
+  }
+  return ''
+}
+
+function getFirebaseConfig(options: NormalizedOptions) {
+  if (options.firebaseConfigName) {
+    return ` --config ${options.firebaseConfigName}`
+  }
+  return ''
+}
+
 export function getBuildTarget(project: ProjectConfiguration) {
   return {
     executor: '@simondotm/nx-firebase:build',
@@ -22,34 +36,40 @@ export function getBuildTarget(project: ProjectConfiguration) {
   }
 }
 
-export function getDeployTarget(firebaseConfigName: string) {
+export function getDeployTarget(options: NormalizedOptions) {
   return {
     executor: 'nx:run-commands',
     options: {
-      command: `firebase deploy --config ${firebaseConfigName}`,
+      command: `firebase deploy${getFirebaseConfig(
+        options,
+      )}${getFirebaseProject(options)}`,
     },
   }
 }
 
 export function getConfigTarget(
   projectRoot: string,
-  firebaseConfigName: string,
+  options: NormalizedOptions,
 ) {
   return {
     executor: 'nx:run-commands',
     options: {
-      command: `firebase functions:config:get --config ${firebaseConfigName} > ${projectRoot}/.runtimeconfig.json`,
+      command: `firebase functions:config:get${getFirebaseConfig(
+        options,
+      )}${getFirebaseProject(options)} > ${projectRoot}/.runtimeconfig.json`,
     },
   }
 }
 
-export function getEmulateTarget(firebaseConfigName: string) {
+export function getEmulateTarget(options: NormalizedOptions) {
   return {
     executor: 'nx:run-commands',
     options: {
       commands: [
         `npx kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299`,
-        `firebase emulators:start --config ${firebaseConfigName}`,
+        `firebase emulators:start ${getFirebaseConfig(
+          options,
+        )}${getFirebaseProject(options)}`,
       ],
       parallel: false,
     },
@@ -72,12 +92,9 @@ export function addProject(tree: Tree, options: NormalizedOptions): void {
   const project = readProjectConfiguration(tree, options.projectName)
 
   project.targets.build = getBuildTarget(project)
-  project.targets.deploy = getDeployTarget(options.firebaseConfigName)
-  project.targets.getconfig = getConfigTarget(
-    project.root,
-    options.firebaseConfigName,
-  )
-  project.targets.emulate = getEmulateTarget(options.firebaseConfigName)
+  project.targets.deploy = getDeployTarget(options)
+  project.targets.getconfig = getConfigTarget(project.root, options)
+  project.targets.emulate = getEmulateTarget(options)
   project.targets.serve = getServeTarget(project)
 
   updateProjectConfiguration(tree, options.name, project)

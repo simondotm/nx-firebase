@@ -6,6 +6,7 @@
     "start": "nx serve",
     "build": "nx run nx-firebase:build",
     "test": "nx run nx-firebase:test",
+    "lint": "nx run nx-firebase:lint",
     "e2e": "nx run nx-firebase-e2e:e2e"
   },
   "private": true,
@@ -43,4 +44,3 @@
     "tslib": "^2.3.0"
   }
 }
-
