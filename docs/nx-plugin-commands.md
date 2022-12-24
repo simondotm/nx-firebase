@@ -25,3 +25,7 @@ Notes mainly for my own benefit/reminder here.
 For example, after changing `.prettierrc` settings
 
 - `nx format:write --all`
+
+**Unit Tests**
+
+I've not implemented a full set of unit tests yet, but the e2e tests do perform a few standard tests.
