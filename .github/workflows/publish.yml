@@ -1,12 +1,11 @@
-name: Release & Publish
+# Publish package to npm when a Github release is published
+name: Publish
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [released]
 
 jobs:
-
   publish_github:
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +17,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
       #- run: npm run addscope
-      - run: npm install
+      - run: npm ci
 
       - name: Build plugin
         run: npx nx build nx-firebase
@@ -33,7 +32,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
   publish_npm:
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +41,7 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm install
+      - run: npm ci
 
       - name: Build plugin
         run: npx nx build nx-firebase
@@ -53,20 +51,3 @@ jobs:
         working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  release:
-    needs: [ publish_github, publish_npm ]
-    name: Release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
