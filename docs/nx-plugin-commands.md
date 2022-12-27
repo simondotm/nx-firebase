@@ -25,3 +25,9 @@ Notes mainly for my own benefit/reminder here.
 For example, after changing `.prettierrc` settings
 
 - `nx format:write --all`
+
+**Unit Tests**
+
+I've not implemented a full set of unit tests yet, but the e2e tests do perform a few standard tests.
+
+> **Note**: I created this plugin to primarily serve my own needs, so feature requests may take a bit of time to consider, but feedback and collaboration is very welcome for this project, since the Nrwl Nx team have an extremely rapid release cadence and it's sometimes hard to keep up with all the changes!

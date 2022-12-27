@@ -2,50 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+- [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
+  - [v0.13.0-beta.0](#v0130-beta0)
+  - [v0.3.4](#v034)
+  - [v0.3.3](#v033)
+  - [v0.3.2](#v032)
+  - [v0.3.1](#v031)
+  - [v0.3.0](#v030)
+  - [v0.2.3](#v023)
+  - [v0.2.2 - Initial Release](#v022---initial-release)
+
+## v0.13.0-beta.0
+
+Due to the large number of API changes in Nx from version 12 to version 13.10, this plugin has been rewritten from scratch:
+
+- **Improved compatibility**
+  - To support the latest Nx devkit API's for plugins
+- **Refactored build process**
+  - `build` executor is now entirely based on the `@nrwl/js:tsc` executor, which simplifies maintenance of the plugin
+  - this also enables `--watch` to work
+  - _(note that changes to Nx library dependencies are still not yet detectable in `--watch` mode)_
+- **Functions Node engine**
+  - Plugin now defaults to Node 16 runtime engine for firebase functions
+- **Improved Firebase configurations**
+  - `nx g @simondotm/nx-firebase:app` will now generate a `firebase.json` configuration file for the **first** firebase application in the Nx workspace. Additional generated firebase applications will have a firebase configuration named `firebase.project-name.json`
+- **Project Alias Support**
+  - If you already know the firebase project alias you are using for your application, you can now use the `--project` generator parameter to set this in the project targets eg. `nx g @simondotm/nx-firebase:app appname --project=firebaseprojectalias`
+- **Additional dependencies**
+  - `nx g @simondotm/nx-firebase:app` will add firebase and [`kill-port`](https://www.npmjs.com/package/kill-port) dependencies
+  - `kill-port` is used by the `serve` and `emulate` targets to ensure clean startup.
+- **Documentation has been updated**
+
+Recommended minimum version of Nx is now 13.10.6. See [Nx Migration](docs/nx-migration.md) documentation for more information.
+
 ## v0.3.4
 
-Interim release fixes for nx version 13.0.2+ where `createProjectGraph` was deprecated.
+Interim release fixes for issues introduced in nx version 13.0.2+ where `createProjectGraph` was deprecated.
 
 As of Nx v13.10.x, `copyAssets` was also broken in v0.3.4 of the plugin, but now fixed thanks to contributors.
 
 **Migration Recommendations**
 
-If you are running on older versions of Nx, the following information may be useful.
-
-The `nx-firebase` plugin does not have a migration script, so recommended changes for updating from older Nx versions are as follows:
-
-- From Nx version 12.5.9+,
-- Upgrade Node version to at least 14.2.0
-- Nx versions prior to 13.10.0 used `@nrwl/tao` dependency which doesn't seem to get migrated automatically, so...
-- If you are on Nx version < 13.10.x, we would recommend that Nx updates are applied sequentially to ensure safe migrations using this sequence of commands for each update:
-  - `npx nx @nrwl/workspace@<version>`
-  - `npm install`
-  - `npm install @nrwl/tao@<version>`
-  - `npx nx migrate --run-migrations`
-  - `npx nx run-many --target=build --all` - to check your build continues to work ok with this updated version
-  - ^ do this sequence for each minor release upto Nx 13.10.x
-  - Where the list of each minor Nx Update release `version` is:
-    - `12.2.0`
-    - `12.3.6`
-    - `12.4.0`,
-    - `12.5.9` - recommend running `nx g @nrwl/workspace:convert-to-nx-project --all` for this version
-    - `12.6.6`
-    - `12.7.2`
-    - `12.8.0`
-    - `12.9.0` and `12.10.0` seem to be problematic, so can skip to:
-    - `13.0.0`
-    - `13.0.2` - at this point you will need to `npm install @simondotm/nx-firebase@0.3.4`
-    - `13.1.6` (use tao version `@13.1.4`)
-    - `13.2.3` (use tao version `@13.2.4`)
-    - `13.3.12`
-    - `13.4.6`
-    - `13.5.3`
-    - `13.6.1`
-    - `13.7.3`
-    - `13.8.8` - In this release `@nrwl/node:package` is replaced with `@nrwl/js:tsc`
-    - `13.9.7` - In this release `@nrwl/tao` is replaced with the `nx` cli, so manual updates of `@nrwl/tao` package version are no longer necessary
-    - `13.10.6` - The last minor release of Nx 13.
-    - The plugin is not yet tested with Nx version 14+
+If you are running on older versions of Nx, the following information may be useful:
 
 **No more `--with-deps`**
 
@@ -57,9 +55,22 @@ Therefore `--with-deps` is deprecated, so this parameter can be removed from any
 
 Same applies for `--parallel` since this is now a default setting in `nx.json`
 
+It may be necessary to pass `--parallel=3` in CI scripts however.
+
 **Nx command syntax**
 
-It may also be worth updating commands within any firebase application targets of the format `nx run project:build` to the newer `nx build project` syntax
+It may also be worth updating commands within any firebase application targets of the format:
+
+- `nx run project:build` to the newer
+- `nx build project` syntax
+
+**Update executors**
+
+As of Nx 13.8.8, `@nrwl/node:package` is replaced by `@nrwl/js:tsc`.
+
+Nx version migrations below may handle this transition for you, but if not, you may need to update your `build` targets for imported libraries accordingly to build with `@nrwl/js:tsc`.
+
+See [Nx Migration](docs/nx-migration.md) documentation for more information.
 
 ## v0.3.3
 
