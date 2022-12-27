@@ -9,10 +9,12 @@ Firebase is quite particular about how it deploys functions code to GCP, in so m
 1. It does not upload `node_modules` folder, and
 2. It requires all code used by all functions to be self-contained within the `functions` directory that is set in the `firebase.json` [configuration file](https://firebase.google.com/docs/functions/manage-functions#deploy_functions).
 
-An additional constraint is that we do not want to use Webpack for building function code because:
+An additional constraint is that we typically do not want to use Webpack for building function code because:
 
 1. It prevents us from using dynamic function exports that optimize cold starts (since webpack bundles all functions and all exports into one module)
 2. With Firebase functions, there's really no need or benefit to optimize, minify or otherwise change the compiled JS we upload
+
+That said, the new `codebase` feature of the Firebase functions configurations could allow for multiple Nx apps to be created and make bundlers more useful for tree-shaking unwanted dependencies for improved cold start performance.
 
 Other considerations:
 

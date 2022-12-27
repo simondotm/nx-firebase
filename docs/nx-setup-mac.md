@@ -1,4 +1,4 @@
-# Nx Setup Guide (Mac)
+# Nx Development Setup Guide (Mac)
 
 Clean installation steps for the whole setup of node/npm/nvm/nx, assuming mac with `zsh` shell.
 

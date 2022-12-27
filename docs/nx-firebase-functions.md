@@ -1,4 +1,4 @@
-## Firebase Functions
+# Firebase Functions
 
 An Nx-Firebase app is essentially a Firebase _functions_ directory (along with the few other configuration files as mentioned above). The main difference is that there isn't a directory called `functions` which you may be used to from projects setup by the Firebase CLI; with Nx-Firebase your app directory IS your functions folder.
 

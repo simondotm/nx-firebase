@@ -1,4 +1,4 @@
-## Using Firebase Emulators
+# Using Firebase Emulators
 
 The Firebase emulators work well within Nx and `nx-firebase`.
 
@@ -10,7 +10,7 @@ When the Firebase Emulators are running, it is no longer possible to run `nx bui
 
 To workaround this, use:
 
-- **`nx build appname --with-deps --deleteOutputPath=false`**
+- **`nx build appname --deleteOutputPath=false`**
 
 which will instruct the build to proceed without cleaning the output directory first. Note this approach could lead to scenarios where spurious files exist in `dist` due to skipping the cleaning step.
 
@@ -23,3 +23,5 @@ To serve the application, use:
 Which will build the functions application and all of its dependencies, whilst launching the emulators, and the typescript compiler in watch mode.
 
 > **IMPORTANT:** _Note that whilst `nx serve` will be useful when changing existing functions code, due to `tsc --watch` being enabled, it will NOT correctly detect changes if additional library imports are added to the source code or changes are made to any imported libraries during a watched session. To remedy this, relaunch the emulators by running `nx serve` again._
+
+The latest version of `nx-firebase` uses the `kill-port` npm package to ensure the emulator is properly shutdown before re-running `serve`.

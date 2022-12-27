@@ -1,8 +1,8 @@
-## Supporting Libraries in Functions
+# Supporting Nx Libraries in Functions
 
 Supporting Nx libraries as external packages with Firebase functions is slightly tricky. The solution the Nx-Firebase plugin uses is to use [local package references](https://firebase.google.com/docs/functions/handle-dependencies#including_local_nodejs_modules).
 
-Nx-Firebase has a custom build executor which is based on the `@nrwl/node:package` executor, with a few additional build steps.
+Nx-Firebase has a custom build executor which is based on the `@nrwl/js:tsc` executor, with a few additional build steps.
 
 1. It compiles any node libraries that are dependents of our Firebase application
 2. It compiles the Firebase application functions code as a pure buildable Typescript library package

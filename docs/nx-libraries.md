@@ -2,9 +2,19 @@
 
 Nx-Firebase supports use of Nx Libraries within functions code.
 
+## Creating a library
+
 To use a shared library with an Nx Firebase Application (Functions), first create a buildable (and it must be buildable) Typescript Nx node library in your workspace:
 
-**`nx g @nrwl/node:lib mynodelib --buildable`**
+**`nx g @nrwl/node:lib mynodelib --buildable --importPath="@myorg/mynodelib`**
+
+> _Note: The `--importPath` option is highly recommended to ensure the correct typescript aliases and npm package configurations for your library._
+
+As of Nx 13.8.8, you can also use:
+
+**`nx g @nrwl/js:tsc mylib --buildable --importPath="@myorg/mylib`**
+
+## Importing a library
 
 You can now:
 
@@ -12,9 +22,11 @@ You can now:
 
 in your Firebase functions code as you'd normally expect.
 
+## Building with libraries
+
 You can then build your Firebase application (and any dependencies) with:
 
-**`nx run appname:build --with-deps [--force]`**
+**`nx build appname`**
 
 This action will:
 
@@ -24,7 +36,9 @@ This action will:
 4. Make a local copy of all dependent node libraries referenced by your functions in the Firebase Application `dist/apps/appname/libs` directory and also in the `dist/apps/appname/node_modules` directory
 5. Update the Firebase functions `package.json` to use local package references to the dependent libraries.
 
-**TL;DR; version:**
+> _**Note:** The Nx-Firebase plugin will detect if any non-buildable libraries have been imported by a firebase application, and halt compilation._
+
+## Deploying with libraries
 
 Building the Firebase Application takes care of all local library dependencies so you dont have to, and it ensures your functions are all ready to deploy simply using:
 
@@ -34,6 +48,4 @@ Or
 
 **`nx deploy appname --only functions`**
 
-_(see Technical Notes below for further explanation of all this)_
-
-> _**Note:** The Nx-Firebase plugin will detect if any non-buildable libraries have been imported by a firebase application, and halt compilation._
+_(see [Technical Notes](technical-notes.md) for further explanation of all this)_
