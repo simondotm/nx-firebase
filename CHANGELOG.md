@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 - [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
+  - [v0.13.0-beta.0](#v0130-beta0)
   - [v0.3.4](#v034)
   - [v0.3.3](#v033)
   - [v0.3.2](#v032)
@@ -10,6 +11,29 @@ All notable changes to this project will be documented in this file.
   - [v0.3.0](#v030)
   - [v0.2.3](#v023)
   - [v0.2.2 - Initial Release](#v022---initial-release)
+
+## v0.13.0-beta.0
+
+Due to the large number of API changes in Nx from version 12 to version 13.10, this plugin has been rewritten from scratch:
+
+- **Improved compatibility**
+  - To support the latest Nx devkit API's for plugins
+- **Refactored build process**
+  - `build` executor is now entirely based on the `@nrwl/js:tsc` executor, which simplifies maintenance of the plugin
+  - this also enables `--watch` to work
+  - _(note that changes to Nx library dependencies are still not yet detectable in `--watch` mode)_
+- **Functions Node engine**
+  - Plugin now defaults to Node 16 runtime engine for firebase functions
+- **Improved Firebase configurations**
+  - `nx g @simondotm/nx-firebase:app` will now generate a `firebase.json` configuration file for the **first** firebase application in the Nx workspace. Additional generated firebase applications will have a firebase configuration named `firebase.project-name.json`
+- **Project Alias Support**
+  - If you already know the firebase project alias you are using for your application, you can now use the `--project` generator parameter to set this in the project targets eg. `nx g @simondotm/nx-firebase:app appname --project=firebaseprojectalias`
+- **Additional dependencies**
+  - `nx g @simondotm/nx-firebase:app` will add firebase and [`kill-port`](https://www.npmjs.com/package/kill-port) dependencies
+  - `kill-port` is used by the `serve` and `emulate` targets to ensure clean startup.
+- **Documentation has been updated**
+
+Recommended minimum version of Nx is now 13.10.6. See [Nx Migration](docs/nx-migration.md) documentation for more information.
 
 ## v0.3.4
 

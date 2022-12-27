@@ -38,7 +38,7 @@ Additionally:
 
 # User Guide
 
-- [Quick Start](docs/quick-start.md)
+- **[Quick Start](docs/quick-start.md)**
 
 **Nx Firebase**
 
