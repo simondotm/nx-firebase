@@ -1,5 +1,5 @@
 import { offsetFromRoot, Tree } from '@nrwl/devkit'
-import { generateFiles, joinPathFragments, logger } from '@nrwl/devkit'
+import { generateFiles, joinPathFragments } from '@nrwl/devkit'
 import { firebaseNodeEngine, firebaseNodeRuntime } from '../../../utils'
 import type { NormalizedOptions } from '../schema'
 

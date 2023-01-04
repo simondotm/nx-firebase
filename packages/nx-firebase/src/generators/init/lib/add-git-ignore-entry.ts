@@ -1,4 +1,4 @@
-import { logger, Tree } from '@nrwl/devkit'
+import { Tree } from '@nrwl/devkit'
 
 export const gitIgnoreEntries = `
 
