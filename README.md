@@ -39,7 +39,11 @@ Additionally:
 # User Guide
 
 - **[Quick Start](docs/quick-start.md)**
+
+**Nx Applications**
+
 - [Nx-Firebase Applications](docs/nx-firebase-applications.md)
+- [Nx-Firebase Targets](docs/nx-firebase-targets.md)
 
 **Nx Firebase**
 
