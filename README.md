@@ -48,6 +48,7 @@ Additionally:
 - [Firebase Emulators](docs/nx-firebase-emulators.md)
 - [Firebase Databases](docs/nx-firebase-databases.md)
 - [Firebase Projects](docs/nx-firebase-projects.md)
+- [Firebase Versions](docs/firebase-versions.md)
 
 **Nx Libraries**
 
