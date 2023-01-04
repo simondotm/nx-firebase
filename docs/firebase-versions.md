@@ -6,6 +6,7 @@
     - [Node 16 support](#node-16-support)
     - [Node 14 support](#node-14-support)
     - [Node 12 support](#node-12-support)
+    - [Node 10](#node-10)
   - [ES Modules Support](#es-modules-support)
   - [Firebase Admin SDK Versions](#firebase-admin-sdk-versions)
   - [Firebase Functions Versions](#firebase-functions-versions)
@@ -49,6 +50,10 @@
 - `firebase-tools` supports Node 12 until [version 10.9.2](https://github.com/firebase/firebase-tools/releases/tag/v10.9.2), but note that it is now deprecated.
 - `firebase-functions` supports Node 12 upto [version 3.24.1](https://github.com/firebase/firebase-functions/releases/tag/v3.24.1)
 - `firebase-admin` supports Node 12 upto [version 10.3.0](https://github.com/firebase/firebase-admin-node/releases/tag/v10.3.0)
+
+### Node 10
+
+Node 10 is no longer supported by firebase or `nx-firebase`.
 
 ## ES Modules Support
 
