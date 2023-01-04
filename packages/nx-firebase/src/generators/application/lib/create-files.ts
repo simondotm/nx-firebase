@@ -81,7 +81,8 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
       '',
       substitutions,
     )
-  } else {
-    logger.log('✓ .firebaserc already exists in this workspace')
   }
+  // else {
+  //   logger.log('✓ .firebaserc already exists in this workspace')
+  // }
 }

@@ -7,6 +7,7 @@ import {
   firebaseFunctionsVersion,
   firebaseToolsVersion,
   firebaseVersion,
+  killportVersion,
 } from '../../utils/versions'
 import { initGenerator } from './init'
 import { gitIgnoreEntries } from './lib'
@@ -23,6 +24,20 @@ describe('init generator', () => {
     await initGenerator(tree, {})
     const gitIgnore = tree.read('.gitignore')
     expect(gitIgnore.toString('utf-8')).toContain(gitIgnoreEntries)
+  })
+
+  it('should not have dependencies', async () => {
+    const packageJson = devkit.readJson(tree, 'package.json')
+    expect(packageJson.dependencies['firebase']).toBeUndefined()
+    expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
+    expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
+    expect(packageJson.dependencies['tslib']).toBeUndefined()
+
+    expect(
+      packageJson.devDependencies['firebase-functions-test'],
+    ).toBeUndefined()
+    expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
+    expect(packageJson.devDependencies['kill-port']).toBeUndefined()
   })
 
   it('should add dependencies', async () => {
@@ -44,6 +59,38 @@ describe('init generator', () => {
     expect(packageJson.devDependencies['firebase-tools']).toBe(
       firebaseToolsVersion,
     )
+    expect(packageJson.devDependencies['kill-port']).toBe(killportVersion)
+  })
+
+  it('should only add dependencies if not already present', async () => {
+    const packageJsonDefault = devkit.readJson(tree, 'package.json')
+
+    const testVersion = '0.0.1'
+    packageJsonDefault.dependencies['firebase'] = testVersion
+    packageJsonDefault.dependencies['firebase-admin'] = testVersion
+    packageJsonDefault.dependencies['firebase-functions'] = testVersion
+    // packageJsonDefault.dependencies['tslib'] = testVersion
+
+    packageJsonDefault.devDependencies['firebase-tools'] = testVersion
+    packageJsonDefault.devDependencies['kill-port'] = testVersion
+    packageJsonDefault.devDependencies['firebase-functions-test'] = testVersion
+
+    devkit.writeJson(tree, 'package.json', packageJsonDefault)
+
+    await initGenerator(tree, {})
+
+    const packageJson = devkit.readJson(tree, 'package.json')
+
+    expect(packageJson.dependencies['firebase']).toBe(testVersion)
+    expect(packageJson.dependencies['firebase-admin']).toBe(testVersion)
+    expect(packageJson.dependencies['firebase-functions']).toBe(testVersion)
+    // expect(packageJson.dependencies['tslib']).toBe(testVersion)
+
+    expect(packageJson.devDependencies['firebase-functions-test']).toBe(
+      testVersion,
+    )
+    expect(packageJson.devDependencies['firebase-tools']).toBe(testVersion)
+    expect(packageJson.devDependencies['kill-port']).toBe(testVersion)
   })
 
   it('should add jest config when unitTestRunner is jest', async () => {
