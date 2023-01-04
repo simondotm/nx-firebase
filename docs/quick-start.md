@@ -1,6 +1,16 @@
 # Quick Start
 
+- [Quick Start](#quick-start)
+  - [Installation](#installation)
+  - [Create Firebase Application](#create-firebase-application)
+  - [Build Project](#build-project)
+  - [Deploy Project (Firebase functions)](#deploy-project-firebase-functions)
+  - [Serve Project](#serve-project)
+  - [Get Remote Functions Config](#get-remote-functions-config)
+
 ## Installation
+
+Assuming you have
 
 **`npm install @simondotm/nx-firebase`**
 

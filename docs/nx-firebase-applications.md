@@ -8,7 +8,7 @@ When a new Nx Firebase application project is added to the workspace it will gen
 
 **Within the application folder:**
 
-- A buildable Typescript node library for Firebase functions
+- Default `src` Typescript source code for Firebase functions
 - Default `package.json` for the Firebase functions
 - Default `firestore.indexes` for Firestore database indexes
 - Default `firestore.rules` for Firestore database rules
@@ -24,7 +24,7 @@ When a new Nx Firebase application project is added to the workspace it will gen
 
 - A default/empty `.firebaserc` in the root of the workspace (if it doesn't already exist)
 
-You should use `firebase --add` to register your projects & aliases in the `.firebaserc`.
+You should use `npx firebase --add` to register your [projects & aliases](nx-firebase-projects.md) in the `.firebaserc`.
 
 ## Nx-Firebase Application Targets (Executors)
 

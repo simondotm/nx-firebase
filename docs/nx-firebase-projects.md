@@ -7,12 +7,13 @@
   - [Updating Firebase Configurations](#updating-firebase-configurations)
   - [Binding Nx projects to Firebase projects](#binding-nx-projects-to-firebase-projects)
   - [Renaming Projects](#renaming-projects)
+  - [Deployment Environments](#deployment-environments)
 
 ## Introduction
 
 Firebase projects are created in the firebase web console, and then specified in your local workspace configurations as deployment targets in your `.firebaserc` file, along with a `firebase.json` configuration for the various cloud components of that project (databases/functions/sites etc.).
 
-`nx-firebase` generally maps one `@simondotm/nx-firebase:app` to one firebase project.
+`nx-firebase` generally assumes a mapping of one `@simondotm/nx-firebase:app` to one firebase project and configuration file.
 
 ## Nx Workspaces With Single Firebase Projects
 
@@ -45,3 +46,31 @@ You can ensure this is always the case for commands like `nx deploy app` etc. by
 ## Renaming Projects
 
 **Important:** _If you do rename your firebase configuration files, remember to update (or remove) any `--config` settings in your Nx-Firebase application's `serve` and `deploy` targets in your `workspace.json` or `angular.json` configuration file._
+
+## Deployment Environments
+
+A common practice with Firebase is to generate different Firebase projects for each deployment environments (such as dev / staging / production etc.)
+
+This can be manually achieved with `nx-firebase` by adding `production` targets to your Nx `project.json` files eg.:
+
+```
+    "deploy": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "command": "npx firebase deploy --config firebase.json --project your-dev-firebase-project"
+      },
+      "configurations": {
+        "production": {
+          "command": "npx firebase deploy --config firebase.json --project your-prod-firebase-project"
+        }
+      }
+    },
+
+```
+
+You can now run:
+
+- `nx deploy my-firebase-app` for dev deployment
+- `nx deploy my-firebase-app --prod` for production deployment
+
+Note that `your-dev-firebase-project` and `your-prod-firebase-project` must exist as [aliases](https://firebase.google.com/docs/cli#project_aliases) in your `.firebaserc` file for this to work.
