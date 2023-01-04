@@ -39,15 +39,16 @@ Additionally:
 # User Guide
 
 - **[Quick Start](docs/quick-start.md)**
+- [Nx-Firebase Applications](docs/nx-firebase-applications.md)
 
 **Nx Firebase**
 
-- [Firebase Applications](docs/nx-firebase-applications.md)
 - [Firebase Functions](docs/nx-firebase-functions.md)
 - [Firebase Hosting](docs/nx-firebase-hosting.md)
 - [Firebase Emulators](docs/nx-firebase-emulators.md)
 - [Firebase Databases](docs/nx-firebase-databases.md)
 - [Firebase Projects](docs/nx-firebase-projects.md)
+- [Firebase Versions](docs/firebase-versions.md)
 
 **Nx Libraries**
 
