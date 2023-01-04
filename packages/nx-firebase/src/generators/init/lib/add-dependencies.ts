@@ -1,10 +1,4 @@
-import {
-  GeneratorCallback,
-  logger,
-  readJson,
-  readRootPackageJson,
-  Tree,
-} from '@nrwl/devkit'
+import { GeneratorCallback, readJson, Tree } from '@nrwl/devkit'
 import { addDependenciesToPackageJson } from '@nrwl/devkit'
 import {
   tsLibVersion,

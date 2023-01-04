@@ -1,22 +1,22 @@
-import { BuildExecutorSchema } from './schema'
-import { runExecutor } from './build'
-import { ExecutorContext, Tree } from '@nrwl/devkit'
-import { ExecutorOptions } from '@nrwl/js/src/utils/schema'
-import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import applicationGenerator from '../../generators/application/application'
+// import { BuildExecutorSchema } from './schema'
+// import { runExecutor } from './build'
+// import { ExecutorContext, Tree } from '@nrwl/devkit'
+// import { ExecutorOptions } from '@nrwl/js/src/utils/schema'
+// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
+// import applicationGenerator from '../../generators/application/application'
 
-const options: BuildExecutorSchema = {}
+// const options: BuildExecutorSchema = {}
 // SM: Testing the executor is painful, use e2e suite instead.
 
 describe('Build Executor', () => {
-  let context: ExecutorContext
-  let testOptions: ExecutorOptions
+  // let context: ExecutorContext
+  // let testOptions: ExecutorOptions
 
-  let tree: Tree
-  const appName = 'functions'
+  // let tree: Tree
+  // const appName = 'functions'
 
   beforeEach(async () => {
-    tree = createTreeWithEmptyV1Workspace()
+    // tree = createTreeWithEmptyV1Workspace()
     jest.clearAllMocks()
     /*
     await applicationGenerator(tree, { name: appName })
