@@ -7,9 +7,10 @@
     - [Node 14 support](#node-14-support)
     - [Node 12 support](#node-12-support)
   - [ES Modules Support](#es-modules-support)
-  - [Firebase Functions Versions](#firebase-functions-versions)
   - [Firebase Admin SDK Versions](#firebase-admin-sdk-versions)
-  - [V2 Cloud Functions](#v2-cloud-functions)
+  - [Firebase Functions Versions](#firebase-functions-versions)
+    - [V2 Cloud Functions](#v2-cloud-functions)
+  - [Firebase Client SDK](#firebase-client-sdk)
   - [Nx-Firebase Plugin Defaults](#nx-firebase-plugin-defaults)
 
 ## Firebase Node Versions
@@ -17,42 +18,43 @@
 ### Node 18 support
 
 - Currently in preview only for firebase functions
-- Use [lastest version](https://github.com/firebase/firebase-tools/releases) of `firebase-tools`
+- The latest Node 18 version is `18.12.1`
+- Use functions runtime `nodejs18`
+- `firebase-tools` - use [lastest version](https://github.com/firebase/firebase-tools/releases)
+- `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
+- `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
 
 ### Node 16 support
 
 - Node 16 is the currently [recommended runtime](https://cloud.google.com/functions/docs/concepts/nodejs-runtime) for firebase functions
-- Supported as default from [version 10.0.0](https://github.com/firebase/firebase-tools/releases/tag/v10.0.0) of `firebase-tools`
 - The latest Node 16 version is `16.19.0`
 - Use functions runtime `nodejs16`
-- Recommend minimum [version 10](https://github.com/firebase/firebase-tools/releases/tag/v10.9.2) of `firebase-tools` for Node 16
+- `firebase-tools` supports Node 16 as default from [version 10.0.0](https://github.com/firebase/firebase-tools/releases/tag/v10.0.0), recommend minimum [version 10.9.2](https://github.com/firebase/firebase-tools/releases/tag/v10.9.2)
+- `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
+- `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
 
 ### Node 14 support
 
 - The latest Node 14 version is `14.21.2`
-- Recommend minimum [version 9](https://github.com/firebase/firebase-tools/releases/tag/v9.23.3) of `firebase-tools` for Node 14
 - Use functions runtime `nodejs14`
+- `firebase-tools` - minimum [version 9.23.3](https://github.com/firebase/firebase-tools/releases/tag/v9.23.3)
+- `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
+- `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
 - Node 14 introduces ESM support (see below)
 
 ### Node 12 support
 
 - Node 12 support was dropped in [version 11.0.0](https://github.com/firebase/firebase-tools/releases/tag/v11.0.0) of the firebase tools.
-- Use [version 9](https://github.com/firebase/firebase-tools/releases/tag/v9.23.3) or [version 10](https://github.com/firebase/firebase-tools/releases/tag/v10.9.2) of `firebase-tools` if you require Node 12, but note that it is now deprecated.
-- `firebase-functions` supported upto [version 3](https://github.com/firebase/firebase-functions/releases/tag/v3.24.1)
-- `firebase-admin` upto [version 9]()
+- Use functions runtime `nodejs12`
+- `firebase-tools` supports Node 12 until [version 10.9.2](https://github.com/firebase/firebase-tools/releases/tag/v10.9.2), but note that it is now deprecated.
+- `firebase-functions` supports Node 12 upto [version 3.24.1](https://github.com/firebase/firebase-functions/releases/tag/v3.24.1)
+- `firebase-admin` supports Node 12 upto [version 10.3.0](https://github.com/firebase/firebase-admin-node/releases/tag/v10.3.0)
 
 ## ES Modules Support
 
 - [ES Modules are supported](https://cloud.google.com/functions/docs/concepts/nodejs-runtime#using_es_modules) in Node 14+ runtimes
 - Recommend minimum `firebase-functions` minimum [version 9.16.2+](https://github.com/firebase/firebase-tools/releases/tag/v9.16.2) (which has `@google-cloud/functions-framework@1.9.0`)
 - At least [version 9](https://github.com/firebase/firebase-tools/releases/tag/v9.23.3) of `firebase-tools` is necessary, but later versions likely to provide better support
-
-## Firebase Functions Versions
-
-- [Latest Github Release](https://github.com/firebase/firebase-functions/releases)
-- [Version 4.0.0+](https://github.com/firebase/firebase-functions/releases/tag/v4.0.0) of `firebase-functions`
-  - drops support for Node 8, 10, 12
-  - drops support for `firebase-admin` versions 8 and 9
 
 ## Firebase Admin SDK Versions
 
@@ -68,7 +70,14 @@
   - Supports ES Modules
 - [All Release Notes](https://firebase.google.com/support/release-notes/admin/node)
 
-## V2 Cloud Functions
+## Firebase Functions Versions
+
+- [Latest Github Release](https://github.com/firebase/firebase-functions/releases)
+- [Version 4.0.0+](https://github.com/firebase/firebase-functions/releases/tag/v4.0.0) of `firebase-functions`
+  - drops support for Node 8, 10, 12
+  - drops support for `firebase-admin` versions 8 and 9
+
+### V2 Cloud Functions
 
 A [2nd generation of cloud functions](https://firebase.google.com/docs/functions/beta) became [generally available](https://cloud.google.com/blog/products/serverless/cloud-functions-2nd-generation-now-generally-available) in August 2022 with main differences for v2 functions:
 
@@ -83,6 +92,10 @@ The [2nd generation of firebase functions](https://firebase.google.com/docs/func
 
 Using v2 functions requires `import * as functionsV2 from "firebase-functions/v2"`
 
+## Firebase Client SDK
+
+The `nx-firebase` plugin executors focus only on backend deployment and function compilation, so Firebase client SDK version considerations only apply to frontend applications, which doesn't tend to require as much dependency management, unless you are using a client application library such as [Angular/AngularFire](https://github.com/angular/angularfire#angular-and-firebase-versions).
+
 ## Nx-Firebase Plugin Defaults
 
 `nx-firebase` plugin does not require or enforce any particular versions of firebase packages/cli.
@@ -92,5 +105,6 @@ That said, typically only certain combinations of Nx/Firebase/Node versions make
 New applications generated in new Nx workspaces by `@simondotm/nx-firebase` will install:
 
 - Functions with `nodejs16` runtime enabled
-- `firebase-tools` version 11
-- `firebase-functions` version 4
+- `firebase-tools` version 11.x
+- `firebase-functions` version 4.x
+- `firebase-admin` version 11.x
