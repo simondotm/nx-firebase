@@ -1,6 +1,5 @@
-/* eslint-disable */
-export default {
-  displayName: 'nx-firebase-e2e',
+module.exports = {
+  displayName: 'nx-firebase',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +10,5 @@ export default {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/e2e/nx-firebase-e2e',
+  coverageDirectory: '../../coverage/packages/nx-firebase',
 }

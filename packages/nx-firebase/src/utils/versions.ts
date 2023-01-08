@@ -1,5 +1,9 @@
-export const nxVersion = '^15.3.0'
-export const tsLibVersion = '^2.3.0'
+// Declare target version of Nx that the plugin is currently compatible with
+export const pluginNxVersion = '^13.10.6'
+export const pluginNxVersionMajor = '13'
+
+// Tslib version changes with each Nx version
+export const tsLibVersion = '^2.0.0'
 
 // Firebase packages are not managed by the plugin
 // but they are added if they do not exist already in the workspace
@@ -29,4 +33,4 @@ if (!tsConfigTarget) {
 }
 
 // kill-port is used by the emulator/serve target
-export const killportVersion = '2.0.1'
+export const killportVersion = '^2.0.1'

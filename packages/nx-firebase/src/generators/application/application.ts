@@ -1,4 +1,4 @@
-import type { GeneratorCallback, Tree } from '@nrwl/devkit'
+import { GeneratorCallback, Tree } from '@nrwl/devkit'
 import { convertNxGenerator, formatFiles } from '@nrwl/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial'
@@ -33,6 +33,7 @@ export async function applicationGenerator(
   const nodeApplicationTask = await nodeApplicationGenerator(
     tree,
     toNodeApplicationGeneratorOptions(options),
+    // rawOptions,
   )
   deleteFiles(tree, options)
   createFiles(tree, options)
