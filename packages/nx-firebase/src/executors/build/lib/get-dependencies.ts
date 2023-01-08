@@ -1,8 +1,8 @@
 import {
-  createProjectGraphAsync,
   ExecutorContext,
   logger,
   ProjectGraphProjectNode,
+  readCachedProjectGraph,
 } from '@nrwl/devkit'
 import {
   calculateProjectDependencies,
@@ -22,17 +22,23 @@ export async function getFirebaseDependencies(
     `- Processing dependencies for firebase functions app '${context.projectName}':`,
   )
 
+  // NX 14/15 ONLY
+  // createProjectGraphAsync for Nx13 does not work with newer versions of Nx workspaces due to `root` field no longer being in the `project.json` files
+  // See https://github.com/e-square-io/nx-github-actions/issues/53
+  // This means our Nx 13 version of the plugin cannot support project graph changes
   // SM: recompute the project graph on every iteration so that --watch will work,
-  //  since the context.projectGraph is only a snapshot
-  const projectGraph = await createProjectGraphAsync()
+  //  since the context.projectGraph is only a snapshot of dependencies at the time the plugin was run
+  // const projectGraph = await createProjectGraphAsync()
 
+  const projectGraph = readCachedProjectGraph()
   const {
     target,
     dependencies,
     nonBuildableDependencies,
     topLevelDependencies,
   } = calculateProjectDependencies(
-    projectGraph, // context.projectGraph,
+    projectGraph,
+    // context.projectGraph, // NX14/15 only
     context.root,
     context.projectName,
     context.targetName,
