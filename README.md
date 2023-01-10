@@ -2,7 +2,7 @@
 
 ![npm](https://img.shields.io/npm/dw/@simondotm/nx-firebase.svg)
 
-A plugin for [Nx](https://nx.dev) >= 12.1.1 that provides support for Firebase projects in an Nx monorepo workspace.
+A plugin for [Nx](https://nx.dev) that provides support for Firebase projects in an Nx monorepo workspace.
 
 See [CHANGELOG](https://github.com/simondotm/nx-firebase/blob/main/CHANGELOG.md) for release notes.
 
@@ -72,3 +72,4 @@ Additionally:
 - [Unsupported Features](docs/unsupported-features.md)
 - [Plugin Notes](docs/nx-plugin-commands.md)
 - [Nx Development Setup for Mac](docs/nx-setup-mac.md)
+- [Plu]
