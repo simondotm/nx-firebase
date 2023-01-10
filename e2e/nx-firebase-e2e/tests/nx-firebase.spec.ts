@@ -113,7 +113,7 @@ function addContentToIndexTs(
   addition: string,
 ) {
   updateFile(indexTsPath, (content: string) => {
-    const replaced = content.replace(importMatch, `${match}\n${addition}`)
+    const replaced = content.replace(match, `${match}\n${addition}`)
     return replaced
   })
 }
