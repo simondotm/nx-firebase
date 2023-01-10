@@ -32,5 +32,6 @@
   "workspaceLayout": {
     "appsDir": "e2e",
     "libsDir": "packages"
-  }
+  },
+  "defaultProject": "nx-firebase"
 }

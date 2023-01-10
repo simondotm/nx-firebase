@@ -1,0 +1,52 @@
+{
+  "root": "e2e/testbed",
+  "sourceRoot": "e2e/testbed/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/e2e/testbed",
+        "main": "e2e/testbed/src/main.ts",
+        "tsConfig": "e2e/testbed/tsconfig.app.json",
+        "assets": ["e2e/testbed/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "e2e/testbed/src/environments/environment.ts",
+              "with": "e2e/testbed/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "testbed:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["e2e/testbed/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/e2e/testbed"],
+      "options": {
+        "jestConfig": "e2e/testbed/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
