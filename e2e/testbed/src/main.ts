@@ -7,6 +7,7 @@
  * - Check firebase deployments in CI environment
  */
 
+import { info, log } from './app/log'
 import { addContentToTextFile, customExec } from './app/utils'
 import { createTestDir, createWorkspace } from './app/workspace'
 
@@ -41,31 +42,36 @@ async function testPlugin(workspaceDir: string) {
 }
 
 async function testNxVersion(nxVersion: string, pluginVersion: string) {
-  console.log(
-    '----------------------------------------------------------------------------',
-  )
-  console.log(
-    ` TESTING NX VERSION '${nxVersion}' AGAINST PLUGIN VERSION '${pluginVersion}'`,
-  )
-  console.log(
-    '----------------------------------------------------------------------------',
-  )
+  try {
+    info(
+      '----------------------------------------------------------------------------\n',
+    )
+    info(
+      ` TESTING NX VERSION '${nxVersion}' AGAINST PLUGIN VERSION '${pluginVersion}'\n`,
+    )
+    info(
+      '----------------------------------------------------------------------------\n',
+    )
 
-  // setup the target Nx workspace
-  const testDir = `${defaultCwd}/tmp/test/${nxVersion}`
-  const workspaceDir = `${testDir}/myorg`
+    // setup the target Nx workspace
+    const testDir = `${defaultCwd}/tmp/test/${nxVersion}`
+    const workspaceDir = `${testDir}/myorg`
 
-  console.log(
-    `Creating new Nx workspace version ${nxVersion} in directory '${testDir}'`,
-  )
+    log(
+      `Creating new Nx workspace version ${nxVersion} in directory '${testDir}'`,
+    )
 
-  createTestDir(testDir)
-  await createWorkspace(nxVersion, workspaceDir, pluginVersion)
+    createTestDir(testDir)
+    await createWorkspace(nxVersion, workspaceDir, pluginVersion)
 
-  // run the plugin test suite
-  await testPlugin(workspaceDir)
+    // run the plugin test suite
+    await testPlugin(workspaceDir)
 
-  console.log('done')
+    info('SUCCESS\n')
+  } catch (err) {
+    info(err)
+    info(`FAILED - INCOMPATIBILITY DETECTED`)
+  }
 }
 
 async function main() {

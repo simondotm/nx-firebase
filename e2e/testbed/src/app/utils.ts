@@ -2,6 +2,7 @@ import { exec } from 'child_process'
 import * as fs from 'fs'
 import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
 import { exit } from 'process'
+import { log } from './log'
 
 /**
  * Promisify node `exec`, with stdout & stderr piped to console
@@ -15,7 +16,7 @@ export async function customExec(
 ): Promise<{ stdout: string; stderr: string }> {
   const cwd = dir ? dir : process.cwd()
   return new Promise((resolve, reject) => {
-    console.log(`Executing command '${command}' in '${cwd}'`)
+    log(`Executing command '${command}' in '${cwd}'`)
     const process = exec(command, { cwd: cwd }, (error, stdout, stderr) => {
       if (error) {
         console.warn(error)
@@ -25,16 +26,16 @@ export async function customExec(
     })
 
     process.stdout.on('data', (data) => {
-      console.log(data.toString())
+      log(data.toString())
     })
 
     process.stderr.on('data', (data) => {
-      console.log(data.toString())
+      log(data.toString())
     })
 
     process.on('exit', (code) => {
       if (code) {
-        console.log('child process exited with code ' + code.toString())
+        log('child process exited with code ' + code.toString())
       }
     })
   })
@@ -45,11 +46,11 @@ export async function customExec(
  * @param dir
  */
 export function setCwd(dir: string) {
-  console.log(`Switching cwd to '${dir}'`)
+  log(`Switching cwd to '${dir}'`)
 
   process.chdir(dir)
 
-  console.log(`Switched cwd to '${process.cwd()}'`)
+  log(`Switched cwd to '${process.cwd()}'`)
 }
 
 /**

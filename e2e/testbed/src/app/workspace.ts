@@ -1,9 +1,10 @@
 import * as fs from 'fs'
+import { log } from './log'
 import { customExec, setCwd } from './utils'
 
 export function createTestDir(testDir: string) {
   if (!fs.existsSync(testDir)) {
-    console.log(`Creating test dir '${testDir}'...`)
+    log(`Creating test dir '${testDir}'...`)
     fs.mkdirSync(testDir)
   }
   setCwd(testDir)
@@ -11,7 +12,7 @@ export function createTestDir(testDir: string) {
 
 export function cleanWorkspace(dir: string) {
   if (fs.existsSync(dir)) {
-    console.log(`Cleaning workspace '${dir}'...`)
+    log(`Cleaning workspace '${dir}'...`)
     fs.rmSync(dir, { recursive: true, force: true })
   }
 }
