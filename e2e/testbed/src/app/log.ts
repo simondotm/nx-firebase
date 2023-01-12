@@ -9,10 +9,10 @@ export function log(msg: string) {
   if (ENABLE_LOG) {
     console.log(msg)
   }
-  fs.appendFileSync(LOG_FILE, msg)
+  fs.appendFileSync(LOG_FILE, `${msg}\n`)
 }
 
 export function info(msg: string) {
   console.log(msg)
-  fs.appendFileSync(LOG_FILE, msg)
+  fs.appendFileSync(LOG_FILE, `${msg}\n`)
 }

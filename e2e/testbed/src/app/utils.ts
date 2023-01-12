@@ -1,7 +1,7 @@
 import { exec } from 'child_process'
 import * as fs from 'fs'
-import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
-import { exit } from 'process'
+// import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
+// import { exit } from 'process'
 import { log } from './log'
 
 /**
@@ -19,7 +19,7 @@ export async function customExec(
     log(`Executing command '${command}' in '${cwd}'`)
     const process = exec(command, { cwd: cwd }, (error, stdout, stderr) => {
       if (error) {
-        console.warn(error)
+        console.warn(error.message)
         reject(error)
       }
       resolve({ stdout, stderr })
@@ -39,6 +39,10 @@ export async function customExec(
       }
     })
   })
+}
+
+export async function runNxCommandAsync(command: string, dir?: string) {
+  return customExec(`npx nx ${command} --verbose`, dir)
 }
 
 /**

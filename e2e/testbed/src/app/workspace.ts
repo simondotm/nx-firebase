@@ -31,7 +31,12 @@ export async function createWorkspace(
     `npx create-nx-workspace@${nxVersion} --preset=apps --interactive=false --name=myorg --nxCloud=false`,
   )
   setCwd(workspaceDir)
+
+  // these should be installed with the plugin I guess?
+  // if we dont install them here, they'll be found in the parent workspace node_modules
   await customExec(`npm i @nrwl/js@${nxVersion} --save-dev`)
+  await customExec(`npm i @nrwl/devkit@${nxVersion} --save-dev`)
+  await customExec(`npm i @nrwl/jest@${nxVersion} --save-dev`)
   // install the target plugin we want to test
   await installPlugin(pluginVersion)
 }
