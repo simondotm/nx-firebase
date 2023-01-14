@@ -5,6 +5,7 @@
  * - Node versions 14,16,18
  * - Nx versions against plugin versions
  * - Check firebase deployments in CI environment
+ * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
 import { info, log, setLogFile } from './app/log'
@@ -12,12 +13,14 @@ import { deleteDir, setCwd } from './app/utils'
 import { createTestDir, createWorkspace } from './app/workspace'
 import { rootDir } from './app/cwd'
 import { setupAll, setupNxWorkspace } from './app/setup'
-import { nxReleases } from './app/nx-releases'
+import { nxReleases } from './app/versions'
 import { testPlugin } from './app/test'
 import { green, red } from './app/colours'
 import { customExec } from './app/exec'
 
 async function testNxVersion(nxVersion: string, pluginVersion: string) {
+  let error: string | undefined
+
   const t = Date.now()
 
   const testDir = `${rootDir}/${nxVersion}`
@@ -35,17 +38,6 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
     setCwd(rootDir)
     deleteDir(testDir)
 
-    // setup the target Nx workspace
-    // const testDir = `${defaultCwd}/tmp/test/${nxVersion}`
-    // const workspaceDir = `${testDir}/myorg`
-
-    // log(
-    //   `Creating new Nx workspace version ${nxVersion} in directory '${testDir}'`,
-    // )
-
-    // createTestDir(testDir)
-    // await createWorkspace(nxVersion, workspaceDir, pluginVersion)
-
     // unpack the archive
     setCwd(rootDir)
     await customExec(`tar -xzf ${archiveFile}`) // add -v for verbose
@@ -60,6 +52,7 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
     info(
       red(`TESTING VERSION '${nxVersion}' FAILED - INCOMPATIBILITY DETECTED\n`),
     )
+    error = err.message
   }
 
   // cleanup
@@ -68,9 +61,11 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
 
   const dt = Date.now() - t
   info(`Completed in ${dt}ms\n`)
+
+  return error
 }
 
-async function main() {
+async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   const t = Date.now()
   // await testNxVersion('13.10.6', '0.3.4')
   //   await testNxVersion('14.8.6', '0.3.4')
@@ -89,6 +84,10 @@ async function main() {
     }
   }
 
+  // setup phase - generates workspaces for each Nx minor release
+  //  gzip's and caches them for re-use
+  // splitting the setup phase from the test phase allows us to cache
+  // node_modules in CI github actions for this compat test
   for (let i = 0; i < releases.length; ++i) {
     const release = releases[i]
     info(
@@ -97,7 +96,32 @@ async function main() {
       } --------------------------------------------------------------------------\n`,
     )
     await setupNxWorkspace(release, '0.3.4')
-    await testNxVersion(release, '0.3.4')
+  }
+
+  if (!options.onlySetup) {
+    // test phase - tests each Nx minor release
+    const errors: string[] = []
+    for (let i = 0; i < releases.length; ++i) {
+      const release = releases[i]
+      info(
+        `-- ${i + 1}/${
+          releases.length
+        } --------------------------------------------------------------------------\n`,
+      )
+      const result = await testNxVersion(release, '0.3.4')
+      if (result) {
+        errors.push(result)
+      }
+    }
+
+    if (errors.length) {
+      info(red('TEST ERRORS:`n'))
+      for (const error of errors) {
+        info(red(error))
+      }
+    } else {
+      info(green('ALL TESTS SUCCEEDED'))
+    }
   }
 
   const dt = Date.now() - t
@@ -105,7 +129,7 @@ async function main() {
 }
 
 if (process.argv.length > 2 && process.argv[2] === '--setup') {
-  setupAll()
+  main({ onlySetup: true })
 } else {
   main()
 }
