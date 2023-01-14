@@ -10,7 +10,7 @@
 import { info, log } from './app/log'
 import { deleteDir, setCwd } from './app/utils'
 import { createTestDir, createWorkspace } from './app/workspace'
-import { defaultCwd } from './app/cwd'
+import { rootDir } from './app/cwd'
 import { setupAll, setupNxWorkspace } from './app/setup'
 import { nxReleases } from './app/nx-releases'
 import { testPlugin } from './app/test'
@@ -20,7 +20,6 @@ import { customExec } from './app/exec'
 async function testNxVersion(nxVersion: string, pluginVersion: string) {
   const t = Date.now()
 
-  const rootDir = `${defaultCwd}/node_modules/.cache/nx-firebase`
   const testDir = `${rootDir}/${nxVersion}`
   const workspaceDir = `${testDir}/myorg`
   const archiveFile = `${rootDir}/${nxVersion}.tar.gz`

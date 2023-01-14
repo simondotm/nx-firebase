@@ -1,6 +1,6 @@
 // setup re-usable workspaces for e2e testbed
 import { red } from './colours'
-import { defaultCwd } from './cwd'
+import { defaultCwd, rootDir } from './cwd'
 import { customExec } from './exec'
 import { info, log, setLogFile } from './log'
 import { nxReleases } from './nx-releases'
@@ -13,7 +13,6 @@ export async function setupNxWorkspace(
 ) {
   try {
     // setup the target Nx workspace
-    const rootDir = `${defaultCwd}/node_modules/.cache/nx-firebase`
     const testDir = `${rootDir}/${nxVersion}`
     const workspaceDir = `${testDir}/myorg`
     const archiveFile = `${rootDir}/${nxVersion}.tar.gz`
