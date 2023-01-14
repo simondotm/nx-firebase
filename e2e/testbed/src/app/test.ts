@@ -81,4 +81,13 @@ export async function testPlugin(workspaceDir: string) {
     expectToContain(stdout, npmContent)
     expectToContain(stdout, libContent)
   })
+
+  // TODO: other checks
+  // - check package.json contains the deps
+  // - check package.json has the right node engine
+  // - check all the files exist
+  // - check the firebase config looks legit
+  // - if possible, run a test deploy?
+  // - check the init generator installs the firebase deps
+  // - check the plugin peerdeps installs the @nrwl/js and @nrwl/devkit and @nrwl/node deps
 }

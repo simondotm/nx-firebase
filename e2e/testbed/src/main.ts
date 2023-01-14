@@ -8,26 +8,23 @@
  * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
-import { info, log, setLogFile } from './app/log'
+import { info, setLogFile } from './app/log'
 import { deleteDir, setCwd } from './app/utils'
-import { createTestDir, createWorkspace } from './app/workspace'
-import { rootDir } from './app/cwd'
-import { setupAll, setupNxWorkspace } from './app/setup'
+import { setupNxWorkspace } from './app/setup'
 import { nxReleases } from './app/versions'
 import { testPlugin } from './app/test'
 import { green, red } from './app/colours'
 import { customExec } from './app/exec'
+import { getCache } from './app/cache'
 
 async function testNxVersion(nxVersion: string, pluginVersion: string) {
   let error: string | undefined
 
   const t = Date.now()
 
-  const testDir = `${rootDir}/${nxVersion}`
-  const workspaceDir = `${testDir}/myorg`
-  const archiveFile = `${rootDir}/${nxVersion}.tar.gz`
+  const cache = getCache(nxVersion, pluginVersion)
 
-  setLogFile(`${rootDir}/${nxVersion}.e2e.txt`)
+  setLogFile(`${cache.rootDir}/${nxVersion}.e2e.txt`)
 
   try {
     info(
@@ -35,16 +32,16 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
     )
 
     // cleanup
-    setCwd(rootDir)
-    deleteDir(testDir)
+    setCwd(cache.rootDir)
+    deleteDir(cache.testDir)
 
     // unpack the archive
-    setCwd(rootDir)
-    await customExec(`tar -xzf ${archiveFile}`) // add -v for verbose
+    setCwd(cache.rootDir)
+    await customExec(`tar -xzf ${cache.archiveFile}`) // add -v for verbose
 
     // run the plugin test suite
-    setCwd(workspaceDir)
-    await testPlugin(workspaceDir)
+    setCwd(cache.workspaceDir)
+    await testPlugin(cache.workspaceDir)
 
     info(green(`TESTING VERSION '${nxVersion}' SUCCEEDED\n`))
   } catch (err) {
@@ -56,8 +53,8 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
   }
 
   // cleanup
-  setCwd(rootDir)
-  deleteDir(testDir)
+  setCwd(cache.rootDir)
+  deleteDir(cache.testDir)
 
   const dt = Date.now() - t
   info(`Completed in ${dt}ms\n`)
@@ -128,6 +125,7 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   info(`Total time ${dt}ms`)
 }
 
+// entry
 if (process.argv.length > 2 && process.argv[2] === '--setup') {
   main({ onlySetup: true })
 } else {
