@@ -10,8 +10,8 @@
     "e2e": "nx run nx-firebase-e2e:e2e",
     "release": "cd packages/nx-firebase && npm version",
     "release-help": "echo `npm run version -- v1.2.3` to set package version & commit tag",
-    "compat": "nx run testbed:build && node dist/e2e/testbed/main.js",
-    "setup": "nx run testbed:build && node dist/e2e/testbed/main.js --setup"
+    "compat": "nx run compat:build && node dist/e2e/compat/main.js",
+    "setup": "nx run compat:build && node dist/e2e/compat/main.js --setup"
   },
   "private": true,
   "devDependencies": {
