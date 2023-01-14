@@ -8,14 +8,19 @@
  * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
-import { info, setLogFile } from './app/log'
+import { green, info, red, setLogFile, time } from './app/log'
 import { deleteDir, setCwd } from './app/utils'
 import { setupNxWorkspace } from './app/setup'
-import { nxReleases } from './app/versions'
+import { testVersions } from './app/versions'
 import { testPlugin } from './app/test'
-import { green, red } from './app/colours'
 import { customExec } from './app/exec'
 import { getCache } from './app/cache'
+
+function clean() {
+  const cache = getCache('', '')
+  info(red(`Cleaning compat test cache dir '${cache.rootDir}'`))
+  deleteDir(cache.rootDir)
+}
 
 async function testNxVersion(nxVersion: string, pluginVersion: string) {
   let error: string | undefined
@@ -57,55 +62,57 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
   deleteDir(cache.testDir)
 
   const dt = Date.now() - t
-  info(`Completed in ${dt}ms\n`)
+  info(`Completed in ${time(dt)}\n`)
 
   return error
 }
 
 async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   const t = Date.now()
-  // await testNxVersion('13.10.6', '0.3.4')
-  //   await testNxVersion('14.8.6', '0.3.4')
-  //   await testNxVersion('15.3.3', '0.3.4')
-  //   await testNxVersion('15.4.5', '0.3.4')
 
-  const releases: string[] = []
+  const pluginVersion = '0.3.4'
 
-  for (const maj in nxReleases) {
-    const majVersions = nxReleases[maj]
+  // gather all nx versions in the test matrix
+  const nxReleases: string[] = []
+  for (const maj in testVersions.nxReleases) {
+    const majVersions = testVersions.nxReleases[maj]
     for (const min in majVersions) {
       const patchVersions = majVersions[min]
       const latestVersion = patchVersions[patchVersions.length - 1]
       const version = `${maj}.${min}.${latestVersion}`
-      releases.push(version)
+      nxReleases.push(version)
     }
   }
 
+  //-----------------------------------------------------------------------
   // setup phase - generates workspaces for each Nx minor release
+  //-----------------------------------------------------------------------
   //  gzip's and caches them for re-use
   // splitting the setup phase from the test phase allows us to cache
   // node_modules in CI github actions for this compat test
-  for (let i = 0; i < releases.length; ++i) {
-    const release = releases[i]
+  for (let i = 0; i < nxReleases.length; ++i) {
+    const release = nxReleases[i]
     info(
       `-- ${i + 1}/${
-        releases.length
+        nxReleases.length
       } --------------------------------------------------------------------------\n`,
     )
-    await setupNxWorkspace(release, '0.3.4')
+    await setupNxWorkspace(release, pluginVersion)
   }
 
+  //-----------------------------------------------------------------------
+  // test phase - tests each Nx minor release
+  //-----------------------------------------------------------------------
   if (!options.onlySetup) {
-    // test phase - tests each Nx minor release
     const errors: string[] = []
-    for (let i = 0; i < releases.length; ++i) {
-      const release = releases[i]
+    for (let i = 0; i < nxReleases.length; ++i) {
+      const release = nxReleases[i]
       info(
         `-- ${i + 1}/${
-          releases.length
+          nxReleases.length
         } --------------------------------------------------------------------------\n`,
       )
-      const result = await testNxVersion(release, '0.3.4')
+      const result = await testNxVersion(release, pluginVersion)
       if (result) {
         errors.push(result)
       }
@@ -121,13 +128,20 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
     }
   }
 
+  //-----------------------------------------------------------------------
+  // Complete
+  //-----------------------------------------------------------------------
   const dt = Date.now() - t
-  info(`Total time ${dt}ms`)
+  info(`Total time ${time(dt)}`)
 }
 
 // entry
-if (process.argv.length > 2 && process.argv[2] === '--setup') {
-  main({ onlySetup: true })
+if (process.argv.length > 2) {
+  if (process.argv[2] === '--setup') {
+    main({ onlySetup: true })
+  } else if (process.argv[2] === '--clean') {
+    clean()
+  }
 } else {
   main()
 }

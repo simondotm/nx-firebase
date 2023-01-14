@@ -1,7 +1,6 @@
 // setup re-usable workspaces for e2e testbed
-import { green, red } from './colours'
 import { customExec } from './exec'
-import { info, log, setLogFile } from './log'
+import { green, info, log, red, setLogFile } from './log'
 import { deleteDir, deleteFile, ensureDir, fileExists, setCwd } from './utils'
 import { createTestDir, createWorkspace } from './workspace'
 import { getCache } from './cache'
