@@ -7,7 +7,7 @@
  * - Check firebase deployments in CI environment
  */
 
-import { info, log } from './app/log'
+import { info, log, setLogFile } from './app/log'
 import { deleteDir, setCwd } from './app/utils'
 import { createTestDir, createWorkspace } from './app/workspace'
 import { rootDir } from './app/cwd'
@@ -24,10 +24,16 @@ async function testNxVersion(nxVersion: string, pluginVersion: string) {
   const workspaceDir = `${testDir}/myorg`
   const archiveFile = `${rootDir}/${nxVersion}.tar.gz`
 
+  setLogFile(`${rootDir}/${nxVersion}.e2e.txt`)
+
   try {
     info(
       `TESTING NX VERSION '${nxVersion}' AGAINST PLUGIN VERSION '${pluginVersion}'\n`,
     )
+
+    // cleanup
+    setCwd(rootDir)
+    deleteDir(testDir)
 
     // setup the target Nx workspace
     // const testDir = `${defaultCwd}/tmp/test/${nxVersion}`

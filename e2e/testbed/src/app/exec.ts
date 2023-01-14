@@ -39,5 +39,6 @@ export async function customExec(
 }
 
 export async function runNxCommandAsync(command: string, dir?: string) {
-  return customExec(`npx nx ${command} --verbose`, dir)
+  const result = await customExec(`npx nx ${command} --verbose`, dir)
+  return result
 }

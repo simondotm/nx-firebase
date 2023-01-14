@@ -50,6 +50,11 @@ export function addContentToTextFile(
   addition: string,
 ) {
   const content = fs.readFileSync(path, 'utf8')
+  if (!content.includes(match)) {
+    throw Error(
+      `ERROR: addContentToTextFile: Could not find '${match}' in '${path}'`,
+    )
+  }
   const replaced = content.replace(match, `${match}\n${addition}`)
   fs.writeFileSync(path, replaced)
 }
