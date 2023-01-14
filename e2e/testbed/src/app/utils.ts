@@ -1,49 +1,7 @@
-import { exec } from 'child_process'
 import * as fs from 'fs'
 // import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
 // import { exit } from 'process'
 import { log } from './log'
-
-/**
- * Promisify node `exec`, with stdout & stderr piped to console
- * @param command
- * @param dir - defaults to cwd if not specified
- * @returns
- */
-export async function customExec(
-  command: string,
-  dir?: string,
-): Promise<{ stdout: string; stderr: string }> {
-  const cwd = dir ? dir : process.cwd()
-  return new Promise((resolve, reject) => {
-    log(`Executing command '${command}' in '${cwd}'`)
-    const process = exec(command, { cwd: cwd }, (error, stdout, stderr) => {
-      if (error) {
-        console.warn(error.message)
-        reject(error)
-      }
-      resolve({ stdout, stderr })
-    })
-
-    process.stdout.on('data', (data) => {
-      log(data.toString())
-    })
-
-    process.stderr.on('data', (data) => {
-      log(data.toString())
-    })
-
-    process.on('exit', (code) => {
-      if (code) {
-        log('child process exited with code ' + code.toString())
-      }
-    })
-  })
-}
-
-export async function runNxCommandAsync(command: string, dir?: string) {
-  return customExec(`npx nx ${command} --verbose`, dir)
-}
 
 /**
  * Set current working directory
@@ -55,6 +13,29 @@ export function setCwd(dir: string) {
   process.chdir(dir)
 
   log(`Switched cwd to '${process.cwd()}'`)
+}
+
+export function ensureDir(path: string) {
+  const pathExists = fs.existsSync(path)
+  if (!pathExists) {
+    log(`Creating dir '${path}'...`)
+    fs.mkdirSync(path)
+  }
+  return pathExists
+}
+
+export function fileExists(path: string) {
+  return fs.existsSync(path)
+}
+
+export function deleteFile(path: string) {
+  log(`deleting file '${path}'`)
+  fs.rmSync(path)
+}
+
+export function deleteDir(path: string) {
+  log(`deleting dir '${path}'`)
+  fs.rmSync(path, { recursive: true, force: true })
 }
 
 /**
@@ -71,14 +52,4 @@ export function addContentToTextFile(
   const content = fs.readFileSync(path, 'utf8')
   const replaced = content.replace(match, `${match}\n${addition}`)
   fs.writeFileSync(path, replaced)
-}
-
-/**
- * Test helper function approximating the Jest style of expect().toContain()
- * @param content
- * @param expected
- * @returns true if content contains expected string
- */
-export function expectToContain(content: string, expected: string) {
-  return content.includes(expected)
 }

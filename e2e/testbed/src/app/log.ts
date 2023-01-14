@@ -1,9 +1,16 @@
 const ENABLE_LOG = false
-const LOG_FILE = `${process.cwd()}/e2e.log`
+const DEFAULT_LOG_FILE = `${process.cwd()}/e2e.log`
 
 import * as fs from 'fs'
 
-fs.writeFileSync(LOG_FILE, '')
+let LOG_FILE: string | undefined
+
+export function setLogFile(path?: string) {
+  LOG_FILE = path || DEFAULT_LOG_FILE
+  fs.writeFileSync(LOG_FILE, '')
+}
+
+setLogFile()
 
 export function log(msg: string) {
   if (ENABLE_LOG) {
