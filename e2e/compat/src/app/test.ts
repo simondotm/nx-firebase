@@ -1,8 +1,8 @@
-import { Cache, getCache } from './cache'
-import { customExec, runNxCommandAsync } from './exec'
-import { expectToContain, expectToNotContain, it } from './jest-ish'
-import { green, info, red, setLogFile, time } from './log'
-import { addContentToTextFile, deleteDir, setCwd } from './utils'
+import { Cache, getCache } from './utils/cache'
+import { customExec, runNxCommandAsync } from './utils/exec'
+import { expectToContain, expectToNotContain, it } from './utils/jest-ish'
+import { green, info, red, setLogFile, time } from './utils/log'
+import { addContentToTextFile, deleteDir, setCwd } from './utils/utils'
 
 const npmContent = [
   `Added 'npm' dependency 'firebase-admin'`,

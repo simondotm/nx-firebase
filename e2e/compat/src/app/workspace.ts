@@ -1,7 +1,7 @@
 import * as fs from 'fs'
-import { customExec } from './exec'
-import { log } from './log'
-import { setCwd } from './utils'
+import { customExec } from './utils/exec'
+import { log } from './utils/log'
+import { setCwd } from './utils/utils'
 
 export function createTestDir(testDir: string) {
   if (!fs.existsSync(testDir)) {

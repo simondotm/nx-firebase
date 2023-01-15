@@ -1,9 +1,15 @@
 // setup re-usable workspaces for e2e testbed
-import { customExec } from './exec'
-import { green, info, log, red, setLogFile } from './log'
-import { deleteDir, deleteFile, ensureDir, fileExists, setCwd } from './utils'
+import { customExec } from './utils/exec'
+import { green, info, log, red, setLogFile } from './utils/log'
+import {
+  deleteDir,
+  deleteFile,
+  ensureDir,
+  fileExists,
+  setCwd,
+} from './utils/utils'
 import { createTestDir, createWorkspace } from './workspace'
-import { Cache } from './cache'
+import { Cache } from './utils/cache'
 
 /**
  * Generate an NxWorkspace with the given versions and gzip it

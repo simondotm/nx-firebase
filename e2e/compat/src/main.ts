@@ -8,11 +8,11 @@
  * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
-import { green, info, red, time } from './app/log'
+import { green, info, red, time } from './app/utils/log'
 import { setupNxWorkspace } from './app/setup'
 import { testVersions } from './app/versions'
 import { clean, testNxVersion } from './app/test'
-import { getCache } from './app/cache'
+import { getCache } from './app/utils/cache'
 
 async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   const t = Date.now()
