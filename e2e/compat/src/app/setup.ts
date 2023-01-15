@@ -3,7 +3,7 @@ import { customExec } from './exec'
 import { green, info, log, red, setLogFile } from './log'
 import { deleteDir, deleteFile, ensureDir, fileExists, setCwd } from './utils'
 import { createTestDir, createWorkspace } from './workspace'
-import { getCache } from './cache'
+import { Cache } from './cache'
 
 /**
  * Generate an NxWorkspace with the given versions and gzip it
@@ -12,36 +12,34 @@ import { getCache } from './cache'
  * @param pluginVersion - target nx-firebase version eg. '0.3.4'
  * @param force - always recreate the workspace
  */
-export async function setupNxWorkspace(
-  nxVersion: string,
-  pluginVersion: string,
-  force = false,
-) {
-  const cache = getCache(nxVersion, pluginVersion)
-
+export async function setupNxWorkspace(cache: Cache, force = false) {
   try {
     // setup the target Nx workspace
     const archiveExists = fileExists(cache.archiveFile) && !force
 
     info(
-      `SETUP NX VERSION '${nxVersion}' WITH PLUGIN VERSION '${pluginVersion}' ${
-        archiveExists ? '[CACHED]' : 'INSTALLING'
-      }\n`,
+      `SETUP NX VERSION '${cache.nxVersion}' WITH PLUGIN VERSION '${
+        cache.pluginVersion
+      }' ${archiveExists ? '[CACHED]' : 'INSTALLING'}\n`,
     )
 
     ensureDir(cache.rootDir)
 
-    setLogFile(`${cache.rootDir}/${nxVersion}.log.txt`)
+    setLogFile(`${cache.rootDir}/${cache.nxVersion}.log.txt`)
 
     log(
-      `Creating new Nx workspace version ${nxVersion} in directory '${cache.testDir}'`,
+      `Creating new Nx workspace version ${cache.nxVersion} in directory '${cache.testDir}'`,
     )
 
     // create workspace & archive if it doesn't already exist
     if (!archiveExists) {
       deleteDir(cache.testDir)
       createTestDir(cache.testDir)
-      await createWorkspace(nxVersion, cache.workspaceDir, pluginVersion)
+      await createWorkspace(
+        cache.nxVersion,
+        cache.workspaceDir,
+        cache.pluginVersion,
+      )
       // delete any existing archive file so we do not accidentally append to archive
       if (fileExists(cache.archiveFile)) {
         deleteFile(cache.archiveFile)
@@ -50,17 +48,17 @@ export async function setupNxWorkspace(
       // cwd is workspaceDir
       setCwd(cache.rootDir)
       // archive the workspace
-      await customExec(`tar -zcf ${cache.archiveFile} ./${nxVersion}`) // add -v for verbose
+      await customExec(`tar -zcf ${cache.archiveFile} ./${cache.nxVersion}`) // add -v for verbose
       deleteDir(cache.testDir)
     } else {
       log(
         `WQokspace archive '${cache.archiveFile}' already exists for '${cache.workspaceDir}', no setup required`,
       )
     }
-    info(green(`SETUP VERSION '${nxVersion}' SUCCEEDED\n`))
+    info(green(`SETUP VERSION '${cache.nxVersion}' SUCCEEDED\n`))
   } catch (err) {
     info(err.message)
-    info(red(`SETUP VERSION '${nxVersion}' FAILED\n`))
+    info(red(`SETUP VERSION '${cache.nxVersion}' FAILED\n`))
     // escalate, this is a show stopper
     throw err
   }

@@ -1,6 +1,7 @@
-import { runNxCommandAsync } from './exec'
-import { log } from './log'
-import { addContentToTextFile } from './utils'
+import { Cache, getCache } from './cache'
+import { customExec, runNxCommandAsync } from './exec'
+import { green, info, log, red, setLogFile, time } from './log'
+import { addContentToTextFile, deleteDir, setCwd } from './utils'
 
 /**
  * Test helper function approximating the Jest style of expect().toContain()
@@ -90,4 +91,55 @@ export async function testPlugin(workspaceDir: string) {
   // - if possible, run a test deploy?
   // - check the init generator installs the firebase deps
   // - check the plugin peerdeps installs the @nrwl/js and @nrwl/devkit and @nrwl/node deps
+}
+
+export function clean() {
+  const cache = getCache('', '')
+  info(red(`Cleaning compat test cache dir '${cache.rootDir}'`))
+  deleteDir(cache.rootDir)
+}
+
+export async function testNxVersion(cache: Cache) {
+  let error: string | undefined
+
+  const t = Date.now()
+
+  setLogFile(`${cache.rootDir}/${cache.nxVersion}.e2e.txt`)
+
+  try {
+    info(
+      `TESTING NX VERSION '${cache.nxVersion}' AGAINST PLUGIN VERSION '${cache.pluginVersion}'\n`,
+    )
+
+    // cleanup
+    setCwd(cache.rootDir)
+    deleteDir(cache.testDir)
+
+    // unpack the archive
+    setCwd(cache.rootDir)
+    await customExec(`tar -xzf ${cache.archiveFile}`) // add -v for verbose
+
+    // run the plugin test suite
+    setCwd(cache.workspaceDir)
+    await testPlugin(cache.workspaceDir)
+
+    info(green(`TESTING VERSION '${cache.nxVersion}' SUCCEEDED\n`))
+  } catch (err) {
+    info(err.message)
+    info(
+      red(
+        `TESTING VERSION '${cache.nxVersion}' FAILED - INCOMPATIBILITY DETECTED\n`,
+      ),
+    )
+    error = err.message
+  }
+
+  // cleanup
+  setCwd(cache.rootDir)
+  deleteDir(cache.testDir)
+
+  const dt = Date.now() - t
+  info(`Completed in ${time(dt)}\n`)
+
+  return error
 }

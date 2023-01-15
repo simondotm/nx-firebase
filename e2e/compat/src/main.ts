@@ -8,64 +8,11 @@
  * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
-import { green, info, red, setLogFile, time } from './app/log'
-import { deleteDir, setCwd } from './app/utils'
+import { green, info, red, time } from './app/log'
 import { setupNxWorkspace } from './app/setup'
 import { testVersions } from './app/versions'
-import { testPlugin } from './app/test'
-import { customExec } from './app/exec'
+import { clean, testNxVersion } from './app/test'
 import { getCache } from './app/cache'
-
-function clean() {
-  const cache = getCache('', '')
-  info(red(`Cleaning compat test cache dir '${cache.rootDir}'`))
-  deleteDir(cache.rootDir)
-}
-
-async function testNxVersion(nxVersion: string, pluginVersion: string) {
-  let error: string | undefined
-
-  const t = Date.now()
-
-  const cache = getCache(nxVersion, pluginVersion)
-
-  setLogFile(`${cache.rootDir}/${nxVersion}.e2e.txt`)
-
-  try {
-    info(
-      `TESTING NX VERSION '${nxVersion}' AGAINST PLUGIN VERSION '${pluginVersion}'\n`,
-    )
-
-    // cleanup
-    setCwd(cache.rootDir)
-    deleteDir(cache.testDir)
-
-    // unpack the archive
-    setCwd(cache.rootDir)
-    await customExec(`tar -xzf ${cache.archiveFile}`) // add -v for verbose
-
-    // run the plugin test suite
-    setCwd(cache.workspaceDir)
-    await testPlugin(cache.workspaceDir)
-
-    info(green(`TESTING VERSION '${nxVersion}' SUCCEEDED\n`))
-  } catch (err) {
-    info(err.message)
-    info(
-      red(`TESTING VERSION '${nxVersion}' FAILED - INCOMPATIBILITY DETECTED\n`),
-    )
-    error = err.message
-  }
-
-  // cleanup
-  setCwd(cache.rootDir)
-  deleteDir(cache.testDir)
-
-  const dt = Date.now() - t
-  info(`Completed in ${time(dt)}\n`)
-
-  return error
-}
 
 async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   const t = Date.now()
@@ -97,7 +44,8 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
         nxReleases.length
       } --------------------------------------------------------------------------\n`,
     )
-    await setupNxWorkspace(release, pluginVersion)
+    const cache = getCache(release, pluginVersion)
+    await setupNxWorkspace(cache)
   }
 
   //-----------------------------------------------------------------------
@@ -112,7 +60,8 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
           nxReleases.length
         } --------------------------------------------------------------------------\n`,
       )
-      const result = await testNxVersion(release, pluginVersion)
+      const cache = getCache(release, pluginVersion)
+      const result = await testNxVersion(cache)
       if (result) {
         errors.push(result)
       }
