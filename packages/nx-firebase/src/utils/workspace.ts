@@ -26,6 +26,7 @@ function readNxWorkspaceVersion(): string {
   return ''
 }
 
+// determine the Nx version being used by the host workspace
 export const workspaceNxVersion = readNxWorkspaceVersion()
 
 export function checkNxVersion() {

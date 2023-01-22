@@ -1,4 +1,5 @@
 import {
+  createProjectGraphAsync,
   ExecutorContext,
   logger,
   ProjectGraphProjectNode,
@@ -28,9 +29,19 @@ export async function getFirebaseDependencies(
   // This means our Nx 13 version of the plugin cannot support project graph changes
   // SM: recompute the project graph on every iteration so that --watch will work,
   //  since the context.projectGraph is only a snapshot of dependencies at the time the plugin was run
+  // seems like 14.1.10 is when this started being compatible.
+
+  // SM: update, cant see why this would be true if we're using the same Nx devkit version as the Nx workspace
+  // NX 13.x file - https://github.com/nrwl/nx/blob/1b0092c69f64e77abd5fc54bc034ba45267c8f91/packages/nx/src/project-graph/project-graph.ts#L87
+
   // const projectGraph = await createProjectGraphAsync()
 
+  // SM: in Nx 14.5.x projectGraph is passed in via context
+  // @nrwl/js:tsc executor uses readCachedProjectGraph, so we'll use it too
+  // https://github.com/nrwl/nx/blob/13.10.x/packages/js/src/utils/check-dependencies.ts
+  // https://github.com/nrwl/nx/blob/14.5.x/packages/js/src/utils/check-dependencies.ts
   const projectGraph = readCachedProjectGraph()
+
   const {
     target,
     dependencies,
@@ -38,7 +49,7 @@ export async function getFirebaseDependencies(
     topLevelDependencies,
   } = calculateProjectDependencies(
     projectGraph,
-    // context.projectGraph, // NX14/15 only
+    // context.projectGraph, // NX14.5.x+ only
     context.root,
     context.projectName,
     context.targetName,

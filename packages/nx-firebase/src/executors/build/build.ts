@@ -1,5 +1,5 @@
 import '../../utils/e2ePatch' // intentional side effects
-import { ExecutorContext, logger } from '@nrwl/devkit'
+import { createProjectGraphAsync, ExecutorContext, logger } from '@nrwl/devkit'
 import type { ExecutorOptions } from '@nrwl/js/src/utils/schema'
 import { tscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
 import { firebaseBuildExecutor } from './lib'
@@ -35,11 +35,18 @@ export async function* runExecutor(
     logger.info(`options=${JSON.stringify(options, null, 3)}`)
   }
 
-  console.log(`NX_WORKSPACE_ROOT_PATH=${process.env.NX_WORKSPACE_ROOT_PATH}`)
+  // console.log(`NX_WORKSPACE_ROOT_PATH=${process.env.NX_WORKSPACE_ROOT_PATH}`)
+
+  // logger.info(`process.env.CI=${process.env.CI}`)
+  // logger.info(`process.env.NX_DAEMON=${process.env.CI}`)
 
   // // SM: recompute the project graph on every iteration so that --watch will work,
   // //  since the context.projectGraph is only a snapshot
-  // //const projectGraph = await createProjectGraphAsync()
+  if (options.watch) {
+    // const projectGraph = await createProjectGraphAsync()
+    await createProjectGraphAsync()
+    // logger.info(JSON.stringify(graph, null, 3))
+  }
 
   // iterate the tscExecutor generator until it completes
   // this approach allows us to add a custom post-compile process.
