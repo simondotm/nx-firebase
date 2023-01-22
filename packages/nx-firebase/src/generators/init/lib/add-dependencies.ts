@@ -58,10 +58,18 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   // from:
   // https://github.com/nrwl/nx/blob/5b7dba1cb78cabcf631129b4ce8163406b9c1328/packages/devkit/src/utils/package-json.ts#L84
   //
+
+  // used by the plugin internals, most likely already in the host workspace
   addDevDependencyIfNotPresent('@nrwl/devkit', workspaceNxVersion)
+
+  // used by the plugin application generator
   addDevDependencyIfNotPresent('@nrwl/linter', workspaceNxVersion)
   addDevDependencyIfNotPresent('@nrwl/jest', workspaceNxVersion)
+
+  // used as a proxy typescript app by the plugin application generator
   addDevDependencyIfNotPresent('@nrwl/node', workspaceNxVersion)
+
+  // used by the plugin application builder
   addDevDependencyIfNotPresent('@nrwl/js', workspaceNxVersion)
 
   return addDependenciesToPackageJson(tree, dependencies, devDependencies)
