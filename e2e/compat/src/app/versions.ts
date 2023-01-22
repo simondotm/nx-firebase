@@ -1,5 +1,6 @@
 export const testVersions = {
-  pluginVersions: ['0.3.4', 'local'],
+  pluginVersions: ['local', '0.3.4'],
+  // pluginVersions: ['0.3.4', 'local'],
   nxReleases: {
     '15': {
       '4': [0, 1, 2, 3, 4, 5],

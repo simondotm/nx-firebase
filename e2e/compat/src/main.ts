@@ -14,7 +14,17 @@ import { testVersions } from './app/versions'
 import { clean, testNxVersion } from './app/test'
 import { getCache } from './app/utils/cache'
 
-async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
+// Force CI environment if necessary
+// process.env.CI = 'true'
+// process.env.NX_DAEMON = 'false'
+
+type CmdOptions = {
+  onlySetup: boolean
+  force: boolean
+  clean: boolean
+}
+
+async function main(options: CmdOptions) {
   const t = Date.now()
 
   const pluginVersions = testVersions.pluginVersions
@@ -37,48 +47,60 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   //  gzip's and caches them for re-use
   // splitting the setup phase from the test phase allows us to cache
   // node_modules in CI github actions for this compat test
-  for (const pluginVersion of pluginVersions) {
-    for (let i = 0; i < nxReleases.length; ++i) {
-      const release = nxReleases[i]
-      info(
-        `-- ${i + 1}/${
-          nxReleases.length
-        } --------------------------------------------------------------------------\n`,
-      )
-      const cache = getCache(release, pluginVersion)
-      await setupNxWorkspace(cache)
-    }
-  }
+  const testMatrixSize = nxReleases.length * pluginVersions.length * 2 // 2 = setup+test
 
   //-----------------------------------------------------------------------
   // test phase - tests each Nx minor release
   //-----------------------------------------------------------------------
-  if (!options.onlySetup) {
+  let testCounter = 0
+  const errors: string[] = []
+  for (let i = 0; i < nxReleases.length; ++i) {
     for (const pluginVersion of pluginVersions) {
-      const errors: string[] = []
-      for (let i = 0; i < nxReleases.length; ++i) {
-        const release = nxReleases[i]
-        info(
-          `-- ${i + 1}/${
-            nxReleases.length
-          } --------------------------------------------------------------------------\n`,
-        )
-        const cache = getCache(release, pluginVersion)
+      const release = nxReleases[i]
+
+      //-----------------------------------------------------------------------
+      // setup phase - generates workspaces for each Nx minor release
+      //-----------------------------------------------------------------------
+      //  gzip's and caches them for re-use
+      // splitting the setup phase from the test phase allows us to cache
+      // node_modules in CI github actions for this compat test
+      info(
+        `-- ${
+          testCounter + 1
+        }/${testMatrixSize} --------------------------------------------------------------------------\n`,
+      )
+
+      const cache = getCache(release, pluginVersion)
+      await setupNxWorkspace(cache, options.force)
+      ++testCounter
+
+      //-----------------------------------------------------------------------
+      // test phase - tests each Nx minor release
+      //-----------------------------------------------------------------------
+      info(
+        `-- ${
+          testCounter + 1
+        }/${testMatrixSize} --------------------------------------------------------------------------\n`,
+      )
+
+      if (!options.onlySetup) {
         const result = await testNxVersion(cache)
         if (result) {
           errors.push(result)
         }
       }
-
-      if (errors.length) {
-        info(red('TEST ERRORS:`n'))
-        for (const error of errors) {
-          info(red(error))
-        }
-      } else {
-        info(green('ALL TESTS SUCCEEDED'))
-      }
+      ++testCounter
     }
+  }
+
+  // report error summary
+  if (errors.length) {
+    info(red('TEST ERRORS:`n'))
+    for (const error of errors) {
+      info(red(error))
+    }
+  } else {
+    info(green('ALL TESTS SUCCEEDED'))
   }
 
   //-----------------------------------------------------------------------
@@ -89,12 +111,19 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
 }
 
 // entry
+const options: CmdOptions = { onlySetup: false, force: false, clean: false }
 if (process.argv.length > 2) {
   if (process.argv[2] === '--setup') {
-    main({ onlySetup: true })
+    options.onlySetup = true
   } else if (process.argv[2] === '--clean') {
-    clean()
+    options.clean = true
+  } else if (process.argv[2] === '--force') {
+    options.force = true
   }
+}
+
+if (options.clean) {
+  clean()
 } else {
-  main()
+  main(options)
 }

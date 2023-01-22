@@ -107,17 +107,16 @@ export async function testNxVersion(cache: Cache) {
     error = err.message
   }
 
-  if (cache.disableDaemon) {
-    // stop nx daemon
-    await runNxCommandAsync(`reset`)
-  }
+  // pretty sure there's nothing but trouble doing this
+  // if (cache.disableDaemon) {
+  // stop nx daemon after the test to stop connection in use errors
+  // await runNxCommandAsync(`reset`)
+  // }
 
   // cleanup
   setCwd(cache.rootDir)
 
-  // lets not delete after the test for now
-  // so we can see whats going on
-  // deleteDir(cache.testDir)
+  deleteDir(cache.testDir)
 
   const dt = Date.now() - t
   info(`Completed in ${time(dt)}\n`)

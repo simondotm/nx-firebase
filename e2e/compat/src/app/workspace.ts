@@ -73,9 +73,9 @@ export async function createWorkspace(cache: Cache) {
     await runNxCommandAsync(`g @simondotm/nx-firebase:init`)
   }
 
-  if (cache.disableDaemon) {
-    // cleanup - stop nx daemon
-    log(`Stopping nx daemon...`)
-    await runNxCommandAsync(`reset`)
-  }
+  // if (cache.disableDaemon) {
+  // cleanup - stop nx daemon post setup to prevent connection in use errors
+  // log(`Stopping nx daemon...`)
+  // await runNxCommandAsync('reset')
+  // }
 }

@@ -1,4 +1,5 @@
-import { log } from './log'
+import { info } from 'console'
+import { log, red } from './log'
 
 /**
  * Test helper function approximating the Jest style of expect().toContain()
@@ -6,13 +7,14 @@ import { log } from './log'
  * @param expected
  * @returns true if content contains expected string
  */
-export function etc(content: string, expected: string) {
-  return content.includes(expected)
+function etc(content: string, expected: string) {
+  const pass = content.includes(expected)
+  return pass
 }
 
-export function expectToContain(content: string, expected: string | string[]) {
+function expectToContainInner(content: string, expected: string | string[]) {
   if (Array.isArray(expected)) {
-    for (const e in expected) {
+    for (const e of expected) {
       if (!etc(content, e)) {
         return false
       }
@@ -23,15 +25,44 @@ export function expectToContain(content: string, expected: string | string[]) {
   }
 }
 
+export function expectToContain(content: string, expected: string | string[]) {
+  // log(`- expectToContain`)
+  // log(`- content='${content}'`)
+  // log(`- expected='${expected}'`)
+
+  const pass = expectToContainInner(content, expected)
+  if (!pass) {
+    throw new Error(
+      `TEST FAILED: expected '${expected}', received '${content}'`,
+    )
+  }
+  return pass
+}
+
 export function expectToNotContain(
   content: string,
   expected: string | string[],
 ) {
-  return !expectToContain(content, expected)
+  // log(`- expectToNotContain`)
+  // log(`- content='${content}'`)
+  // log(`- not expected='${expected}'`)
+
+  const pass = !expectToContainInner(content, expected)
+  if (!pass) {
+    throw new Error(
+      `TEST FAILED: not expected '${expected}', received '${content}'`,
+    )
+  }
+  return pass
 }
 
 // hacky jest-like tester
 export async function it(testName: string, testFunc: () => Promise<void>) {
   log(` - ${testName}`)
-  await testFunc()
+  try {
+    await testFunc()
+  } catch (err) {
+    info(red(err))
+    throw err
+  }
 }
