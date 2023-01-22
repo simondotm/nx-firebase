@@ -41,11 +41,8 @@ export async function setupNxWorkspace(cache: Cache, force = false) {
     if (!archiveExists) {
       deleteDir(cache.testDir)
       createTestDir(cache.testDir)
-      await createWorkspace(
-        cache.nxVersion,
-        cache.workspaceDir,
-        cache.pluginVersion,
-      )
+      await createWorkspace(cache)
+
       // delete any existing archive file so we do not accidentally append to archive
       if (fileExists(cache.archiveFile)) {
         deleteFile(cache.archiveFile)

@@ -19,7 +19,7 @@ export function ensureDir(path: string) {
   const pathExists = fs.existsSync(path)
   if (!pathExists) {
     log(`Creating dir '${path}'...`)
-    fs.mkdirSync(path)
+    fs.mkdirSync(path, { recursive: true })
   }
   return pathExists
 }

@@ -1,7 +1,8 @@
 import { GeneratorCallback, readJson, Tree } from '@nrwl/devkit'
 import { addDependenciesToPackageJson } from '@nrwl/devkit'
+import { workspaceNxVersion } from '../../../utils'
 import {
-  tsLibVersion,
+  //  tsLibVersion,
   firebaseVersion,
   firebaseAdminVersion,
   firebaseFunctionsVersion,
@@ -37,17 +38,31 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     }
   }
 
+  // dependencies
   addDependencyIfNotPresent('firebase', firebaseVersion)
   addDependencyIfNotPresent('firebase-admin', firebaseAdminVersion)
   addDependencyIfNotPresent('firebase-functions', firebaseFunctionsVersion)
-  addDependencyIfNotPresent('tslib', tsLibVersion)
+  //SM: not convinced we should be adding tslib in this plugin
+  //addDependencyIfNotPresent('tslib', tsLibVersion)
 
+  // dev dependencies
   addDevDependencyIfNotPresent('firebase-tools', firebaseToolsVersion)
   addDevDependencyIfNotPresent(
     'firebase-functions-test',
     firebaseFunctionsTestVersion,
   )
   addDevDependencyIfNotPresent('kill-port', killportVersion)
+
+  // TODO: find out if Nx devkit adds these versions even if they already exist
+  // for now, only add them if they aren't in the workspace already at the same version as the host workspace
+  // from:
+  // https://github.com/nrwl/nx/blob/5b7dba1cb78cabcf631129b4ce8163406b9c1328/packages/devkit/src/utils/package-json.ts#L84
+  //
+  addDevDependencyIfNotPresent('@nrwl/devkit', workspaceNxVersion)
+  addDevDependencyIfNotPresent('@nrwl/linter', workspaceNxVersion)
+  addDevDependencyIfNotPresent('@nrwl/jest', workspaceNxVersion)
+  addDevDependencyIfNotPresent('@nrwl/node', workspaceNxVersion)
+  addDevDependencyIfNotPresent('@nrwl/js', workspaceNxVersion)
 
   return addDependenciesToPackageJson(tree, dependencies, devDependencies)
 }

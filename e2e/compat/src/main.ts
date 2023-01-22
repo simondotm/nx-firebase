@@ -17,7 +17,7 @@ import { getCache } from './app/utils/cache'
 async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   const t = Date.now()
 
-  const pluginVersion = '0.3.4'
+  const pluginVersions = testVersions.pluginVersions
 
   // gather all nx versions in the test matrix
   const nxReleases: string[] = []
@@ -37,22 +37,7 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
   //  gzip's and caches them for re-use
   // splitting the setup phase from the test phase allows us to cache
   // node_modules in CI github actions for this compat test
-  for (let i = 0; i < nxReleases.length; ++i) {
-    const release = nxReleases[i]
-    info(
-      `-- ${i + 1}/${
-        nxReleases.length
-      } --------------------------------------------------------------------------\n`,
-    )
-    const cache = getCache(release, pluginVersion)
-    await setupNxWorkspace(cache)
-  }
-
-  //-----------------------------------------------------------------------
-  // test phase - tests each Nx minor release
-  //-----------------------------------------------------------------------
-  if (!options.onlySetup) {
-    const errors: string[] = []
+  for (const pluginVersion of pluginVersions) {
     for (let i = 0; i < nxReleases.length; ++i) {
       const release = nxReleases[i]
       info(
@@ -61,19 +46,38 @@ async function main(options: { onlySetup: boolean } = { onlySetup: false }) {
         } --------------------------------------------------------------------------\n`,
       )
       const cache = getCache(release, pluginVersion)
-      const result = await testNxVersion(cache)
-      if (result) {
-        errors.push(result)
-      }
+      await setupNxWorkspace(cache)
     }
+  }
 
-    if (errors.length) {
-      info(red('TEST ERRORS:`n'))
-      for (const error of errors) {
-        info(red(error))
+  //-----------------------------------------------------------------------
+  // test phase - tests each Nx minor release
+  //-----------------------------------------------------------------------
+  if (!options.onlySetup) {
+    for (const pluginVersion of pluginVersions) {
+      const errors: string[] = []
+      for (let i = 0; i < nxReleases.length; ++i) {
+        const release = nxReleases[i]
+        info(
+          `-- ${i + 1}/${
+            nxReleases.length
+          } --------------------------------------------------------------------------\n`,
+        )
+        const cache = getCache(release, pluginVersion)
+        const result = await testNxVersion(cache)
+        if (result) {
+          errors.push(result)
+        }
       }
-    } else {
-      info(green('ALL TESTS SUCCEEDED'))
+
+      if (errors.length) {
+        info(red('TEST ERRORS:`n'))
+        for (const error of errors) {
+          info(red(error))
+        }
+      } else {
+        info(green('ALL TESTS SUCCEEDED'))
+      }
     }
   }
 

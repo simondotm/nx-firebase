@@ -14,13 +14,18 @@ export async function customExec(
   const cwd = dir ? dir : process.cwd()
   return new Promise((resolve, reject) => {
     log(`Executing command '${command}' in '${cwd}'`)
-    const process = exec(command, { cwd: cwd }, (error, stdout, stderr) => {
-      if (error) {
-        console.warn(error.message)
-        reject(error)
-      }
-      resolve({ stdout, stderr })
-    })
+    const process = exec(
+      command,
+      //      { cwd: cwd, env: { NX_DAEMON: 'false' } }, // force CI type environment so Nx Daemon doesn't act up with multiple instances
+      // { cwd: cwd, env: { CI: 'true' } }, // force CI type environment so Nx Daemon doesn't act up with multiple instances
+      (error, stdout, stderr) => {
+        if (error) {
+          console.warn(error.message)
+          reject(error)
+        }
+        resolve({ stdout, stderr })
+      },
+    )
 
     process.stdout.on('data', (data) => {
       log(data.toString())

@@ -3,6 +3,7 @@ import { customExec, runNxCommandAsync } from './utils/exec'
 import { expectToContain, expectToNotContain, it } from './utils/jest-ish'
 import { green, info, red, setLogFile, time } from './utils/log'
 import { addContentToTextFile, deleteDir, setCwd } from './utils/utils'
+import { installPlugin } from './workspace'
 
 const npmContent = [
   `Added 'npm' dependency 'firebase-admin'`,
@@ -84,8 +85,15 @@ export async function testNxVersion(cache: Cache) {
     setCwd(cache.rootDir)
     await customExec(`tar -xzf ${cache.archiveFile}`) // add -v for verbose
 
-    // run the plugin test suite
     setCwd(cache.workspaceDir)
+
+    if (cache.deferPluginInstall) {
+      // lets see if installing the plugin in the test suite
+      // makes things more stable...
+      await installPlugin(cache)
+    }
+
+    // run the plugin test suite
     await testPlugin(cache.workspaceDir)
 
     info(green(`TESTING VERSION '${cache.nxVersion}' SUCCEEDED\n`))
@@ -99,9 +107,17 @@ export async function testNxVersion(cache: Cache) {
     error = err.message
   }
 
+  if (cache.disableDaemon) {
+    // stop nx daemon
+    await runNxCommandAsync(`reset`)
+  }
+
   // cleanup
   setCwd(cache.rootDir)
-  deleteDir(cache.testDir)
+
+  // lets not delete after the test for now
+  // so we can see whats going on
+  // deleteDir(cache.testDir)
 
   const dt = Date.now() - t
   info(`Completed in ${time(dt)}\n`)
