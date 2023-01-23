@@ -4,7 +4,10 @@ export const gitIgnoreEntries = `
 
 # Nx-Firebase
 .runtimeconfig.json
+**/.emulators/*
+**/.firebase/*
 database-debug.log
+firebase-debug.log
 firestore-debug.log
 pubsub-debug.log
 ui-debug.log
