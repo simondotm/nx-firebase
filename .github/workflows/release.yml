@@ -10,7 +10,6 @@ on:
 
 jobs:
   release:
-    needs: [publish_github, publish_npm]
     name: Release
     runs-on: ubuntu-latest
     steps:
