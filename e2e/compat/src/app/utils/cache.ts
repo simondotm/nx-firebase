@@ -13,6 +13,7 @@ export type Cache = {
   disableDaemon: boolean
   isLocalPlugin: boolean
   deferPluginInstall: boolean // defer plugin installs to the test suite rather than the workspace setup
+  nodeVersion: number // major node version
 }
 
 /**
@@ -41,5 +42,6 @@ export function getCache(nxVersion: string, pluginVersion: string): Cache {
     disableDaemon: false,
     // disableDaemon:  isLocalPlugin,
     // deferPluginInstall: isLocalPlugin, // for local plugin tests, install them for tests so that code changes are present in tests
+    nodeVersion: parseInt(process.versions.node.split('.')[0]),
   }
 }

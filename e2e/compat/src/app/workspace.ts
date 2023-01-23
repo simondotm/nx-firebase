@@ -21,14 +21,18 @@ export function cleanWorkspace(dir: string) {
 }
 
 export async function installPlugin(cache: Cache) {
+  // this version of plugin has peerdeps that only work with node 14 / npm 6
+  const requireLegacyPeerDeps =
+    cache.nodeVersion >= 16 && cache.pluginVersion === '0.3.4'
+  const legacyPeerDeps = requireLegacyPeerDeps ? '--legacy-peer-deps' : ''
   if (cache.isLocalPlugin) {
     // install the plugin from the nx-firebase workspace as a local file dependency
     await customExec(
-      `npm i ${cache.pluginWorkspace}/dist/packages/nx-firebase --save-dev`,
+      `npm i ${cache.pluginWorkspace}/dist/packages/nx-firebase --save-dev ${legacyPeerDeps}`,
     )
   } else {
     await customExec(
-      `npm i @simondotm/nx-firebase@${cache.pluginVersion} --save-dev`,
+      `npm i @simondotm/nx-firebase@${cache.pluginVersion} --save-dev ${legacyPeerDeps}`,
     )
   }
 }
