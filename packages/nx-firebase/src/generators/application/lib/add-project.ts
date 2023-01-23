@@ -97,5 +97,5 @@ export function addProject(tree: Tree, options: NormalizedOptions): void {
   project.targets.emulate = getEmulateTarget(options)
   project.targets.serve = getServeTarget(project)
 
-  updateProjectConfiguration(tree, options.name, project)
+  updateProjectConfiguration(tree, options.projectName, project)
 }

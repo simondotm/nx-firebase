@@ -1,3 +1,4 @@
+import '../../utils/e2ePatch' // intentional side effects
 import type { GeneratorCallback, Tree } from '@nrwl/devkit'
 import { convertNxGenerator, formatFiles } from '@nrwl/devkit'
 import { initGenerator as nodeInitGenerator } from '@nrwl/node'

@@ -1,4 +1,4 @@
-import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
+// import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
@@ -11,11 +11,12 @@ import {
 } from '@nrwl/nx-plugin/testing'
 
 const JEST_TIMEOUT = 120000
-const USE_DAEMON = false
 
-const daemonStatus = USE_DAEMON
-  ? 'Nx Daemon is currently running'
-  : 'Nx Daemon is not running'
+// NX14/15 ONLY
+// const USE_DAEMON = false
+// const daemonStatus = USE_DAEMON
+//   ? 'Nx Daemon is currently running'
+//   : 'Nx Daemon is not running'
 
 const appName = 'functions'
 
@@ -112,7 +113,7 @@ function addContentToIndexTs(
   addition: string,
 ) {
   updateFile(indexTsPath, (content: string) => {
-    const replaced = content.replace(importMatch, `${match}\n${addition}`)
+    const replaced = content.replace(match, `${match}\n${addition}`)
     return replaced
   })
 }
@@ -134,23 +135,24 @@ describe('nx-firebase e2e', () => {
   beforeAll(async () => {
     ensureNxProject(pluginName, pluginPath)
 
-    if (USE_DAEMON) {
-      const result = await runNxCommandAsync('daemon --start')
-      expect(result.stdout).toContain(
-        'Daemon Server - Started in a background process',
-      )
-    } else {
-      const nxJsonFile = tmpProjPath('nx.json')
-      const nxJson = readJsonFile(nxJsonFile)
-      // nxJson['pluginsConfig'] = {
-      //   '@nrwl/js': {
-      //     analyzeSourceFiles: true,
-      //   },
-      // }
-      // force local e2e tests to use same setup as CI environment
-      nxJson.tasksRunnerOptions.default.options.useDaemonProcess = false
-      writeJsonFile(nxJsonFile, nxJson)
-    }
+    // NX14/15 ONLY
+    // if (USE_DAEMON) {
+    //   const result = await runNxCommandAsync('daemon --start')
+    //   expect(result.stdout).toContain(
+    //     'Daemon Server - Started in a background process',
+    //   )
+    // } else {
+    //   const nxJsonFile = tmpProjPath('nx.json')
+    //   const nxJson = readJsonFile(nxJsonFile)
+    //   // nxJson['pluginsConfig'] = {
+    //   //   '@nrwl/js': {
+    //   //     analyzeSourceFiles: true,
+    //   //   },
+    //   // }
+    //   // force local e2e tests to use same setup as CI environment
+    //   nxJson.tasksRunnerOptions.default.options.useDaemonProcess = false
+    //   writeJsonFile(nxJsonFile, nxJson)
+    // }
 
     // await runNxCommandAsync('reset')
   }, JEST_TIMEOUT)
@@ -195,14 +197,15 @@ describe('nx-firebase e2e', () => {
     JEST_TIMEOUT,
   )
 
-  it(
-    'should have correct nx daemon status',
-    async () => {
-      const result = await runNxCommandAsync('daemon')
-      expect(result.stdout).toContain(daemonStatus)
-    },
-    JEST_TIMEOUT,
-  )
+  // NX14/15 ONLY
+  // it(
+  //   'should have correct nx daemon status',
+  //   async () => {
+  //     const result = await runNxCommandAsync('daemon')
+  //     expect(result.stdout).toContain(daemonStatus)
+  //   },
+  //   JEST_TIMEOUT,
+  // )
 
   it(
     'should create nx-firebase app',
@@ -224,14 +227,15 @@ describe('nx-firebase e2e', () => {
     JEST_TIMEOUT,
   )
 
-  it(
-    'should have correct nx daemon status',
-    async () => {
-      const result = await runNxCommandAsync('daemon')
-      expect(result.stdout).toContain(daemonStatus)
-    },
-    JEST_TIMEOUT,
-  )
+  // NX14/15 ONLY
+  // it(
+  //   'should have correct nx daemon status',
+  //   async () => {
+  //     const result = await runNxCommandAsync('daemon')
+  //     expect(result.stdout).toContain(daemonStatus)
+  //   },
+  //   JEST_TIMEOUT,
+  // )
 
   it(
     'should build nx-firebase app',
@@ -254,14 +258,15 @@ describe('nx-firebase e2e', () => {
     JEST_TIMEOUT,
   )
 
-  it(
-    'should have correct nx daemon status',
-    async () => {
-      const result = await runNxCommandAsync('daemon')
-      expect(result.stdout).toContain(daemonStatus)
-    },
-    JEST_TIMEOUT,
-  )
+  // NX14/15 ONLY
+  // it(
+  //   'should have correct nx daemon status',
+  //   async () => {
+  //     const result = await runNxCommandAsync('daemon')
+  //     expect(result.stdout).toContain(daemonStatus)
+  //   },
+  //   JEST_TIMEOUT,
+  // )
 
   // SM: DOESNT WORK IN E2E FOR SOME REASON.
   // it(
@@ -293,8 +298,9 @@ describe('nx-firebase e2e', () => {
           ),
         ).not.toThrow()
 
-        const project = readJson(`${projectData.projectDir}/project.json`)
-        expect(project.name).toEqual(`${projectData.projectName}`)
+        // NX14/15 ONLY
+        // const project = readJson(`${projectData.projectDir}/project.json`)
+        // expect(project.name).toEqual(`${projectData.projectName}`)
       },
       JEST_TIMEOUT,
     )
@@ -343,69 +349,69 @@ describe('nx-firebase e2e', () => {
       JEST_TIMEOUT,
     )
 
-    // it(
-    //   'should create buildable typescript library in subdir',
-    //   async () => {
-    //     await runNxCommandAsync(
-    //       `${libGeneratorCommand} ${subDirBuildableLibData.name} --buildable --directory ${subDirBuildableLibData.dir} --importPath="${subDirBuildableLibData.npmScope}"`,
-    //     )
+    it(
+      'should create buildable typescript library in subdir',
+      async () => {
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${subDirBuildableLibData.name} --buildable --directory ${subDirBuildableLibData.dir} --importPath="${subDirBuildableLibData.npmScope}"`,
+        )
 
-    //     // no need to test the js library generator, only that it ran ok
-    //     expect(() =>
-    //       checkFilesExist(`${subDirBuildableLibData.projectDir}/package.json`),
-    //     ).not.toThrow()
+        // no need to test the js library generator, only that it ran ok
+        expect(() =>
+          checkFilesExist(`${subDirBuildableLibData.projectDir}/package.json`),
+        ).not.toThrow()
 
-    //     const result = await runNxCommandAsync(
-    //       `build ${subDirBuildableLibData.projectName}`,
-    //     )
-    //     expect(result.stdout).toContain(compileComplete)
-    //     expect(result.stdout).toContain(
-    //       `${buildSuccess} ${subDirBuildableLibData.projectName}`,
-    //     )
-    //   },
-    //   JEST_TIMEOUT,
-    // )
+        const result = await runNxCommandAsync(
+          `build ${subDirBuildableLibData.projectName}`,
+        )
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(
+          `${buildSuccess} ${subDirBuildableLibData.projectName}`,
+        )
+      },
+      JEST_TIMEOUT,
+    )
 
-    // it(
-    //   'should create non-buildable typescript library',
-    //   async () => {
-    //     await runNxCommandAsync(
-    //       `${libGeneratorCommand} ${nonBuildableLibData.name} --buildable=false --importPath="${nonBuildableLibData.npmScope}"`,
-    //     )
+    it(
+      'should create non-buildable typescript library',
+      async () => {
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${nonBuildableLibData.name} --buildable=false --importPath="${nonBuildableLibData.npmScope}"`,
+        )
 
-    //     expect(() =>
-    //       checkFilesExist(`${nonBuildableLibData.projectDir}/package.json`),
-    //     ).toThrow()
+        expect(() =>
+          checkFilesExist(`${nonBuildableLibData.projectDir}/package.json`),
+        ).toThrow()
 
-    //     const project = readJson(
-    //       `${nonBuildableLibData.projectDir}/project.json`,
-    //     )
-    //     expect(project.targets.build).not.toBeDefined()
-    //   },
-    //   JEST_TIMEOUT,
-    // )
+        const project = readJson(
+          `${nonBuildableLibData.projectDir}/project.json`,
+        )
+        expect(project.targets.build).not.toBeDefined()
+      },
+      JEST_TIMEOUT,
+    )
 
-    // it(
-    //   'should create incompatible typescript library',
-    //   async () => {
-    //     await runNxCommandAsync(
-    //       `${libGeneratorCommand} ${incompatibleLibData.name} --directory=${incompatibleLibData.dir}`,
-    //     )
+    it(
+      'should create incompatible typescript library',
+      async () => {
+        await runNxCommandAsync(
+          `${libGeneratorCommand} ${incompatibleLibData.name} --directory=${incompatibleLibData.dir}`,
+        )
 
-    //     expect(() =>
-    //       checkFilesExist(`${incompatibleLibData.projectDir}/package.json`),
-    //     ).not.toThrow()
+        expect(() =>
+          checkFilesExist(`${incompatibleLibData.projectDir}/package.json`),
+        ).not.toThrow()
 
-    //     const result = await runNxCommandAsync(
-    //       `build ${incompatibleLibData.projectName}`,
-    //     )
-    //     expect(result.stdout).toContain(compileComplete)
-    //     expect(result.stdout).toContain(
-    //       `${buildSuccess} ${incompatibleLibData.projectName}`,
-    //     )
-    //   },
-    //   JEST_TIMEOUT,
-    // )
+        const result = await runNxCommandAsync(
+          `build ${incompatibleLibData.projectName}`,
+        )
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(
+          `${buildSuccess} ${incompatibleLibData.projectName}`,
+        )
+      },
+      JEST_TIMEOUT,
+    )
   })
 
   //--------------------------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ import {
   ExecutorContext,
   logger,
   ProjectGraphProjectNode,
+  readCachedProjectGraph,
 } from '@nrwl/devkit'
 import {
   calculateProjectDependencies,
@@ -22,9 +23,24 @@ export async function getFirebaseDependencies(
     `- Processing dependencies for firebase functions app '${context.projectName}':`,
   )
 
+  // NX 14/15 ONLY
+  // createProjectGraphAsync for Nx13 does not work with newer versions of Nx workspaces due to `root` field no longer being in the `project.json` files
+  // See https://github.com/e-square-io/nx-github-actions/issues/53
+  // This means our Nx 13 version of the plugin cannot support project graph changes
   // SM: recompute the project graph on every iteration so that --watch will work,
-  //  since the context.projectGraph is only a snapshot
-  const projectGraph = await createProjectGraphAsync()
+  //  since the context.projectGraph is only a snapshot of dependencies at the time the plugin was run
+  // seems like 14.1.10 is when this started being compatible.
+
+  // SM: update, cant see why this would be true if we're using the same Nx devkit version as the Nx workspace
+  // NX 13.x file - https://github.com/nrwl/nx/blob/1b0092c69f64e77abd5fc54bc034ba45267c8f91/packages/nx/src/project-graph/project-graph.ts#L87
+
+  // const projectGraph = await createProjectGraphAsync()
+
+  // SM: in Nx 14.5.x projectGraph is passed in via context
+  // @nrwl/js:tsc executor uses readCachedProjectGraph, so we'll use it too
+  // https://github.com/nrwl/nx/blob/13.10.x/packages/js/src/utils/check-dependencies.ts
+  // https://github.com/nrwl/nx/blob/14.5.x/packages/js/src/utils/check-dependencies.ts
+  const projectGraph = readCachedProjectGraph()
 
   const {
     target,
@@ -32,7 +48,8 @@ export async function getFirebaseDependencies(
     nonBuildableDependencies,
     topLevelDependencies,
   } = calculateProjectDependencies(
-    projectGraph, // context.projectGraph,
+    projectGraph,
+    // context.projectGraph, // NX14.5.x+ only
     context.root,
     context.projectName,
     context.targetName,

@@ -1,6 +1,8 @@
 import type { Tree } from '@nrwl/devkit'
 import * as devkit from '@nrwl/devkit'
-import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
+// NX 14/15 only
+// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
+import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
 import { applicationGenerator } from './application'
 import {
   getBuildTarget,
@@ -19,7 +21,9 @@ describe('application generator', () => {
   const appDirectory = 'my-firebase-app'
 
   beforeEach(() => {
-    tree = createTreeWithEmptyV1Workspace()
+    // NX 14/15 only
+    // tree = createTreeWithEmptyV1Workspace()
+    tree = createTreeWithEmptyWorkspace()
     jest.clearAllMocks()
   })
 
@@ -59,11 +63,13 @@ describe('application generator', () => {
     )
     expect(tsConfig.compilerOptions.emitDecoratorMetadata).toBe(true)
     expect(tsConfig.compilerOptions.target).toBe('es2021') // default target is node 16
-    expect(tsConfig.exclude).toEqual([
-      'jest.config.ts',
-      'src/**/*.spec.ts',
-      'src/**/*.test.ts',
-    ])
+    // NX14/15 only
+    // expect(tsConfig.exclude).toEqual([
+    //   'jest.config.ts',
+    //   'src/**/*.spec.ts',
+    //   'src/**/*.test.ts',
+    // ])
+    expect(tsConfig.exclude).toEqual(['**/*.spec.ts', '**/*.test.ts'])
   })
 
   it('should update project configuration', async () => {
@@ -144,6 +150,26 @@ describe('application generator', () => {
     await applicationGenerator(tree, { name: appName2 })
     expect(tree.isFile(`firebase.json`)).toBeTruthy()
     expect(tree.isFile(`firebase.${appName2}.json`)).toBeTruthy()
+  })
+
+  it('should generate app in subdirectory', async () => {
+    const dir = 'subdir'
+    const name = `app`
+
+    await applicationGenerator(tree, { name: name, directory: dir })
+
+    // default firebase project files
+    expect(tree.exists(`apps/${dir}/${name}/src/index.ts`)).toBeTruthy()
+    expect(tree.exists(`apps/${dir}/${name}/public/index.html`)).toBeTruthy()
+    expect(tree.exists(`apps/${dir}/${name}/package.json`)).toBeTruthy()
+    expect(tree.exists(`apps/${dir}/${name}/readme.md`)).toBeTruthy()
+    // rules & indexes
+    expect(tree.exists(`apps/${dir}/${name}/database.rules.json`)).toBeTruthy()
+    expect(
+      tree.exists(`apps/${dir}/${name}/firestore.indexes.json`),
+    ).toBeTruthy()
+    expect(tree.exists(`apps/${dir}/${name}/firestore.rules`)).toBeTruthy()
+    expect(tree.exists(`apps/${dir}/${name}/storage.rules`)).toBeTruthy()
   })
 
   describe('--skipFormat', () => {
