@@ -40,7 +40,7 @@ export function getBuildTarget(project: ProjectConfiguration) {
 
 export function getDeployTarget(options: NormalizedOptions) {
   return {
-    executor: 'nx:run-commands',
+    executor: '@nrwl/workspace:run-commands',
     options: {
       command: `firebase deploy${getFirebaseConfig(
         options,
@@ -54,7 +54,7 @@ export function getConfigTarget(
   options: NormalizedOptions,
 ) {
   return {
-    executor: 'nx:run-commands',
+    executor: '@nrwl/workspace:run-commands',
     options: {
       command: `firebase functions:config:get${getFirebaseConfig(
         options,
@@ -68,7 +68,7 @@ export function getEmulateTarget(
   project: ProjectConfiguration,
 ) {
   return {
-    executor: 'nx:run-commands',
+    executor: '@nrwl/workspace:run-commands',
     options: {
       commands: [
         `node -e 'setTimeout(()=>{},5000)'`,
@@ -90,7 +90,7 @@ export function getEmulateTarget(
 
 export function getServeTarget(options: NormalizedOptions) {
   return {
-    executor: 'nx:run-commands',
+    executor: '@nrwl/workspace:run-commands',
     options: {
       commands: [
         `nx run ${options.projectName}:build --watch`,
