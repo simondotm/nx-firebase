@@ -87,10 +87,13 @@ describe('application generator', () => {
 
     // validate the custom targets for nx-firebase apps
     const firebaseConfigName = `firebase.json`
+    // const projectName = project.name //NX14/15 project.json format only has project name in file
+    const projectName = appName
+
     const options: NormalizedOptions = {
       name: appName,
       projectRoot: project.root,
-      projectName: project.name,
+      projectName,
       firebaseConfigName,
     }
 
@@ -99,8 +102,8 @@ describe('application generator', () => {
     expect(project.targets.getconfig).toEqual(
       getConfigTarget(project.root, options),
     )
-    expect(project.targets.emulate).toEqual(getEmulateTarget(options))
-    expect(project.targets.serve).toEqual(getServeTarget(project))
+    expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
+    expect(project.targets.serve).toEqual(getServeTarget(options))
 
     // assume @nrwl/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()
@@ -122,10 +125,12 @@ describe('application generator', () => {
 
     // validate the custom targets for nx-firebase apps
     const firebaseConfigName = `firebase.json`
+    // const projectName = project.name //NX14/15 project.json format only has project name in file
+    const projectName = appName
     const options: NormalizedOptions = {
       name: appName,
       projectRoot: project.root,
-      projectName: project.name,
+      projectName,
       firebaseConfigName,
       project: 'fb-proj',
     }
@@ -135,8 +140,8 @@ describe('application generator', () => {
     expect(project.targets.getconfig).toEqual(
       getConfigTarget(project.root, options),
     )
-    expect(project.targets.emulate).toEqual(getEmulateTarget(options))
-    expect(project.targets.serve).toEqual(getServeTarget(project))
+    expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
+    expect(project.targets.serve).toEqual(getServeTarget(options))
 
     // assume @nrwl/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()

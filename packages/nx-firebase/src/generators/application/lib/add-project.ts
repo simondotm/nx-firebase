@@ -61,12 +61,22 @@ export function getConfigTarget(
   }
 }
 
-export function getEmulateTarget(options: NormalizedOptions) {
+export function getEmulateTarget(
+  options: NormalizedOptions,
+  project: ProjectConfiguration,
+) {
   return {
     executor: 'nx:run-commands',
     options: {
       commands: [
-        `npx kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299`,
+        `node -e 'setTimeout(()=>{},5000)'`,
+        `kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500`,
+        `firebase functions:config:get ${getFirebaseConfig(
+          options,
+        )}${getFirebaseProject(options)} > ${joinPathFragments(
+          'dist',
+          project.root,
+        )}/.runtimeconfig.json`,
         `firebase emulators:start ${getFirebaseConfig(
           options,
         )}${getFirebaseProject(options)}`,
@@ -76,13 +86,13 @@ export function getEmulateTarget(options: NormalizedOptions) {
   }
 }
 
-export function getServeTarget(project: ProjectConfiguration) {
+export function getServeTarget(options: NormalizedOptions) {
   return {
     executor: 'nx:run-commands',
     options: {
       commands: [
-        `nx run ${project.name}:build --watch`,
-        `nx run ${project.name}:emulate`,
+        `nx run ${options.projectName}:build --watch`,
+        `nx run ${options.projectName}:emulate`,
       ],
     },
   }
@@ -94,8 +104,8 @@ export function addProject(tree: Tree, options: NormalizedOptions): void {
   project.targets.build = getBuildTarget(project)
   project.targets.deploy = getDeployTarget(options)
   project.targets.getconfig = getConfigTarget(project.root, options)
-  project.targets.emulate = getEmulateTarget(options)
-  project.targets.serve = getServeTarget(project)
+  project.targets.emulate = getEmulateTarget(options, project)
+  project.targets.serve = getServeTarget(options)
 
   updateProjectConfiguration(tree, options.projectName, project)
 }
