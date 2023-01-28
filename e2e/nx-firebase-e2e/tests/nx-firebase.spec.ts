@@ -250,7 +250,7 @@ describe('nx-firebase e2e', () => {
       expect(() =>
         checkFilesExist(
           `${distDir}/package.json`,
-          `${distDir}/readme.md`,
+          // `${distDir}/readme.md`, // we no longer copy .md files as a default asset
           `${distDir}/src/index.js`,
         ),
       ).not.toThrow()
