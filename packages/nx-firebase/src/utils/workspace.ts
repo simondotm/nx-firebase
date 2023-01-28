@@ -14,6 +14,7 @@ type PackageJson = {
 export type WorkspaceVersion =
   | {
       version: string
+      versionCode: number // major*10000 + minor*100 + patch eg. 151001
       major: number
       minor: number
     }
@@ -30,10 +31,14 @@ function readNxWorkspaceVersion(): WorkspaceVersion {
     const workspaceNxVersion = workspaceNxPackageVersion.match(semVerRegEx)
     if (workspaceNxVersion.length) {
       const semver = workspaceNxVersion[0].split('.')
+      const major = parseInt(semver[0])
+      const minor = parseInt(semver[1])
+      const patch = parseInt(semver[2])
       return {
         version: workspaceNxVersion[0],
-        major: parseInt(semver[0]),
-        minor: parseInt(semver[1]),
+        versionCode: major * 10000 + minor * 100 + patch,
+        major,
+        minor,
       }
     }
   }

@@ -6,6 +6,17 @@ import {
 import { workspaceNxVersion } from '../../../utils'
 import type { NormalizedOptions } from '../schema'
 
+/**
+ * Return run-commands executor that is most compatible with host workspace version
+ */
+function getRunCommandsExecutor() {
+  // `nx:run-commands` executor is supported from Nx 14.8.0+
+  const supportsNxRunCommands = workspaceNxVersion.versionCode >= 140800
+  return supportsNxRunCommands
+    ? 'nx:run-commands'
+    : '@nrwl/workspace:run-commands'
+}
+
 function getFirebaseProject(options: NormalizedOptions) {
   if (options.project) {
     return ` --project ${options.project}`
@@ -41,7 +52,7 @@ export function getBuildTarget(project: ProjectConfiguration) {
 
 export function getDeployTarget(options: NormalizedOptions) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: getRunCommandsExecutor(),
     options: {
       command: `firebase deploy${getFirebaseConfig(
         options,
@@ -55,7 +66,7 @@ export function getConfigTarget(
   options: NormalizedOptions,
 ) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: getRunCommandsExecutor(),
     options: {
       command: `firebase functions:config:get${getFirebaseConfig(
         options,
@@ -69,7 +80,7 @@ export function getEmulateTarget(
   project: ProjectConfiguration,
 ) {
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: getRunCommandsExecutor(),
     options: {
       commands: [
         `node -e 'setTimeout(()=>{},5000)'`,
@@ -109,7 +120,7 @@ export function getServeTarget(options: NormalizedOptions) {
       ]
 
   return {
-    executor: '@nrwl/workspace:run-commands',
+    executor: getRunCommandsExecutor(),
     options: {
       commands,
     },
