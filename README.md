@@ -19,12 +19,11 @@ Nx provides a great way to manage monorepo workflows and this plugin helps to in
 
 Supports:
 
-- Typescript Firebase functions
+- Typescript Firebase functions as Nx applications
 - Single or multiple Firebase projects in one Nx workspace
-- Firebase applications in app subdirectories
 - Use of shared Nx buildable libraries in Firebase functions
 - Nx provides automatic dependency checking for builds
-- Building functions with `tsc` `--watch` mode
+- Building & serving functions with watch mode
 - Firebase Emulators
 - Convenience Nx `getconfig` target to fetch remote firebase functions configuration variables to local `.runtimeconfig.json` file
 - Convenience Nx `deploy`, `emulate`, and `serve` targets for functions
@@ -72,4 +71,3 @@ Additionally:
 - [Unsupported Features](docs/unsupported-features.md)
 - [Plugin Notes](docs/nx-plugin-commands.md)
 - [Nx Development Setup for Mac](docs/nx-setup-mac.md)
-- [Plu]

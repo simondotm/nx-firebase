@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 - [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
+  - [v0.13.0-beta.1](#v0130-beta1)
   - [v0.13.0-beta.0](#v0130-beta0)
   - [v0.3.4](#v034)
   - [v0.3.3](#v033)
@@ -11,6 +12,20 @@ All notable changes to this project will be documented in this file.
   - [v0.3.0](#v030)
   - [v0.2.3](#v023)
   - [v0.2.2 - Initial Release](#v022---initial-release)
+
+## v0.13.0-beta.1
+
+**Changes**
+
+- `main` removed from template `package.json` for firebase app generator - this is automatically set by the builder
+- Support `nx watch` in compatible Nx workspace hosts
+- Support `nx:run-commands` in compatible Nx workspace hosts
+- Various small fixes
+
+**Migration Guide**
+
+- Check the [targets documentation](docs/nx-firebase-targets.md) if you already have a workspace that is using nx-firebase
+- Remove `main` from `package.json` files in any nx-firebase apps in your workspace
 
 ## v0.13.0-beta.0
 

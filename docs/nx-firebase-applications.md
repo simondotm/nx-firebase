@@ -18,7 +18,9 @@ When a new Nx Firebase application project is added to the workspace it will gen
 
 **And in the workspace root:**
 
-- A `firebase.json` (or `firebase.<appname>.json` if multiple firebase apps in the workspace) configuration file for the Firebase project, which is preset with references to the various configuration files in the application folder
+- A `firebase.json` configuration file for the Firebase application
+- This is preset with references to the various configuration files in the application folder
+- A `firebase.<appname>.json` if multiple firebase apps exist in the workspace
 
 **It will also generate:**
 
@@ -29,7 +31,11 @@ You should use `npx firebase --add` to register your [projects & aliases](nx-fir
 ## Nx-Firebase Application Targets (Executors)
 
 - `build` - Build the functions applicaion
-- `serve` - Build the functions application in `--watch` mode and start the Firebase Emulators
+- `serve` - Build the functions application in `watch` mode and start the Firebase Emulators
 - `deploy` - Run the Firebase CLI `deploy` command with the application's Firebase configuration. This target accepts forwarded command line options.
 - `lint` - Lint the functions application code
 - `test` - Run Jest unit tests on the functions application code
+- `emulate` - Start the firebase emulation suite
+- `getconfig` - Fetch the firebase remote config
+
+See [Firebase targets](nx-firebase-targets.md) for more information.
