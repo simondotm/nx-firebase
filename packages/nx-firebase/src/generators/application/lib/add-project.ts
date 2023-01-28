@@ -28,9 +28,11 @@ export function getBuildTarget(project: ProjectConfiguration) {
       main: joinPathFragments(project.sourceRoot, 'index.ts'),
       tsConfig: joinPathFragments(project.root, 'tsconfig.app.json'),
       packageJson: joinPathFragments(project.root, 'package.json'),
+      // no need to copy these assets anymore.
+      // .runtimeconfig.json cant be copied at build time because it is .gitignored and Nx also ignores it.
       assets: [
-        joinPathFragments(project.root, '*.md'),
-        joinPathFragments(project.root, '.runtimeconfig.json'),
+        // joinPathFragments(project.root, '*.md'),
+        // joinPathFragments(project.root, '.runtimeconfig.json'),
       ],
     },
   }
