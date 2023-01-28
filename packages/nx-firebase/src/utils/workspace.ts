@@ -10,7 +10,16 @@ type PackageJson = {
   }
 }
 
-function readNxWorkspaceVersion(): string {
+// we dont care about patch versions, also they might be alpha or beta type strings
+export type WorkspaceVersion =
+  | {
+      version: string
+      major: number
+      minor: number
+    }
+  | undefined
+
+function readNxWorkspaceVersion(): WorkspaceVersion {
   // Check the runtime Nx version being used by the current workspace
   const semVerRegEx = /[~^]?([\dvx*]+(?:[-.](?:[\dx*]+|alpha|beta))*)/g
   const workspacePackage = readJsonFile<PackageJson>(
@@ -20,10 +29,15 @@ function readNxWorkspaceVersion(): string {
   if (workspaceNxPackageVersion) {
     const workspaceNxVersion = workspaceNxPackageVersion.match(semVerRegEx)
     if (workspaceNxVersion.length) {
-      return workspaceNxVersion[0]
+      const semver = workspaceNxVersion[0].split('.')
+      return {
+        version: workspaceNxVersion[0],
+        major: parseInt(semver[0]),
+        minor: parseInt(semver[1]),
+      }
     }
   }
-  return ''
+  return undefined
 }
 
 // determine the Nx version being used by the host workspace
@@ -31,9 +45,9 @@ export const workspaceNxVersion = readNxWorkspaceVersion()
 
 export function checkNxVersion() {
   if (workspaceNxVersion) {
-    if (!workspaceNxVersion.includes(pluginNxVersionMajor)) {
+    if (workspaceNxVersion.major > pluginNxVersionMajor) {
       logger.warn(
-        `WARNING: @simondotm/nx-firebase plugin for Nx version (${pluginNxVersion}) may not be compatible with your version of Nx (${workspaceNxVersion})`,
+        `WARNING: @simondotm/nx-firebase plugin for Nx version (${pluginNxVersion}) may not be compatible with your version of Nx (${workspaceNxVersion.version})`,
       )
     }
   } else {

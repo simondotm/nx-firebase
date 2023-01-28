@@ -38,19 +38,23 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     }
   }
 
-  // dependencies
+  // firebase dependencies
   addDependencyIfNotPresent('firebase', firebaseVersion)
   addDependencyIfNotPresent('firebase-admin', firebaseAdminVersion)
   addDependencyIfNotPresent('firebase-functions', firebaseFunctionsVersion)
+
   //SM: not convinced we should be adding tslib in this plugin
   //addDependencyIfNotPresent('tslib', tsLibVersion)
 
-  // dev dependencies
+  // firebase dev dependencies
   addDevDependencyIfNotPresent('firebase-tools', firebaseToolsVersion)
   addDevDependencyIfNotPresent(
     'firebase-functions-test',
     firebaseFunctionsTestVersion,
   )
+
+  // kill-port is used by the emulate target to ensure clean emulator startup
+  // since Nx doesn't kill processes cleanly atm
   addDevDependencyIfNotPresent('kill-port', killportVersion)
 
   // TODO: find out if Nx devkit adds these versions even if they already exist
@@ -59,18 +63,20 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   // https://github.com/nrwl/nx/blob/5b7dba1cb78cabcf631129b4ce8163406b9c1328/packages/devkit/src/utils/package-json.ts#L84
   //
 
-  // used by the plugin internals, most likely already in the host workspace
-  addDevDependencyIfNotPresent('@nrwl/devkit', workspaceNxVersion)
+  // These dependencies are required by the plugin internals, most likely already in the host workspace
+  // but add them if not. They are added with the same version that the host workspace is using.
+  // This is cleaner than using peerDeps.
+  addDevDependencyIfNotPresent('@nrwl/devkit', workspaceNxVersion.version)
 
   // used by the plugin application generator
-  addDevDependencyIfNotPresent('@nrwl/linter', workspaceNxVersion)
-  addDevDependencyIfNotPresent('@nrwl/jest', workspaceNxVersion)
+  addDevDependencyIfNotPresent('@nrwl/linter', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nrwl/jest', workspaceNxVersion.version)
 
-  // used as a proxy typescript app by the plugin application generator
-  addDevDependencyIfNotPresent('@nrwl/node', workspaceNxVersion)
+  // used by the plugin application generator as a proxy for creating a typescript app
+  addDevDependencyIfNotPresent('@nrwl/node', workspaceNxVersion.version)
 
   // used by the plugin application builder
-  addDevDependencyIfNotPresent('@nrwl/js', workspaceNxVersion)
+  addDevDependencyIfNotPresent('@nrwl/js', workspaceNxVersion.version)
 
   return addDependenciesToPackageJson(tree, dependencies, devDependencies)
 }

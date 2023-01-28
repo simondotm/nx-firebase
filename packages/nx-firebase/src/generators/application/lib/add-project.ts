@@ -3,6 +3,7 @@ import {
   readProjectConfiguration,
   updateProjectConfiguration,
 } from '@nrwl/devkit'
+import { workspaceNxVersion } from '../../../utils'
 import type { NormalizedOptions } from '../schema'
 
 function getFirebaseProject(options: NormalizedOptions) {
@@ -89,13 +90,28 @@ export function getEmulateTarget(
 }
 
 export function getServeTarget(options: NormalizedOptions) {
+  const workspaceSupportsNxWatch =
+    workspaceNxVersion.major >= 15 && workspaceNxVersion.minor >= 4
+
+  // From Nx 15.4.x+ we can use the new watch command which gives us the ability to rebuild the main project
+  // if any dependent libraries change.
+  // We have to do an initial build first to create the dist output, and then we watch for further changes, but with --clean, so that we dont delete the
+  //  dist folder every build, because thats also being watched by the emulator.
+  // Otherwise, the only option is to just use `tsc --watch` which only detects changes to the main project.
+  const commands: string[] = workspaceSupportsNxWatch
+    ? [
+        `nx run ${options.projectName}:build && nx watch --projects=${options.projectName} --includeDependentProjects -- nx build ${options.projectName} --clean=false`,
+        `nx run ${options.projectName}:emulate`,
+      ]
+    : [
+        `nx run ${options.projectName}:build --watch`,
+        `nx run ${options.projectName}:emulate`,
+      ]
+
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-      commands: [
-        `nx run ${options.projectName}:build --watch`,
-        `nx run ${options.projectName}:emulate`,
-      ],
+      commands,
     },
   }
 }
