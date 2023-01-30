@@ -111,8 +111,7 @@ Note that when using the Typescript builder, changes to library dependencies **w
   "executor": "nx:run-commands",
   "options": {
     "commands": [
-      "nx run functions:build",
-      "nx watch --projects=functions --includeDependentProjects -- nx build functions --clean=false",
+      "nx run functions:build && nx watch --projects=functions --includeDependentProjects -- nx build functions --clean=false",
       "nx run functions:emulate"
     ],
     "parallel": true
@@ -175,8 +174,6 @@ Note that when using the Typescript builder, changes to library dependencies **w
   }
 }
 ```
-
-** Nx workspaces before version 14.8.0**
 
 ## Lint, Test Targets
 
@@ -258,7 +255,7 @@ Bundles the Firebase functions project using `@nrwl/esbuild:esbuild`. For this t
 
 ```
 "build": {
-  "executor": "@nrwl/esbuild:webpack",
+  "executor": "@nrwl/esbuild:esbuild",
   "outputs": [
     "{options.outputPath}"
   ],
