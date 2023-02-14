@@ -3,7 +3,7 @@
 - [Firebase Versions](#firebase-versions)
   - [Firebase Node Versions](#firebase-node-versions)
     - [Node 18 support](#node-18-support)
-    - [Node 16 support](#node-16-support)
+    - [Node 16 support (Recommended)](#node-16-support-recommended)
     - [Node 14 support](#node-14-support)
     - [Node 12 support](#node-12-support)
     - [Node 10](#node-10)
@@ -25,7 +25,7 @@
 - `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
 - `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
 
-### Node 16 support
+### Node 16 support (Recommended)
 
 - Node 16 is the currently [recommended runtime](https://cloud.google.com/functions/docs/concepts/nodejs-runtime) for firebase functions
 - The latest Node 16 version is `16.19.0`

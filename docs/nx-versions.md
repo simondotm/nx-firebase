@@ -38,6 +38,37 @@ Then, run this sequence for each minor release upto Nx 13.10.x, where the list o
 | `13.9.7`   | n/a                 | In this release `@nrwl/tao` is replaced with the `nx` cli, so manual updates of `@nrwl/tao` package version are no longer necessary from hereon |
 | `13.10.6`  | n/a                 | The last minor release of Nx 13.                                                                                                                |
 
-The plugin is not yet tested with Nx version 14+
+## Nx 14
+
+| Nx Version | Notes                                                                                                                       |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `14.0.0`   | Minor changes to workspace, js configs to ts configs for jest. Angular stays at 13.                                         |
+| `14.0.4`   | `root` removed from `project.json`, still at Angular 13                                                                     |
+| `14.0.5`   | Broken - forget it. _TypeError: Cannot read properties of undefined (reading 'endsWith')_                                   |
+| `14.1.0`   | Fixed again. Repeat of `root` removal migration. Still Angular 13.                                                          |
+| `14.1.5`   | Jest config changes                                                                                                         |
+| `14.1.8`   | DO NOT TAKE THIS VERSION. MESSED UP NX VERSIONS                                                                             |
+| `14.1.11`  |                                                                                                                             |
+| `14.2.0`   | Updates Angular 14.0.7. Had to use `--legacy-peer-deps` on npm install. es2020 for angular apps.                            |
+|            | Some angular migrations for forms. Also some rootdir issues in this version.                                                |
+| `14.2.4`   | Rootdir issues resolved. Had to update ngx-cookie-service and @angular/flex-layout, webapps issue with mediaObserver.media$ |
+| `14.3.4`   | Adds `targetDefaults` to `nx.json`                                                                                          |
+| `14.4.3`   | `@types/node` updated to `18.0.0`, no other migrations                                                                      |
+| `14.5.2`   | Angular updates                                                                                                             |
+| `14.5.5`   | Jest config & tsconfig.spec updates                                                                                         |
+| `14.5.10`  | Updates `rxjs`, manally updated eslint to fix peerdeps issue, some legacy Angular libs may need updating to be compatible   |
+| `14.6.0`   | Updates some angular packages, eslint, jest, installs an rc version of Nx which breaks the nx-firebase plugin on peer deps  |
+| `14.7.6`   | @nrwl/node:webpack => @nrwl/webpack migration                                                                               |
+| `14.8.0`   | Migrates from `@nrwl/workspace:run-command` to `nx:run-command`                                                             |
+
+## Nx 14.8.0
+
+- Node 16 recommended
+- Latest Firebase SDK's work well
+- ES Modules / es2020 are available, and latest Firebase SDK's support this
+
+## Nx 15
+
+The plugin is not yet tested with Nx version 15+
 
 See also [Firebase Versions](firebase-versions.md).
