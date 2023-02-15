@@ -22,7 +22,7 @@ export const firebaseNodeRuntime = `nodejs${firebaseNodeEngine}`
 const nodeVersion: Record<string, string> = {
   '12': 'es2019',
   '14': 'es2020',
-  '16': 'es2021',
+  '16': 'es2020', // es2020 seems more preferred with node 16 than es2021
   '18': 'es2022',
 }
 
