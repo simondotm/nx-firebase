@@ -9,8 +9,10 @@ import {
   createFiles,
   normalizeOptions,
   toNodeApplicationGeneratorOptions,
-  updateTsConfig,
 } from './lib'
+
+import { updateTsConfig } from '../../utils/update-tsconfig'
+
 import { deleteFiles } from './lib/delete-files'
 import type { ApplicationGeneratorOptions } from './schema'
 

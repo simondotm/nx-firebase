@@ -1,7 +1,7 @@
 import type { Tree } from '@nrwl/devkit'
 import { joinPathFragments, updateJson } from '@nrwl/devkit'
-import { tsConfigTarget } from '../../../utils'
-import type { NormalizedOptions } from '../schema'
+import { tsConfigTarget } from '.'
+import type { NormalizedOptions } from '../generators/function/schema'
 
 /**
  * With firebase cli > 10.0.1 now compatible with node versions >=14 we can use es modules rather than commonjs
