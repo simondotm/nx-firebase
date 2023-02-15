@@ -11,7 +11,7 @@ import {
   toNodeApplicationGeneratorOptions,
 } from './lib'
 
-import { updateTsConfig } from '../../utils/update-tsconfig'
+import { updateTsConfig } from '../../utils'
 
 import { deleteFiles } from './lib/delete-files'
 import type { ApplicationGeneratorOptions } from './schema'
@@ -40,7 +40,7 @@ export async function applicationGenerator(
   )
   deleteFiles(tree, options)
   createFiles(tree, options)
-  updateTsConfig(tree, options)
+  updateTsConfig(tree, options.projectRoot)
   addProject(tree, options)
 
   // ensures newly added files are formatted to match workspace style
