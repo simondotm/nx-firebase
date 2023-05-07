@@ -1,5 +1,5 @@
-import { joinPathFragments, logger } from '@nrwl/devkit'
-import { DependentBuildableProjectNode } from '@nrwl/workspace/src/utilities/buildable-libs-utils'
+import { joinPathFragments, logger } from '@nx/devkit'
+import { DependentBuildableProjectNode } from '@nx/workspace/src/utilities/buildable-libs-utils'
 import { copy } from 'fs-extra'
 
 export const FIREBASE_DEPS_DIR = 'libs'

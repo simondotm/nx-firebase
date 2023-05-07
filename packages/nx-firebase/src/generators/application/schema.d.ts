@@ -1,8 +1,8 @@
-import { Linter } from '@nrwl/linter'
+import { Linter } from '@nx/linter'
 import { UnitTestRunner } from '../../utils/test-runners'
 
 export interface ApplicationGeneratorOptions {
-  // standard @nrwl/node:app options
+  // standard @nx/node:app options
   name: string
   directory?: string
   frontendProject?: string

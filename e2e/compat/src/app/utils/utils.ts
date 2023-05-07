@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-// import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
+// import { readJsonFile, writeJsonFile } from '@nx/devkit'
 // import { exit } from 'process'
 import { log } from './log'
 

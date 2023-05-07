@@ -1,8 +1,8 @@
-import type { Tree } from '@nrwl/devkit'
-import * as devkit from '@nrwl/devkit'
+import type { Tree } from '@nx/devkit'
+import * as devkit from '@nx/devkit'
 // NX14/15 ONLY
-// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+// import { createTreeWithEmptyV1Workspace } from '@nx/devkit/testing'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import {
   firebaseAdminVersion,
   firebaseFunctionsTestVersion,

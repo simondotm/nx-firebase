@@ -1,16 +1,19 @@
 {
-  "root": "e2e/compat",
+  "name": "compat",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "e2e/compat/src",
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/node:webpack",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/e2e/compat",
         "main": "e2e/compat/src/main.ts",
         "tsConfig": "e2e/compat/tsconfig.app.json",
-        "assets": ["e2e/compat/src/assets"]
+        "assets": ["e2e/compat/src/assets"],
+        "target": "node",
+        "compiler": "tsc"
       },
       "configurations": {
         "production": {
@@ -27,23 +30,23 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/node:node",
+      "executor": "@nx/node:node",
       "options": {
         "buildTarget": "compat:build"
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["e2e/compat/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/e2e/compat"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/e2e/compat"],
       "options": {
-        "jestConfig": "e2e/compat/jest.config.js",
+        "jestConfig": "e2e/compat/jest.config.ts",
         "passWithNoTests": true
       }
     }

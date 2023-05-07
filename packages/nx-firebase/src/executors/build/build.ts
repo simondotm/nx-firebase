@@ -1,13 +1,13 @@
 import '../../utils/e2ePatch' // intentional side effects
-import { createProjectGraphAsync, ExecutorContext, logger } from '@nrwl/devkit'
-import type { ExecutorOptions } from '@nrwl/js/src/utils/schema'
-import { tscExecutor } from '@nrwl/js/src/executors/tsc/tsc.impl'
+import { createProjectGraphAsync, ExecutorContext, logger } from '@nx/devkit'
+import type { ExecutorOptions } from '@nx/js/src/utils/schema'
+import { tscExecutor } from '@nx/js/src/executors/tsc/tsc.impl'
 import { firebaseBuildExecutor } from './lib'
 import { checkNxVersion } from '../../utils'
 
 /**
  * @simondotm/nx-firebase:build executor is a
- *  customized version of @nrwl/js:tsc executor
+ *  customized version of @nx/js:tsc executor
  */
 export async function* runExecutor(
   options: ExecutorOptions,
@@ -22,7 +22,7 @@ export async function* runExecutor(
   }
 
   /*
-  // --updateBuildableProjectDepsInPackageJson is true by default for @nrwl/js:tsc
+  // --updateBuildableProjectDepsInPackageJson is true by default for @nx/js:tsc
   // https://nx.dev/packages/js/executors/tsc
   // but we havent programmed our executor schema to match yet, so hack them in here.
   const customOptions: ExecutorOptions = {

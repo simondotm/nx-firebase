@@ -55,7 +55,7 @@ This can be manually achieved with `nx-firebase` by adding `production` targets 
 
 ```
     "deploy": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "@nx/workspace:run-commands",
       "options": {
         "command": "npx firebase deploy --config firebase.json --project your-dev-firebase-project"
       },

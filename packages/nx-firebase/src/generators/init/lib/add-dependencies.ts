@@ -1,5 +1,5 @@
-import { GeneratorCallback, readJson, Tree } from '@nrwl/devkit'
-import { addDependenciesToPackageJson } from '@nrwl/devkit'
+import { GeneratorCallback, readJson, Tree } from '@nx/devkit'
+import { addDependenciesToPackageJson } from '@nx/devkit'
 import { workspaceNxVersion } from '../../../utils'
 import {
   //  tsLibVersion,
@@ -66,17 +66,17 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   // These dependencies are required by the plugin internals, most likely already in the host workspace
   // but add them if not. They are added with the same version that the host workspace is using.
   // This is cleaner than using peerDeps.
-  addDevDependencyIfNotPresent('@nrwl/devkit', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nx/devkit', workspaceNxVersion.version)
 
   // used by the plugin application generator
-  addDevDependencyIfNotPresent('@nrwl/linter', workspaceNxVersion.version)
-  addDevDependencyIfNotPresent('@nrwl/jest', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nx/linter', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nx/jest', workspaceNxVersion.version)
 
   // used by the plugin application generator as a proxy for creating a typescript app
-  addDevDependencyIfNotPresent('@nrwl/node', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nx/node', workspaceNxVersion.version)
 
   // used by the plugin application builder
-  addDevDependencyIfNotPresent('@nrwl/js', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nx/js', workspaceNxVersion.version)
 
   return addDependenciesToPackageJson(tree, dependencies, devDependencies)
 }

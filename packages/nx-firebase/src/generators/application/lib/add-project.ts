@@ -1,8 +1,8 @@
-import { joinPathFragments, ProjectConfiguration, Tree } from '@nrwl/devkit'
+import { joinPathFragments, ProjectConfiguration, Tree } from '@nx/devkit'
 import {
   readProjectConfiguration,
   updateProjectConfiguration,
-} from '@nrwl/devkit'
+} from '@nx/devkit'
 import { workspaceNxVersion } from '../../../utils'
 import type { NormalizedOptions } from '../schema'
 
@@ -14,7 +14,7 @@ function getRunCommandsExecutor() {
   const supportsNxRunCommands = workspaceNxVersion.versionCode >= 140800
   return supportsNxRunCommands
     ? 'nx:run-commands'
-    : '@nrwl/workspace:run-commands'
+    : '@nx/workspace:run-commands'
 }
 
 function getFirebaseProject(options: NormalizedOptions) {

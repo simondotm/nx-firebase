@@ -1,8 +1,8 @@
-import type { Tree } from '@nrwl/devkit'
-import * as devkit from '@nrwl/devkit'
+import type { Tree } from '@nx/devkit'
+import * as devkit from '@nx/devkit'
 // NX 14/15 only
-// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+// import { createTreeWithEmptyV1Workspace } from '@nx/devkit/testing'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { applicationGenerator } from './application'
 import {
   getBuildTarget,
@@ -105,7 +105,7 @@ describe('application generator', () => {
     expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
     expect(project.targets.serve).toEqual(getServeTarget(options))
 
-    // assume @nrwl/node is working, we dont need to validate these objects
+    // assume @nx/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()
     expect(project.targets.test).toBeDefined()
   })
@@ -143,7 +143,7 @@ describe('application generator', () => {
     expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
     expect(project.targets.serve).toEqual(getServeTarget(options))
 
-    // assume @nrwl/node is working, we dont need to validate these objects
+    // assume @nx/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()
     expect(project.targets.test).toBeDefined()
   })

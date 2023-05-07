@@ -11,13 +11,13 @@ This document provides examples of how the firebase application `project.json` c
   - [Lint, Test Targets](#lint-test-targets)
   - [Project Configuration](#project-configuration)
 - [Experimental](#experimental)
-    - [Build Target using Webpack bundler (EXPERIMENTAL)](#build-target-using-webpack-bundler-experimental)
-    - [Build Target using esbuild bundler (EXPERIMENTAL)](#build-target-using-esbuild-bundler-experimental)
+  - [Build Target using Webpack bundler (EXPERIMENTAL)](#build-target-using-webpack-bundler-experimental)
+  - [Build Target using esbuild bundler (EXPERIMENTAL)](#build-target-using-esbuild-bundler-experimental)
   - [Firebase Projects Config](#firebase-projects-config)
 
 ## Build Target
 
-- Builds the Firebase functions project as a `@nrwl/js:tsc` node application.
+- Builds the Firebase functions project as a `@nx/js:tsc` node application.
 - The `package.json` in the output directory is updated with project dependencies and local library depedencies.
 - Running this build with `nx run functions:build --watch` will only watch the main application code; it **does not** detect changes to imported library projects.
 
@@ -52,7 +52,7 @@ Fetches the remote firebase project config and stores it locally in the applicat
 
 ```
 "getconfig": {
-  "executor": "@nrwl/workspace:run-commands",
+  "executor": "@nx/workspace:run-commands",
   "options": {
     "command": "firebase functions:config:get --config firebase.functions.json --project my-project > apps/functions/.runtimeconfig.json"
   }
@@ -87,7 +87,7 @@ Starts the firebase emulator:
 
 ```
 "emulate": {
-  "executor": "@nrwl/workspace:run-commands",
+  "executor": "@nx/workspace:run-commands",
   "options": {
     "commands": [
       "node -e \"setTimeout(()=>{},5000)\"",
@@ -142,7 +142,7 @@ Note that when using the Typescript builder, changes to library dependencies **w
 
 ```
 "serve": {
-  "executor": "@nrwl/workspace:run-commands",
+  "executor": "@nx/workspace:run-commands",
   "options": {
     "commands": [
       "nx run functions:build --watch",
@@ -168,7 +168,7 @@ Note that when using the Typescript builder, changes to library dependencies **w
 
 ```
 "deploy": {
-  "executor": "@nrwl/workspace:run-commands",
+  "executor": "@nx/workspace:run-commands",
   "options": {
     "command": "firebase deploy --config firebase.functions.json --project my-project"
   }
@@ -204,7 +204,7 @@ A sample `project.json` file for an `nx-firebase` application project looks like
 
 ### Build Target using Webpack bundler (EXPERIMENTAL)
 
-Bundles the Firebase functions project using `@nrwl/node:webpack`. For this to work:
+Bundles the Firebase functions project using `@nx/node:webpack`. For this to work:
 
 - Make sure your project `package.json` does not have a `main` property set.
 - Your project cannot use dynamic imports via `require`
@@ -213,7 +213,7 @@ Bundles the Firebase functions project using `@nrwl/node:webpack`. For this to w
 
 ```
 "build": {
-  "executor": "@nrwl/node:webpack",
+  "executor": "@nx/node:webpack",
   "outputs": [
     "{options.outputPath}"
   ],

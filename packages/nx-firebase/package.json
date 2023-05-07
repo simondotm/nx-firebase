@@ -22,6 +22,6 @@
   "executors": "./executors.json",
   "peerDependencies": {
     "nx": ">= 13.10.6",
-    "@nrwl/workspace": ">= 13.10.6"
+    "@nx/workspace": ">= 13.10.6"
   }
 }
