@@ -8,12 +8,12 @@ import {
 import {
   calculateProjectDependencies,
   DependentBuildableProjectNode,
-} from '@nx/workspace/src/utilities/buildable-libs-utils'
+} from '@nx/js/src/utils/buildable-libs-utils'
 
 export type FirebaseDependencies = {
   projectDependencies: DependentBuildableProjectNode[]
   npmDependencies: DependentBuildableProjectNode[]
-  target: ProjectGraphProjectNode<unknown>
+  target: ProjectGraphProjectNode
 }
 
 export async function getFirebaseDependencies(
