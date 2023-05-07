@@ -73,7 +73,7 @@ Starts the firebase emulator:
   "executor": "nx:run-commands",
   "options": {
     "commands": [
-      "node -e 'setTimeout(()=>{},5000)'",
+      "node -e \"setTimeout(()=>{},5000)\"",
       "kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500",
       "firebase functions:config:get --config firebase.functions.json --project my-project > dist/functions/.runtimeconfig.json",
       "firebase emulators:start  --config firebase.json"
@@ -90,7 +90,7 @@ Starts the firebase emulator:
   "executor": "@nrwl/workspace:run-commands",
   "options": {
     "commands": [
-      "node -e 'setTimeout(()=>{},5000)'",
+      "node -e \"setTimeout(()=>{},5000)\"",
       "kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500",
       "firebase functions:config:get --config firebase.functions.json --project my-project > dist/functions/.runtimeconfig.json",
       "firebase emulators:start  --config firebase.json"
