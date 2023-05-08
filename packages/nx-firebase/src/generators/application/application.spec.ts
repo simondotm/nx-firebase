@@ -34,7 +34,6 @@ describe('application generator', () => {
   it('should generate files', async () => {
     await applicationGenerator(tree, { name: appName })
 
-    console.log(tree)
     // default firebase project files
     expect(tree.exists(`apps/${appDirectory}/src/index.ts`)).toBeTruthy()
     expect(tree.exists(`apps/${appDirectory}/public/index.html`)).toBeTruthy()
