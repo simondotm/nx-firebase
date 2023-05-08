@@ -7,9 +7,14 @@ on:
   # support manual trigger of this workflow
   workflow_dispatch:
 
+  # run this build action for all pushes to main
   push:
-    # only run this build action if not pushed to release or main branches
-    branches-ignore: ['release*'] #, 'main']
+    branches: ['main']
+
+  # also run for pull requests that target main
+  pull_request:
+    branches:
+      - main    
 
 jobs:
   setup:
