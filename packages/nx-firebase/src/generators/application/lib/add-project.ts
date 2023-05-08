@@ -83,7 +83,7 @@ export function getEmulateTarget(
     executor: getRunCommandsExecutor(),
     options: {
       commands: [
-        `node -e \"setTimeout(()=>{},5000)\"`,
+        `node -e "setTimeout(()=>{},5000)"`,
         `kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500`,
         `firebase functions:config:get ${getFirebaseConfig(
           options,
