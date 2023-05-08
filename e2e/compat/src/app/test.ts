@@ -21,7 +21,7 @@ export async function testPlugin(workspaceDir: string) {
 
   await runNxCommandAsync('g @simondotm/nx-firebase:app functions')
   await runNxCommandAsync(
-    'g @nrwl/js:lib lib1 --buildable --importPath="@myorg/lib1"',
+    'g @nx/js:lib lib1 --buildable --importPath="@myorg/lib1"',
   )
 
   await it('should build the lib', async () => {
@@ -56,7 +56,7 @@ export async function testPlugin(workspaceDir: string) {
   // - check the firebase config looks legit
   // - if possible, run a test deploy?
   // - check the init generator installs the firebase deps
-  // - check the plugin peerdeps installs the @nrwl/js and @nrwl/devkit and @nrwl/node deps
+  // - check the plugin peerdeps installs the @nx/js and @nx/devkit and @nx/node deps
 }
 
 export function clean() {

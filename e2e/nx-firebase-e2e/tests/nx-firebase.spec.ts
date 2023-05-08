@@ -1,4 +1,4 @@
-// import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
+// import { readJsonFile, writeJsonFile } from '@nx/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
@@ -8,7 +8,7 @@ import {
   tmpProjPath,
   uniq,
   updateFile,
-} from '@nrwl/nx-plugin/testing'
+} from '@nx/plugin/testing'
 
 const JEST_TIMEOUT = 120000
 
@@ -23,7 +23,7 @@ const appName = 'functions'
 const subDir = 'subdir'
 
 const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
-const libGeneratorCommand = 'generate @nrwl/js:lib'
+const libGeneratorCommand = 'generate @nx/js:lib'
 const npmScope = '@proj'
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
@@ -145,7 +145,7 @@ describe('nx-firebase e2e', () => {
     //   const nxJsonFile = tmpProjPath('nx.json')
     //   const nxJson = readJsonFile(nxJsonFile)
     //   // nxJson['pluginsConfig'] = {
-    //   //   '@nrwl/js': {
+    //   //   '@nx/js': {
     //   //     analyzeSourceFiles: true,
     //   //   },
     //   // }

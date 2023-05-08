@@ -3,13 +3,15 @@
   "$id": "NxFirebaseInitGenerator",
   "title": "Init Firebase Plugin",
   "description": "Init Firebase Plugin.",
-  "cli": "nx",
   "type": "object",
   "properties": {
     "unitTestRunner": {
       "description": "Adds the specified unit test runner.",
       "type": "string",
-      "enum": ["jest", "none"],
+      "enum": [
+        "jest",
+        "none"
+      ],
       "default": "none"
     },
     "skipFormat": {

@@ -7,9 +7,14 @@ on:
   # support manual trigger of this workflow
   workflow_dispatch:
 
+  # run this build action for all pushes to main
   push:
-    # only run this build action if not pushed to release or main branches
-    branches-ignore: ['release*'] #, 'main']
+    branches: ['main']
+
+  # also run for pull requests that target main
+  pull_request:
+    branches:
+      - main    
 
 jobs:
   setup:
@@ -19,12 +24,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [19.1.0]
+        node-version: [16,18]
 
     steps:
       # Setup steps
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
@@ -46,7 +51,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [19.1.0]
+        node-version: [16,18]
 
     steps:
       - uses: actions/checkout@v3
@@ -71,11 +76,11 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [19.1.0]
+        node-version: [16,18]
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
@@ -96,11 +101,11 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [19.1.0]
+        node-version: [16,18]
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
@@ -121,11 +126,11 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [19.1.0]
+        node-version: [16,18]
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules

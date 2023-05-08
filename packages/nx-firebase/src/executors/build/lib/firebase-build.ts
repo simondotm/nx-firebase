@@ -1,4 +1,4 @@
-import { ExecutorContext } from '@nrwl/devkit'
+import { ExecutorContext } from '@nx/devkit'
 
 import { copyFirebaseDependencies } from './copy-dependencies'
 import { getFirebaseDependencies } from './get-dependencies'

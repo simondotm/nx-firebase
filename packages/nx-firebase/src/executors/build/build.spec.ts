@@ -1,8 +1,8 @@
 // import { BuildExecutorSchema } from './schema'
 // import { runExecutor } from './build'
-// import { ExecutorContext, Tree } from '@nrwl/devkit'
-// import { ExecutorOptions } from '@nrwl/js/src/utils/schema'
-// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
+// import { ExecutorContext, Tree } from '@nx/devkit'
+// import { ExecutorOptions } from '@nx/js/src/utils/schema'
+// import { createTreeWithEmptyV1Workspace } from '@nx/devkit/testing'
 // import applicationGenerator from '../../generators/application/application'
 
 // const options: BuildExecutorSchema = {}

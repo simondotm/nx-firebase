@@ -6,13 +6,13 @@ Nx-Firebase supports use of Nx Libraries within functions code.
 
 To use a shared library with an Nx Firebase Application (Functions), first create a buildable (and it must be buildable) Typescript Nx node library in your workspace:
 
-**`nx g @nrwl/node:lib mynodelib --buildable --importPath="@myorg/mynodelib`**
+**`nx g @nx/node:lib mynodelib --buildable --importPath="@myorg/mynodelib`**
 
 > _Note: The `--importPath` option is highly recommended to ensure the correct typescript aliases and npm package configurations for your library._
 
 As of Nx 13.8.8, you can also use:
 
-**`nx g @nrwl/js:tsc mylib --buildable --importPath="@myorg/mylib`**
+**`nx g @nx/js:tsc mylib --buildable --importPath="@myorg/mylib`**
 
 ## Importing a library
 

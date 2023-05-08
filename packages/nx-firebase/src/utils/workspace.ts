@@ -1,4 +1,4 @@
-import { logger, readJsonFile, workspaceRoot } from '@nrwl/devkit'
+import { logger, readJsonFile, workspaceRoot } from '@nx/devkit'
 import { pluginNxVersion, pluginNxVersionMajor } from './versions'
 
 type PackageJson = {

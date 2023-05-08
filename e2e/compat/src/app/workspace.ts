@@ -60,15 +60,15 @@ export async function createWorkspace(cache: Cache) {
   }
 
   // we meed this plugin for test suite libs
-  await customExec(`npm i @nrwl/js@${cache.nxVersion} --save-dev`)
+  await customExec(`npm i @nx/js@${cache.nxVersion} --save-dev`)
 
   if (!cache.deferPluginInstall) {
     log(`Installing plugin in workspace...`)
     // // these should be installed with the plugin I guess?
     // // if we dont install them here, they'll be found in the parent workspace node_modules
-    // await customExec(`npm i @nrwl/js@${cache.nxVersion} --save-dev`)
-    // await customExec(`npm i @nrwl/devkit@${cache.nxVersion} --save-dev`)
-    // await customExec(`npm i @nrwl/jest@${cache.nxVersion} --save-dev`)
+    // await customExec(`npm i @nx/js@${cache.nxVersion} --save-dev`)
+    // await customExec(`npm i @nx/devkit@${cache.nxVersion} --save-dev`)
+    // await customExec(`npm i @nx/jest@${cache.nxVersion} --save-dev`)
     // install the target plugin we want to test
     await installPlugin(cache)
 
