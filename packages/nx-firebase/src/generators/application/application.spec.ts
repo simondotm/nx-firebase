@@ -1,7 +1,5 @@
 import type { Tree } from '@nx/devkit'
 import * as devkit from '@nx/devkit'
-// NX 14/15 only
-// import { createTreeWithEmptyV1Workspace } from '@nx/devkit/testing'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { applicationGenerator } from './application'
 import {
@@ -21,9 +19,9 @@ describe('application generator', () => {
   const appDirectory = 'my-firebase-app'
 
   beforeEach(() => {
-    // NX 14/15 only
-    // tree = createTreeWithEmptyV1Workspace()
-    tree = createTreeWithEmptyWorkspace()
+    tree = createTreeWithEmptyWorkspace({
+      layout: 'apps-libs'
+    })
     jest.clearAllMocks()
   })
 
@@ -36,6 +34,7 @@ describe('application generator', () => {
   it('should generate files', async () => {
     await applicationGenerator(tree, { name: appName })
 
+    console.log(tree)
     // default firebase project files
     expect(tree.exists(`apps/${appDirectory}/src/index.ts`)).toBeTruthy()
     expect(tree.exists(`apps/${appDirectory}/public/index.html`)).toBeTruthy()
@@ -64,12 +63,11 @@ describe('application generator', () => {
     expect(tsConfig.compilerOptions.emitDecoratorMetadata).toBe(true)
     expect(tsConfig.compilerOptions.target).toBe('es2021') // default target is node 16
     // NX14/15 only
-    // expect(tsConfig.exclude).toEqual([
-    //   'jest.config.ts',
-    //   'src/**/*.spec.ts',
-    //   'src/**/*.test.ts',
-    // ])
-    expect(tsConfig.exclude).toEqual(['**/*.spec.ts', '**/*.test.ts'])
+    expect(tsConfig.exclude).toEqual([
+      'jest.config.ts',
+      'src/**/*.spec.ts',
+      'src/**/*.test.ts',
+    ])
   })
 
   it('should update project configuration', async () => {
