@@ -3,7 +3,6 @@
   "$id": "NxFirebaseApplicationGenerator",
   "title": "Nx Firebase Application Options Schema",
   "description": "Nx Firebase Application Options Schema.",
-  "cli": "nx",
   "type": "object",
   "properties": {
     "name": {
@@ -32,13 +31,19 @@
     "linter": {
       "description": "The tool to use for running lint checks.",
       "type": "string",
-      "enum": ["eslint", "none"],
+      "enum": [
+        "eslint",
+        "none"
+      ],
       "default": "eslint"
     },
     "unitTestRunner": {
       "description": "Test runner to use for unit tests.",
       "type": "string",
-      "enum": ["jest", "none"],
+      "enum": [
+        "jest",
+        "none"
+      ],
       "default": "jest"
     },
     "tags": {
@@ -65,5 +70,7 @@
     }
   },
   "additionalProperties": false,
-  "required": ["name"]
+  "required": [
+    "name"
+  ]
 }

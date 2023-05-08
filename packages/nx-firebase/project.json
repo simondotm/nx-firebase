@@ -1,9 +1,10 @@
 {
-  "root": "packages/nx-firebase",
+  "name": "nx-firebase",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nx-firebase/src",
   "targets": {
     "build": {
-      "executor": "@nrwl/js:tsc",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/packages/nx-firebase",
@@ -35,17 +36,17 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/nx-firebase/**/*.ts"]
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/nx-firebase"],
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/nx-firebase"],
       "options": {
-        "jestConfig": "packages/nx-firebase/jest.config.js",
+        "jestConfig": "packages/nx-firebase/jest.config.ts",
         "passWithNoTests": true
       }
     }

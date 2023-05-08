@@ -3,8 +3,8 @@ import {
   logger,
   readJsonFile,
   writeJsonFile,
-} from '@nrwl/devkit'
-import { DependentBuildableProjectNode } from '@nrwl/workspace/src/utilities/buildable-libs-utils'
+} from '@nx/devkit'
+import { DependentBuildableProjectNode } from '@nx/workspace/src/utilities/buildable-libs-utils'
 import { FIREBASE_DEPS_DIR } from './copy-dependencies'
 
 /**

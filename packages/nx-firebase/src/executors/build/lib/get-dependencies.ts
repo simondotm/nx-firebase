@@ -1,19 +1,19 @@
 import {
-  createProjectGraphAsync,
+  // createProjectGraphAsync,
   ExecutorContext,
   logger,
   ProjectGraphProjectNode,
-  readCachedProjectGraph,
-} from '@nrwl/devkit'
+  // readCachedProjectGraph,
+} from '@nx/devkit'
 import {
   calculateProjectDependencies,
   DependentBuildableProjectNode,
-} from '@nrwl/workspace/src/utilities/buildable-libs-utils'
+} from '@nx/js/src/utils/buildable-libs-utils'
 
 export type FirebaseDependencies = {
   projectDependencies: DependentBuildableProjectNode[]
   npmDependencies: DependentBuildableProjectNode[]
-  target: ProjectGraphProjectNode<unknown>
+  target: ProjectGraphProjectNode
 }
 
 export async function getFirebaseDependencies(
@@ -37,10 +37,10 @@ export async function getFirebaseDependencies(
   // const projectGraph = await createProjectGraphAsync()
 
   // SM: in Nx 14.5.x projectGraph is passed in via context
-  // @nrwl/js:tsc executor uses readCachedProjectGraph, so we'll use it too
+  // @nx/js:tsc executor uses readCachedProjectGraph, so we'll use it too
   // https://github.com/nrwl/nx/blob/13.10.x/packages/js/src/utils/check-dependencies.ts
   // https://github.com/nrwl/nx/blob/14.5.x/packages/js/src/utils/check-dependencies.ts
-  const projectGraph = readCachedProjectGraph()
+  // const projectGraph = readCachedProjectGraph()
 
   const {
     target,
@@ -48,8 +48,7 @@ export async function getFirebaseDependencies(
     nonBuildableDependencies,
     topLevelDependencies,
   } = calculateProjectDependencies(
-    projectGraph,
-    // context.projectGraph, // NX14.5.x+ only
+    context.projectGraph,
     context.root,
     context.projectName,
     context.targetName,

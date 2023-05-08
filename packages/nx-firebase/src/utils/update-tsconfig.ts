@@ -1,5 +1,5 @@
 import type { Tree } from '@nrwl/devkit'
-import { joinPathFragments, updateJson } from '@nrwl/devkit'
+import { joinPathFragments, updateJson } from '@nx/devkit'
 import { tsConfigTarget } from '.'
 
 /**

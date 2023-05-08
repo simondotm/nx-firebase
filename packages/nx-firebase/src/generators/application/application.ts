@@ -1,8 +1,7 @@
-import '../../utils/e2ePatch' // intentional side effects
-import { GeneratorCallback, Tree } from '@nrwl/devkit'
-import { convertNxGenerator, formatFiles } from '@nrwl/devkit'
-import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
-import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial'
+// import '../../utils/e2ePatch' // intentional side effects
+import { GeneratorCallback, Tree } from '@nx/devkit'
+import { convertNxGenerator, formatFiles, runTasksInSerial } from '@nx/devkit'
+import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { initGenerator } from '../init/init'
 import {
   addProject,
@@ -18,7 +17,7 @@ import type { ApplicationGeneratorOptions } from './schema'
 
 /**
  * Firebase 'functions' application generator
- * Uses the `@nrwl/node` application generator as a base implementation
+ * Uses the `@nx/node` application generator as a base implementation
  *
  * @param tree
  * @param rawOptions

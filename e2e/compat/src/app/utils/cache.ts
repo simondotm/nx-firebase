@@ -38,7 +38,7 @@ export function getCache(nxVersion: string, pluginVersion: string): Cache {
     archiveFile,
     pluginWorkspace,
     isLocalPlugin,
-    deferPluginInstall: true, // dont think this is needed after all, was introduced because we had an issue from not installing @nrwl/js plugin
+    deferPluginInstall: true, // dont think this is needed after all, was introduced because we had an issue from not installing @nx/js plugin
     disableDaemon: false,
     // disableDaemon:  isLocalPlugin,
     // deferPluginInstall: isLocalPlugin, // for local plugin tests, install them for tests so that code changes are present in tests

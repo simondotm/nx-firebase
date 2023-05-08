@@ -1,8 +1,6 @@
-import type { Tree } from '@nrwl/devkit'
-import * as devkit from '@nrwl/devkit'
-// NX 14/15 only
-// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import type { Tree } from '@nx/devkit'
+import * as devkit from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { applicationGenerator } from './application'
 import {
   getBuildTarget,
@@ -21,9 +19,9 @@ describe('application generator', () => {
   const appDirectory = 'my-firebase-app'
 
   beforeEach(() => {
-    // NX 14/15 only
-    // tree = createTreeWithEmptyV1Workspace()
-    tree = createTreeWithEmptyWorkspace()
+    tree = createTreeWithEmptyWorkspace({
+      layout: 'apps-libs'
+    })
     jest.clearAllMocks()
   })
 
@@ -64,12 +62,11 @@ describe('application generator', () => {
     expect(tsConfig.compilerOptions.emitDecoratorMetadata).toBe(true)
     expect(tsConfig.compilerOptions.target).toBe('es2021') // default target is node 16
     // NX14/15 only
-    // expect(tsConfig.exclude).toEqual([
-    //   'jest.config.ts',
-    //   'src/**/*.spec.ts',
-    //   'src/**/*.test.ts',
-    // ])
-    expect(tsConfig.exclude).toEqual(['**/*.spec.ts', '**/*.test.ts'])
+    expect(tsConfig.exclude).toEqual([
+      'jest.config.ts',
+      'src/**/*.spec.ts',
+      'src/**/*.test.ts',
+    ])
   })
 
   it('should update project configuration', async () => {
@@ -105,7 +102,7 @@ describe('application generator', () => {
     expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
     expect(project.targets.serve).toEqual(getServeTarget(options))
 
-    // assume @nrwl/node is working, we dont need to validate these objects
+    // assume @nx/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()
     expect(project.targets.test).toBeDefined()
   })
@@ -143,7 +140,7 @@ describe('application generator', () => {
     expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
     expect(project.targets.serve).toEqual(getServeTarget(options))
 
-    // assume @nrwl/node is working, we dont need to validate these objects
+    // assume @nx/node is working, we dont need to validate these objects
     expect(project.targets.lint).toBeDefined()
     expect(project.targets.test).toBeDefined()
   })

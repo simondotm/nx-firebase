@@ -1,8 +1,6 @@
-import type { Tree } from '@nrwl/devkit'
-import * as devkit from '@nrwl/devkit'
-// NX14/15 ONLY
-// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import type { Tree } from '@nx/devkit'
+import * as devkit from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import {
   firebaseAdminVersion,
   firebaseFunctionsTestVersion,
@@ -18,9 +16,9 @@ describe('init generator', () => {
   let tree: Tree
 
   beforeEach(() => {
-    // NX14/15 ONLY
-    // tree = createTreeWithEmptyV1Workspace()
-    tree = createTreeWithEmptyWorkspace()
+    tree = createTreeWithEmptyWorkspace({
+      layout: 'apps-libs'
+    })
     jest.clearAllMocks()
   })
 
@@ -100,17 +98,13 @@ describe('init generator', () => {
   it('should add jest config when unitTestRunner is jest', async () => {
     await initGenerator(tree, { unitTestRunner: 'jest' })
 
-    // NX14/15 ONLY
-    // expect(tree.exists('jest.config.ts')).toBe(true)
-    expect(tree.exists('jest.config.js')).toBe(true)
+    expect(tree.exists('jest.config.ts')).toBe(true)
   })
 
   it('should not add jest config when unitTestRunner is none', async () => {
     await initGenerator(tree, { unitTestRunner: 'none' })
 
-    // NX14/15 ONLY
-    // expect(tree.exists('jest.config.ts')).toBe(false)
-    expect(tree.exists('jest.config.js')).toBe(false)
+    expect(tree.exists('jest.config.ts')).toBe(false)
   })
 
   describe('--skipFormat', () => {

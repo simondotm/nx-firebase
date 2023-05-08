@@ -1,10 +1,11 @@
 {
-  "root": "e2e/nx-firebase-e2e",
+  "name": "nx-firebase-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "e2e/nx-firebase-e2e/src",
   "targets": {
     "e2e": {
-      "executor": "@nrwl/nx-plugin:e2e",
+      "executor": "@nx/plugin:e2e",
       "options": {
         "target": "nx-firebase:build",
         "jestConfig": "e2e/nx-firebase-e2e/jest.config.js"

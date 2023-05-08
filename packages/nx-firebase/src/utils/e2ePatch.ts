@@ -49,7 +49,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { statSync } from 'fs'
 
-// import { logger, readJsonFile } from '@nrwl/devkit'
+// import { logger, readJsonFile } from '@nx/devkit'
 
 // from https://github.com/nrwl/nx/blob/803d5ff126d20d1116d3a505233ddf7d971688d6/packages/nx/src/utils/app-root.ts#L9
 export function fileExists(filePath: string): boolean {
