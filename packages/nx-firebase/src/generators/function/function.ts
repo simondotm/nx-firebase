@@ -35,7 +35,7 @@ export function normalizeOptions(
   // console.log(`options=${options}`)
   // console.log(options)
 
-  const firebaseApp = names(options.firebaseApp).fileName
+  const firebaseApp = names(options.app).fileName
   // console.log(`options.firebaseApp ${firebaseApp}`)
   // get/validate the firebase app project this function will be attached to
   let firebaseAppProject: ProjectConfiguration

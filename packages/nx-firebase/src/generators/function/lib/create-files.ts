@@ -21,7 +21,7 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
     projectName: options.projectName,
     projectRoot: options.projectRoot,
 
-    firebaseAppName: options.firebaseApp,
+    firebaseAppName: options.app,
     firebaseAppConfig,
     firebaseAppConfigPath,
 

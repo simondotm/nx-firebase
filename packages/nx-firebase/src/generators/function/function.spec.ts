@@ -31,7 +31,7 @@ describe('function generator', () => {
     await expect(
       functionGenerator(tree, {
         name: 'myFirebaseFunction',
-        firebaseApp: 'myFirebaseApp',
+        app: 'myFirebaseApp',
       }),
     ).rejects.toThrow(
       "A firebase application project called 'my-firebase-app' was not found in this workspace.",
@@ -56,7 +56,7 @@ describe('function generator', () => {
       it('should generate the correct Nx project config', async () => {
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'my-firebase-app',
+          app: 'my-firebase-app',
         })
         const project = readProjectConfiguration(tree, 'my-firebase-function')
         expect(project.root).toEqual('apps/my-firebase-function')
@@ -117,7 +117,7 @@ describe('function generator', () => {
       it('should update tags', async () => {
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'myFirebaseApp',
+          app: 'myFirebaseApp',
           tags: 'one,two',
         })
         const projects = Object.fromEntries(getProjects(tree))
@@ -131,7 +131,7 @@ describe('function generator', () => {
       it('should generate files', async () => {
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'myFirebaseApp',
+          app: 'myFirebaseApp',
         })
         const root = 'apps/my-firebase-function'
         expect(tree.exists(`${root}/src/main.ts`)).toBeTruthy()
@@ -152,7 +152,7 @@ describe('function generator', () => {
       it('should generate function in subdirectory', async () => {
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'my-firebase-app',
+          app: 'my-firebase-app',
           directory: 'subDir',
         })
 
@@ -184,7 +184,7 @@ describe('function generator', () => {
       it('should add the function to the firebase config', async () => {
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'myFirebaseApp',
+          app: 'myFirebaseApp',
         })
         const firebaseConfig = readJson(tree, 'firebase.json')
         // console.log(firebaseConfig)
@@ -203,7 +203,7 @@ describe('function generator', () => {
 
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'myFirebaseApp',
+          app: 'myFirebaseApp',
         })
 
         const firebaseConfig = readJson(tree, 'firebase.json')
@@ -232,7 +232,7 @@ describe('function generator', () => {
 
         await functionGenerator(tree, {
           name: 'myFirebaseFunction',
-          firebaseApp: 'myFirebaseApp',
+          app: 'myFirebaseApp',
         })
 
         const firebaseConfig = readJson(tree, 'firebase.json')
@@ -299,7 +299,7 @@ describe('function generator', () => {
         it('should generate function configured for --format=esm', async () => {
           await functionGenerator(tree, {
             name: 'myFirebaseFunction',
-            firebaseApp: 'my-firebase-app',
+            app: 'my-firebase-app',
             format: 'esm',
           })
           const project = readProjectConfiguration(tree, 'my-firebase-function')
@@ -323,7 +323,7 @@ describe('function generator', () => {
         it('should generate function configured for --format=commonjs output', async () => {
           await functionGenerator(tree, {
             name: 'myFirebaseFunction',
-            firebaseApp: 'my-firebase-app',
+            app: 'my-firebase-app',
             format: 'cjs',
           })
           const project = readProjectConfiguration(tree, 'my-firebase-function')
@@ -348,7 +348,7 @@ describe('function generator', () => {
         it('should generate function with correct node runtime', async () => {
           await functionGenerator(tree, {
             name: 'myFirebaseFunction',
-            firebaseApp: 'my-firebase-app',
+            app: 'my-firebase-app',
             runTime: '18',
           })
           const project = readProjectConfiguration(tree, 'my-firebase-function')

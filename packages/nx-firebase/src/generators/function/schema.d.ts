@@ -38,7 +38,7 @@ export interface FunctionGeneratorOptions
   directory?: string
   tags?: string
 
-  firebaseApp: string
+  app: string
   runTime?: '16' | '18' | '20'
   format?: 'esm' | 'cjs'
 }

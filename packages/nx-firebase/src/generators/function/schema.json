@@ -40,7 +40,7 @@
       "enum": ["esm", "cjs"],
       "default": "esm"
     },
-    "firebaseApp": {
+    "app": {
       "description": "The name of the parent Nx firebase application project this function will be added to.",
       "type": "string",
       "x-prompt": "Which firebase Nx application project will this function be created for?"
@@ -54,5 +54,5 @@
 
   },
   "additionalProperties": false,
-  "required": ["name", "firebaseApp"]
+  "required": ["name", "app"]
 }
