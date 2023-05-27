@@ -21,7 +21,11 @@
   "generators": "./generators.json",
   "executors": "./executors.json",
   "peerDependencies": {
-    "nx": ">= 13.10.6",
-    "@nx/workspace": ">= 13.10.6"
+    "@nx/workspace": ">= 16.1.1",
+    "nx": ">= 16.1.1"
+  },
+  "dependencies": {
+    "@nx/esbuild": "^16.1.1",
+    "@nx/node": "^16.1.1"
   }
 }

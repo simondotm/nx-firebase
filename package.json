@@ -18,8 +18,10 @@
   "devDependencies": {
     "@nx/devkit": "16.1.1",
     "@nx/eslint-plugin": "16.1.1",
+    "@nx/jest": "16.1.1",
     "@nx/js": "16.1.1",
     "@nx/linter": "16.1.1",
+    "@nx/node": "16.1.1",
     "@nx/plugin": "16.1.1",
     "@nx/workspace": "16.1.1",
     "@swc-node/register": "~1.4.2",
@@ -38,11 +40,10 @@
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "tslib": "^2.0.0",
-    "typescript": "5.0.4",
-    "@nx/jest": "16.1.1",
-    "@nx/node": "16.1.1"
+    "typescript": "5.0.4"
   },
   "dependencies": {
+    "eslint-plugin-prettier": "^4.2.1",
     "semver": "^7.3.8",
     "tslib": "^2.0.0"
   }

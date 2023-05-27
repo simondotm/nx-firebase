@@ -1,6 +1,10 @@
-import { offsetFromRoot, Tree } from '@nx/devkit'
-import { generateFiles, joinPathFragments } from '@nx/devkit'
-import { firebaseNodeEngine, firebaseNodeRuntime } from '../../../utils'
+import {
+  generateFiles,
+  joinPathFragments,
+  offsetFromRoot,
+  Tree,
+} from '@nx/devkit'
+
 import type { NormalizedOptions } from '../schema'
 
 /**
@@ -11,22 +15,18 @@ import type { NormalizedOptions } from '../schema'
  */
 export function createFiles(tree: Tree, options: NormalizedOptions): void {
   const firebaseAppConfig = options.firebaseConfigName
-  const firebaseAppConfigPath = joinPathFragments(
-    offsetFromRoot(options.projectRoot),
-    firebaseAppConfig,
-  )
 
   const substitutions = {
     tmpl: '',
-    name: options.projectName,
-    root: options.projectRoot,
+    projectName: options.projectName,
+    projectRoot: options.projectRoot,
 
-    firebaseAppName: options.name,
+    // firebaseAppName: options.name,
     firebaseAppConfig,
-    firebaseAppConfigPath,
+    // firebaseAppConfigPath,
 
-    firebaseNodeRuntime,
-    firebaseNodeEngine,
+    // firebaseNodeRuntime,
+    // firebaseNodeEngine,
   }
 
   // The default functions package.json & templated typescript source files are added here
