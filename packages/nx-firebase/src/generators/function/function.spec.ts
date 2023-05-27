@@ -71,6 +71,8 @@ describe('function generator', () => {
                 tsConfig: 'apps/my-firebase-function/tsconfig.app.json',
                 assets: ['apps/my-firebase-function/src/assets'],
                 generatePackageJson: true,
+                bundle: true,
+                thirdParty: false,
                 target: 'node16',
                 format: ['esm'],
                 esbuildOptions: {

@@ -25,8 +25,9 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
       tsConfig: project.targets.build.options.tsConfig,
       assets: project.targets.build.options.assets,
       generatePackageJson: true,
-      // bundle: true, // default for esbuild
-      // thirdParty: false, // default for esbuild
+      // these are the defaults for esbuild, but let's set them anyway
+      bundle: true,
+      thirdParty: false,
       target: 'node16',
       format: [options.format || 'esm'], // default for esbuild is esm
       esbuildOptions: {
