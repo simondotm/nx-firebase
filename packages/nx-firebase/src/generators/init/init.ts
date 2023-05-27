@@ -2,7 +2,6 @@
 import type { GeneratorCallback, Tree } from '@nx/devkit'
 import { convertNxGenerator, formatFiles, runTasksInSerial } from '@nx/devkit'
 import { initGenerator as nodeInitGenerator } from '@nx/node'
-// import { runTasksInSerial } from '@nx/workspace/src/utilities/run-tasks-in-serial'
 import { addDependencies, normalizeOptions } from './lib'
 import { addGitIgnoreEntry } from './lib/add-git-ignore-entry'
 import type { InitGeneratorOptions } from './schema'
@@ -21,15 +20,11 @@ export async function initGenerator(
   tree: Tree,
   rawOptions: InitGeneratorOptions,
 ): Promise<GeneratorCallback> {
-  addGitIgnoreEntry(tree)
 
   const options = normalizeOptions(rawOptions)
   const nodeInitTask = await nodeInitGenerator(tree, options)
   const installPackagesTask = addDependencies(tree)
-
-  if (!options.skipFormat) {
-    await formatFiles(tree)
-  }
+  addGitIgnoreEntry(tree)
 
   return runTasksInSerial(nodeInitTask, installPackagesTask)
 }

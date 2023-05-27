@@ -18,15 +18,19 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
 
   const substitutions = {
     tmpl: '',
-    name: options.projectName,
-    root: options.projectRoot,
+    projectName: options.projectName,
+    projectRoot: options.projectRoot,
 
-    firebaseAppName: options.name,
+    firebaseAppName: options.firebaseApp,
     firebaseAppConfig,
     firebaseAppConfigPath,
 
-    firebaseNodeRuntime,
-    firebaseNodeEngine,
+    firebaseNodeEngine: options.runTime,
+
+    // firebaseNodeRuntime,
+    // firebaseNodeEngine,
+
+    moduleType: options.format === 'esm' ? 'module' : 'commonjs',
   }
 
   // The default functions package.json & templated typescript source files are added here
@@ -42,47 +46,4 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
     options.projectRoot,
     substitutions,
   )
-
-  // app project, so that it can be easily located with the cli command, and also enables nx workspaces
-  // to contain multiple firebase projects
-  // firebase.*.json files have to go in the root of the workspace, because firebase function deployment only allows
-  //  the deployed package for functions to exist in a sub directory from where the firebase.json config is located
-  // In principle for users that are not using the firebase functions feature, they could put this firebase.json config
-  //  inside their app folder, but it's better to have consistent behaviour for every workspace
-
-  // generate these firebase files in the root workspace only if they dont already exist
-  // ( since we dont want to overwrite any existing configs)
-
-  // create firebase config file in the root of the workspace.
-  // use `firebase.json` as the first firebase project config
-  // use `firebase.<project-name>.json` for subsequent project configs
-  if (!tree.exists('firebase.json')) {
-    generateFiles(
-      tree,
-      joinPathFragments(__dirname, '..', 'files_firebase'),
-      '',
-      substitutions,
-    )
-  } else {
-    generateFiles(
-      tree,
-      joinPathFragments(__dirname, '..', 'files_workspace'),
-      '', // SM: this is a tree path, not a file system path
-      substitutions,
-    )
-  }
-
-  // For a fresh workspace, the firebase CLI needs at least a firebase.json and an empty .firebaserc
-  //  in order to use commands like 'firebase use --add'
-  if (!tree.exists('.firebaserc')) {
-    generateFiles(
-      tree,
-      joinPathFragments(__dirname, '..', 'files_firebaserc'),
-      '',
-      substitutions,
-    )
-  }
-  // else {
-  //   logger.log('✓ .firebaserc already exists in this workspace')
-  // }
 }

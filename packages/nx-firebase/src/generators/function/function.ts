@@ -1,18 +1,79 @@
-import '../../utils/e2ePatch' // intentional side effects
-import { GeneratorCallback, Tree } from '@nrwl/devkit'
-import { convertNxGenerator, formatFiles } from '@nrwl/devkit'
+// import '../../utils/e2ePatch' // intentional side effects
+import {
+  GeneratorCallback,
+  ProjectConfiguration,
+  readProjectConfiguration,
+  Tree,
+  convertNxGenerator,
+  formatFiles,
+  runTasksInSerial,
+  names,
+} from '@nrwl/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
-import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial'
+
 import { initGenerator } from '../init/init'
 import {
-  addProject,
-  createFiles,
-  normalizeOptions,
-  toNodeApplicationGeneratorOptions,
+  generateFirebaseConfigName,
+  getProjectName,
   updateTsConfig,
-} from './lib'
-import { deleteFiles } from './lib/delete-files'
-import type { ApplicationGeneratorOptions } from './schema'
+} from '../../utils'
+
+import { addFunction, createFiles, updateProject } from './lib'
+import type { FunctionGeneratorOptions, NormalizedOptions } from './schema'
+
+export function normalizeOptions(
+  tree: Tree,
+  options: FunctionGeneratorOptions,
+): NormalizedOptions {
+  const { projectName, projectRoot } = getProjectName(
+    tree,
+    options.name,
+    options.directory,
+  )
+
+  // console.log(`projectName=${projectName}`)
+  // console.log(`options=${options}`)
+  // console.log(options)
+
+  const firebaseApp = names(options.firebaseApp).fileName
+  // console.log(`options.firebaseApp ${firebaseApp}`)
+  // get/validate the firebase app project this function will be attached to
+  let firebaseAppProject: ProjectConfiguration
+  try {
+    firebaseAppProject = readProjectConfiguration(tree, firebaseApp)
+  } catch (err) {
+    throw new Error(
+      `A firebase application project called '${firebaseApp}' was not found in this workspace.`,
+    )
+  }
+
+  // use firebase.<project>.json if it exists, otherwise fall back to firebase.json
+  let firebaseConfigName = `firebase.${firebaseApp}.json`
+  if (!tree.exists(firebaseConfigName)) {
+    // console.log(`looking for ${firebaseConfigName} failed, using fallback`)
+    firebaseConfigName = `firebase.json`
+  }
+
+  // console.log(
+  //   `project=${options.name} firebaseConfigName=${firebaseConfigName}`,
+  // )
+
+  if (!tree.exists(firebaseConfigName)) {
+    throw new Error(
+      `Could not find firebase config called '${firebaseConfigName}' in this workspace.`,
+    )
+  }
+
+  return {
+    ...options,
+    runTime: options.runTime || '16',
+    format: options.format || 'esm',
+    projectRoot,
+    projectName,
+    firebaseConfigName,
+    firebaseAppProject,
+  }
+}
 
 /**
  * Firebase 'functions' application generator
@@ -24,53 +85,64 @@ import type { ApplicationGeneratorOptions } from './schema'
  */
 export async function functionGenerator(
   tree: Tree,
-  rawOptions: ApplicationGeneratorOptions,
+  rawOptions: FunctionGeneratorOptions,
 ): Promise<GeneratorCallback> {
+  const tasks: GeneratorCallback[] = []
+
   const options = normalizeOptions(tree, rawOptions)
 
-  // initialise plugin
-  const initTask = await initGenerator(tree, {
-    unitTestRunner: options.unitTestRunner,
-    skipFormat: true,
-  })
-
-  // 1. check there is a firebase app already, report warning if not
-  // 2. `npx nx g @nrwl/node:app auth-on-create --directory ayok/functions`
-  // 3. options - esm, bundler=esbuild/webpack/rollup/none (use nx-firebase builder)
-  // 4. default build target should be ok
-  // 5. Add function deploy target to project.json (with deployOn build)
-  // 6. check node app generator makes a package.json - set type: module for esm
-  // 7. check tsconfig.app.json has module: es2020 for esm
-  // 8. add function to firebase.xxx.json config
-  //   {
-  //     "source": "dist/apps/ayok/functions/auth-on-create",
-  //     "codebase": "ayok-functions-auth-on-create",
-  //     "runtime": "nodejs16"
+  // // make sure this firebase config name is unique.
+  // // shouldn't happen as nx already enforces unique project names
+  // if (tree.exists(options.firebaseConfigName)) {
+  //   throw Error(
+  //     `There is already a firebase configuration called '${options.firebaseConfigName}' in this workspace. Please try a different project name.`,
+  //   )
   // }
-  // 9. Update `firebase/project.json` to contain: `"implicitDependencies": [..., "ayok-functions-auth-on-create"]`
-  //10. check the default function main.ts code is ok.
-  //11. serve/watch should 'just work'
-  // 12. Change firebase app generator to generate a separate function app instead of a nested app (OR NOT, explain that new version does not create a function app by default)
-  // Check to see if we can hook deletion to remove: implicitDep, function from firebase.xx.json config - remove generator?
-  //
-  const nodeApplicationTask = await nodeApplicationGenerator(
-    tree,
-    toNodeApplicationGeneratorOptions(options),
-    // rawOptions,
-  )
-  deleteFiles(tree, options)
+
+  // initialise plugin
+  const initTask = await initGenerator(tree, {})
+  tasks.push(initTask)
+
+  // Use @nx/node:app to scaffold our function application, then modify as required
+  // `nx g @nx/node:app function-name --directory functions/dir --e2eTestRunner=none --framework=none --unitTestRunner=jest --bundler=esbuild --tags=firebase:firebase-app`
+
+  // Function apps are tagged so that they can built/watched with run-many
+  const tags =
+    `firebase:${options.firebaseAppProject.name}` +
+    (options.tags ? `,${options.tags}` : '')
+
+  const nodeApplicationTask = await nodeApplicationGenerator(tree, {
+    name: options.name,
+    directory: options.directory,
+    tags,
+    setParserOptionsProject: options.setParserOptionsProject,
+    skipFormat: options.skipFormat,
+    e2eTestRunner: 'none',
+    bundler: 'esbuild',
+    framework: 'none',
+    unitTestRunner: 'jest',
+  })
+  tasks.push(nodeApplicationTask)
+
+  // generate function app specific files
   createFiles(tree, options)
-  updateTsConfig(tree, options.projectRoot)
-  addProject(tree, options)
+
+  // update TS config for esm or cjs
+  updateTsConfig(tree, options.projectRoot, options.runTime, options.format)
+
+  // reconfigure the @nx/node:app to suit firebase functions
+  updateProject(tree, options)
+
+  // update firebase functions config
+  addFunction(tree, options)
 
   // ensures newly added files are formatted to match workspace style
   if (!options.skipFormat) {
     await formatFiles(tree)
   }
 
-  return runTasksInSerial(initTask, nodeApplicationTask)
+  return runTasksInSerial(...tasks)
 }
 
 export default functionGenerator
-
-// export const functionSchematic = convertNxGenerator(functionGenerator)
+export const functionSchematic = convertNxGenerator(functionGenerator)

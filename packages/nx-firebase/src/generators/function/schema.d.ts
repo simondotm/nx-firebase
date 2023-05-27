@@ -1,24 +1,51 @@
-import { Linter } from '@nrwl/linter'
-import { UnitTestRunner } from '../../utils/test-runners'
+import { ProjectConfiguration } from '@nx/devkit'
 
-export interface ApplicationGeneratorOptions {
-  // standard @nrwl/node:app options
-  name: string
-  directory?: string
-  frontendProject?: string
-  linter?: Linter
-  skipFormat?: boolean
-  skipPackageJson?: boolean
-  standaloneConfig?: boolean
-  tags?: string
-  unitTestRunner?: UnitTestRunner
+// export interface Schema {
+//   name: string;
+//   skipFormat?: boolean;
+//   skipPackageJson?: boolean;
+//   directory?: string;
+//   unitTestRunner?: 'jest' | 'none';
+//   e2eTestRunner?: 'jest' | 'none';
+//   linter?: Linter;
+//   tags?: string;
+//   frontendProject?: string;
+//   babelJest?: boolean;
+//   js?: boolean;
+//   pascalCaseFiles?: boolean;
+//   setParserOptionsProject?: boolean;
+//   standaloneConfig?: boolean;
+//   bundler?: 'esbuild' | 'webpack';
+//   framework?: NodeJsFrameWorks;
+//   port?: number;
+//   rootProject?: boolean;
+//   docker?: boolean;
+//   isNest?: boolean;
+// }
+
+// subset of @nx/node:application options
+interface NodeGeneratorOptions {
   setParserOptionsProject?: boolean
-  // extra options for @simondotm/nx-firebase:app generator
-  project?: string
+  skipFormat?: boolean
+  // unitTestRunner is always jest
+  // bundler is always esbuild
+  // linter is always eslint
 }
 
-interface NormalizedOptions extends ApplicationGeneratorOptions {
+export interface FunctionGeneratorOptions extends NodeGeneratorOptions {
+  name: string
+  directory?: string
+  tags?: string
+
+  firebaseProject?: string
+  firebaseApp: string
+  runTime?: '16' | '18' | '20'
+  format?: 'esm' | 'cjs'
+}
+
+interface NormalizedOptions extends FunctionGeneratorOptions {
   projectRoot: Path
   projectName: string
   firebaseConfigName: string
+  firebaseAppProject: ProjectConfiguration
 }

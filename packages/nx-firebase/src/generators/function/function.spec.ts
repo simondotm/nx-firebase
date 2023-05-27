@@ -1,29 +1,22 @@
-import type { Tree } from '@nrwl/devkit'
-import * as devkit from '@nrwl/devkit'
-// NX 14/15 only
-// import { createTreeWithEmptyV1Workspace } from '@nrwl/devkit/testing'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
-import { applicationGenerator } from './function'
 import {
-  getBuildTarget,
-  getConfigTarget,
-  getDeployTarget,
-  getEmulateTarget,
-  getServeTarget,
-} from './lib'
-import { NormalizedOptions } from './schema'
+  getProjects,
+  joinPathFragments,
+  readJson,
+  readProjectConfiguration,
+  Tree,
+  writeJson,
+} from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import { functionGenerator } from './function'
+import applicationGenerator from '../application/application'
 
-describe('application generator', () => {
+describe('function generator', () => {
   let tree: Tree
-  //TODO: currently the plugin doesnt properly support camelCase project names (split to kebab-case by node plugin)
-  // or --directory sub directories for applications.
-  const appName = 'my-firebase-app' //'myFirebaseApp'
-  const appDirectory = 'my-firebase-app'
 
   beforeEach(() => {
-    // NX 14/15 only
-    // tree = createTreeWithEmptyV1Workspace()
-    tree = createTreeWithEmptyWorkspace()
+    tree = createTreeWithEmptyWorkspace({
+      layout: 'apps-libs',
+    })
     jest.clearAllMocks()
   })
 
@@ -33,165 +26,345 @@ describe('application generator', () => {
     expect(tree.isFile(`package.json`)).toBeTruthy()
   })
 
-  it('should generate files', async () => {
-    await applicationGenerator(tree, { name: appName })
-
-    // default firebase project files
-    expect(tree.exists(`apps/${appDirectory}/src/index.ts`)).toBeTruthy()
-    expect(tree.exists(`apps/${appDirectory}/public/index.html`)).toBeTruthy()
-    expect(tree.exists(`apps/${appDirectory}/package.json`)).toBeTruthy()
-    expect(tree.exists(`apps/${appDirectory}/readme.md`)).toBeTruthy()
-    // rules & indexes
-    expect(tree.exists(`apps/${appDirectory}/database.rules.json`)).toBeTruthy()
-    expect(
-      tree.exists(`apps/${appDirectory}/firestore.indexes.json`),
-    ).toBeTruthy()
-    expect(tree.exists(`apps/${appDirectory}/firestore.rules`)).toBeTruthy()
-    expect(tree.exists(`apps/${appDirectory}/storage.rules`)).toBeTruthy()
-    // workspace firebase configs
-    expect(tree.isFile(`package.json`)).toBeTruthy()
-    expect(tree.isFile(`firebase.json`)).toBeTruthy()
-    expect(tree.isFile(`.firebaserc`)).toBeTruthy()
-  })
-
-  it('should configure tsconfig correctly', async () => {
-    await applicationGenerator(tree, { name: appName })
-
-    const tsConfig = devkit.readJson(
-      tree,
-      `apps/${appDirectory}/tsconfig.app.json`,
+  it('should require a valid firebase app project', async () => {
+    // generator should throw if there is no valid firebase app project in the workspace
+    await expect(
+      functionGenerator(tree, {
+        name: 'myFirebaseFunction',
+        firebaseApp: 'myFirebaseApp',
+      }),
+    ).rejects.toThrow(
+      "A firebase application project called 'my-firebase-app' was not found in this workspace.",
     )
-    expect(tsConfig.compilerOptions.emitDecoratorMetadata).toBe(true)
-    expect(tsConfig.compilerOptions.target).toBe('es2021') // default target is node 16
-    // NX14/15 only
-    // expect(tsConfig.exclude).toEqual([
-    //   'jest.config.ts',
-    //   'src/**/*.spec.ts',
-    //   'src/**/*.test.ts',
-    // ])
-    expect(tsConfig.exclude).toEqual(['**/*.spec.ts', '**/*.test.ts'])
   })
 
-  it('should update project configuration', async () => {
-    await applicationGenerator(tree, { name: appName })
-
-    const project = devkit.readProjectConfiguration(tree, appName)
-
-    //const workspaceJson = devkit.readJson(tree, '/workspace.json');
-    expect(project.root).toEqual(
-      devkit.joinPathFragments(
-        devkit.getWorkspaceLayout(tree).appsDir,
-        appName,
-      ),
-    )
-
-    // validate the custom targets for nx-firebase apps
-    const firebaseConfigName = `firebase.json`
-    // const projectName = project.name //NX14/15 project.json format only has project name in file
-    const projectName = appName
-
-    const options: NormalizedOptions = {
-      name: appName,
-      projectRoot: project.root,
-      projectName,
-      firebaseConfigName,
-    }
-
-    expect(project.targets.build).toEqual(getBuildTarget(project))
-    expect(project.targets.deploy).toEqual(getDeployTarget(options))
-    expect(project.targets.getconfig).toEqual(
-      getConfigTarget(project.root, options),
-    )
-    expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
-    expect(project.targets.serve).toEqual(getServeTarget(options))
-
-    // assume @nrwl/node is working, we dont need to validate these objects
-    expect(project.targets.lint).toBeDefined()
-    expect(project.targets.test).toBeDefined()
-  })
-
-  it('should update project configuration with --project', async () => {
-    await applicationGenerator(tree, { name: appName, project: 'fb-proj' })
-
-    const project = devkit.readProjectConfiguration(tree, appName)
-
-    //const workspaceJson = devkit.readJson(tree, '/workspace.json');
-    expect(project.root).toEqual(
-      devkit.joinPathFragments(
-        devkit.getWorkspaceLayout(tree).appsDir,
-        appName,
-      ),
-    )
-
-    // validate the custom targets for nx-firebase apps
-    const firebaseConfigName = `firebase.json`
-    // const projectName = project.name //NX14/15 project.json format only has project name in file
-    const projectName = appName
-    const options: NormalizedOptions = {
-      name: appName,
-      projectRoot: project.root,
-      projectName,
-      firebaseConfigName,
-      project: 'fb-proj',
-    }
-
-    expect(project.targets.build).toEqual(getBuildTarget(project))
-    expect(project.targets.deploy).toEqual(getDeployTarget(options))
-    expect(project.targets.getconfig).toEqual(
-      getConfigTarget(project.root, options),
-    )
-    expect(project.targets.emulate).toEqual(getEmulateTarget(options, project))
-    expect(project.targets.serve).toEqual(getServeTarget(options))
-
-    // assume @nrwl/node is working, we dont need to validate these objects
-    expect(project.targets.lint).toBeDefined()
-    expect(project.targets.test).toBeDefined()
-  })
-
-  it('should generate multiple firebase configurations', async () => {
-    const appName1 = `${appName}1`
-    const appName2 = `${appName}2`
-    await applicationGenerator(tree, { name: appName1 })
-    await applicationGenerator(tree, { name: appName2 })
-    expect(tree.isFile(`firebase.json`)).toBeTruthy()
-    expect(tree.isFile(`firebase.${appName2}.json`)).toBeTruthy()
-  })
-
-  it('should generate app in subdirectory', async () => {
-    const dir = 'subdir'
-    const name = `app`
-
-    await applicationGenerator(tree, { name: name, directory: dir })
-
-    // default firebase project files
-    expect(tree.exists(`apps/${dir}/${name}/src/index.ts`)).toBeTruthy()
-    expect(tree.exists(`apps/${dir}/${name}/public/index.html`)).toBeTruthy()
-    expect(tree.exists(`apps/${dir}/${name}/package.json`)).toBeTruthy()
-    expect(tree.exists(`apps/${dir}/${name}/readme.md`)).toBeTruthy()
-    // rules & indexes
-    expect(tree.exists(`apps/${dir}/${name}/database.rules.json`)).toBeTruthy()
-    expect(
-      tree.exists(`apps/${dir}/${name}/firestore.indexes.json`),
-    ).toBeTruthy()
-    expect(tree.exists(`apps/${dir}/${name}/firestore.rules`)).toBeTruthy()
-    expect(tree.exists(`apps/${dir}/${name}/storage.rules`)).toBeTruthy()
-  })
-
-  describe('--skipFormat', () => {
-    it('should format files', async () => {
-      jest.spyOn(devkit, 'formatFiles')
-
-      await applicationGenerator(tree, { name: appName })
-
-      expect(devkit.formatFiles).toHaveBeenCalled()
+  describe('function generator', () => {
+    beforeEach(async () => {
+      await applicationGenerator(tree, {
+        name: 'myFirebaseApp',
+      })
     })
 
-    it('should not format files when --skipFormat=true', async () => {
-      jest.spyOn(devkit, 'formatFiles')
+    describe('application setup', () => {
+      it('should create a firebase config with no functions', async () => {
+        const firebaseConfig = readJson(tree, 'firebase.json')
+        expect(firebaseConfig.functions.length).toEqual(0)
+      })
+    })
 
-      await applicationGenerator(tree, { name: appName, skipFormat: true })
+    describe('function creation', () => {
+      it('should generate the correct Nx project config', async () => {
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'my-firebase-app',
+        })
+        const project = readProjectConfiguration(tree, 'my-firebase-function')
+        expect(project.root).toEqual('apps/my-firebase-function')
+        expect(project.targets).toEqual(
+          expect.objectContaining({
+            build: {
+              executor: '@nx/esbuild:esbuild',
+              outputs: ['{options.outputPath}'],
+              options: {
+                outputPath: 'dist/apps/my-firebase-function',
+                main: 'apps/my-firebase-function/src/main.ts',
+                tsConfig: 'apps/my-firebase-function/tsconfig.app.json',
+                assets: ['apps/my-firebase-function/src/assets'],
+                generatePackageJson: true,
+                target: 'node16',
+                format: ['esm'],
+                esbuildOptions: {
+                  logLevel: 'info',
+                },
+              },
+            },
+            deploy: {
+              executor: 'nx:run-commands',
+              options: {
+                // command: `firebase deploy --config=firebase.json`,
+                command: `nx run my-firebase-app:deploy --only functions:my-firebase-function`,
+              },
+              dependsOn: ['build'],
+            },
+            lint: {
+              executor: '@nx/linter:eslint',
+              outputs: ['{options.outputFile}'],
+              options: {
+                lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],
+              },
+            },
+            test: {
+              executor: '@nx/jest:jest',
+              outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
+              options: {
+                jestConfig: 'apps/my-firebase-function/jest.config.ts',
+                passWithNoTests: true,
+              },
+              configurations: {
+                ci: {
+                  ci: true,
+                  codeCoverage: true,
+                },
+              },
+            },
+          }),
+        )
+        expect(project.targets.serve).toBeUndefined()
+      })
 
-      expect(devkit.formatFiles).not.toHaveBeenCalled()
+      it('should update tags', async () => {
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'myFirebaseApp',
+          tags: 'one,two',
+        })
+        const projects = Object.fromEntries(getProjects(tree))
+        expect(projects).toMatchObject({
+          'my-firebase-function': {
+            tags: ['firebase:my-firebase-app', 'one', 'two'],
+          },
+        })
+      })
+
+      it('should generate files', async () => {
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'myFirebaseApp',
+        })
+        const root = 'apps/my-firebase-function'
+        expect(tree.exists(`${root}/src/main.ts`)).toBeTruthy()
+        expect(tree.exists(`${root}/src/assets/.gitkeep`)).toBeTruthy()
+        expect(tree.exists(`${root}/package.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/readme.md`)).toBeTruthy()
+        expect(tree.exists(`${root}/jest.config.ts`)).toBeTruthy()
+        expect(tree.exists(`${root}/.eslintrc.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/project.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/tsconfig.app.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/tsconfig.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/tsconfig.spec.json`)).toBeTruthy()
+        // do not want, from node generator
+        expect(tree.exists(`${root}/webpack.config.js`)).toBeFalsy()
+        expect(tree.exists(`${root}/src/test-setup.ts`)).toBeFalsy()
+      })
+
+      it('should generate function in subdirectory', async () => {
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'my-firebase-app',
+          directory: 'subDir',
+        })
+
+        const projects = Object.fromEntries(getProjects(tree))
+        expect(projects).toMatchObject({
+          'sub-dir-my-firebase-function': {
+            tags: ['firebase:my-firebase-app'],
+          },
+        })
+
+        const root = 'apps/sub-dir/my-firebase-function'
+        expect(tree.exists(`${root}/src/main.ts`)).toBeTruthy()
+        expect(tree.exists(`${root}/src/assets/.gitkeep`)).toBeTruthy()
+        expect(tree.exists(`${root}/package.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/readme.md`)).toBeTruthy()
+        expect(tree.exists(`${root}/jest.config.ts`)).toBeTruthy()
+        expect(tree.exists(`${root}/.eslintrc.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/project.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/tsconfig.app.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/tsconfig.json`)).toBeTruthy()
+        expect(tree.exists(`${root}/tsconfig.spec.json`)).toBeTruthy()
+        // do not want, from node generator
+        expect(tree.exists(`${root}/webpack.config.js`)).toBeFalsy()
+        expect(tree.exists(`${root}/src/test-setup.ts`)).toBeFalsy()
+      })
+    })
+
+    describe('firebase.json functions config', () => {
+      it('should add the function to the firebase config', async () => {
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'myFirebaseApp',
+        })
+        const firebaseConfig = readJson(tree, 'firebase.json')
+        // console.log(firebaseConfig)
+        expect(firebaseConfig.functions.length).toEqual(1)
+        expect(firebaseConfig.functions[0]).toEqual({
+          codebase: 'my-firebase-function',
+          source: 'dist/apps/my-firebase-function',
+          runtime: `nodejs16`,
+        })
+      })
+
+      it('should handle functions being empty object', async () => {
+        const firebaseConfigInitial = readJson(tree, 'firebase.json')
+        firebaseConfigInitial.functions = {}
+        writeJson(tree, 'firebase.json', firebaseConfigInitial)
+
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'myFirebaseApp',
+        })
+
+        const firebaseConfig = readJson(tree, 'firebase.json')
+        // console.log(firebaseConfig)
+        expect(firebaseConfig.functions.length).toEqual(1)
+        expect(firebaseConfig.functions[0]).toEqual({
+          codebase: 'my-firebase-function',
+          source: 'dist/apps/my-firebase-function',
+          runtime: `nodejs16`,
+        })
+      })
+
+      it('should handle functions being already present', async () => {
+        const firebaseConfigInitial = readJson(tree, 'firebase.json')
+        // console.log('1')
+        // console.log(firebaseConfigInitial)
+        const testFunction = {
+          codebase: 'test',
+          source: 'dist/apps/test',
+          runtime: `nodejs16`,
+        }
+        firebaseConfigInitial.functions = [testFunction]
+        writeJson(tree, 'firebase.json', firebaseConfigInitial)
+        // console.log('2')
+        // console.log(firebaseConfigInitial)
+
+        await functionGenerator(tree, {
+          name: 'myFirebaseFunction',
+          firebaseApp: 'myFirebaseApp',
+        })
+
+        const firebaseConfig = readJson(tree, 'firebase.json')
+        // console.log('3')
+        // console.log(firebaseConfig)
+
+        // expect(firebaseConfig.functions.length).toEqual(2)
+        expect(firebaseConfig.functions[0]).toEqual(testFunction)
+        expect(firebaseConfig.functions[1]).toEqual({
+          codebase: 'my-firebase-function',
+          source: 'dist/apps/my-firebase-function',
+          runtime: `nodejs16`,
+        })
+      })
+    })
+
+    // Not needed since we use the app deploy for functions
+    // describe('function firebase deploy --config', () => {
+    //   it('should generate functions that deploy with correct firebase config', async () => {
+    //     await functionGenerator(tree, {
+    //       name: 'myFirebaseFunction',
+    //       firebaseApp: 'my-firebase-app',
+    //     })
+    //     const project = readProjectConfiguration(tree, 'my-firebase-function')
+    //     expect(project.targets.deploy.options.command).toContain(
+    //       '--config=firebase.json',
+    //     )
+    //   })
+
+    //   it('should generate function with correct firebase config when there are multiple firebase apps', async () => {
+    //     // generate 2nd app, will create a custom firebase.<project>.json
+    //     await applicationGenerator(tree, {
+    //       name: 'myFirebaseApp2',
+    //     })
+    //     // attach this function to 2nd app
+    //     await functionGenerator(tree, {
+    //       name: 'myFirebaseFunction2',
+    //       firebaseApp: 'my-firebase-app2',
+    //     })
+    //     // function should detect & use the custom firebase config
+    //     const project = readProjectConfiguration(tree, 'my-firebase-function2')
+    //     expect(project.targets.deploy.options.command).toContain(
+    //       '--config=firebase.my-firebase-app2.json',
+    //     )
+    //   })
+    // })
+
+    describe('function options', () => {
+      // describe('function option --project', () => {
+      //   it('should generate function that deploy with the correct firebase project', async () => {
+      //     await functionGenerator(tree, {
+      //       name: 'myFirebaseFunction',
+      //       firebaseApp: 'my-firebase-app',
+      //       firebaseProject: 'projectId',
+      //     })
+      //     const project = readProjectConfiguration(tree, 'my-firebase-function')
+      //     expect(project.targets.deploy.options.command).toContain(
+      //       '--project=projectId',
+      //     )
+      //   })
+      // })
+
+      describe('function option --format', () => {
+        it('should generate function configured for --format=esm', async () => {
+          await functionGenerator(tree, {
+            name: 'myFirebaseFunction',
+            firebaseApp: 'my-firebase-app',
+            format: 'esm',
+          })
+          const project = readProjectConfiguration(tree, 'my-firebase-function')
+          expect(project.targets.build.options.format).toEqual(['esm'])
+
+          // check the package has the correct module type
+          const packageJson = readJson(
+            tree,
+            joinPathFragments(project.root, 'package.json'),
+          )
+          expect(packageJson.type).toEqual('module')
+
+          // check the tsconfig
+          const tsConfig = readJson(
+            tree,
+            joinPathFragments(project.root, 'tsconfig.app.json'),
+          )
+          expect(tsConfig.compilerOptions.module).toEqual('es2020')
+        })
+
+        it('should generate function configured for --format=commonjs output', async () => {
+          await functionGenerator(tree, {
+            name: 'myFirebaseFunction',
+            firebaseApp: 'my-firebase-app',
+            format: 'cjs',
+          })
+          const project = readProjectConfiguration(tree, 'my-firebase-function')
+          expect(project.targets.build.options.format).toEqual(['cjs'])
+
+          // check the package has the correct module type
+          const packageJson = readJson(
+            tree,
+            joinPathFragments(project.root, 'package.json'),
+          )
+          expect(packageJson.type).toEqual('commonjs')
+
+          // check the tsconfig
+          const tsConfig = readJson(
+            tree,
+            joinPathFragments(project.root, 'tsconfig.app.json'),
+          )
+          expect(tsConfig.compilerOptions.module).toEqual('commonjs')
+        })
+      })
+      describe('function option --runTime', () => {
+        it('should generate function with correct node runtime', async () => {
+          await functionGenerator(tree, {
+            name: 'myFirebaseFunction',
+            firebaseApp: 'my-firebase-app',
+            runTime: '18',
+          })
+          const project = readProjectConfiguration(tree, 'my-firebase-function')
+
+          // check the package has the correct module type
+          const packageJson = readJson(
+            tree,
+            joinPathFragments(project.root, 'package.json'),
+          )
+          expect(packageJson.engines.node).toEqual('18')
+
+          // check the function firebase config
+          const firebaseConfig = readJson(tree, 'firebase.json')
+          // console.log(firebaseConfig)
+          expect(firebaseConfig.functions[0].runtime).toEqual('nodejs18')
+        })
+      })
     })
   })
+  // check implicitDependencies
 })
