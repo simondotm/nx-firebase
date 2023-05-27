@@ -12,6 +12,18 @@ import {
 
 const JEST_TIMEOUT = 120000
 
+// TODO:
+// check dependent packages are installed
+// check that functions are added
+// check that functions build
+// check that libraries can be buildable and non-buildable
+// check that functions can be within firebase app folder
+// check all options
+// remove all tests related to old plugin
+// dont check anything that the generator tests already test, this is just e2e
+
+
+
 // NX14/15 ONLY
 // const USE_DAEMON = false
 // const daemonStatus = USE_DAEMON
@@ -71,7 +83,7 @@ const nonBuildableLibData = getLibDirectories('nonbuildablelib')
 const incompatibleLibData = getLibDirectories('incompatiblelib', 'subdir')
 
 //const indexTs = `apps/${appName}/src/index.ts`
-let indexTsFile
+// let indexTsFile
 const importMatch = `import * as functions from 'firebase-functions';`
 
 type AppDirectoryData = typeof appData
@@ -80,9 +92,9 @@ type LibDirectoryData = typeof buildableLibData
 function expectedAppFiles(directoryData: AppDirectoryData) {
   const projectPath = directoryData.projectDir
   return [
-    `${projectPath}/src/index.ts`,
-    `${projectPath}/public/index.html`,
-    `${projectPath}/package.json`,
+    // `${projectPath}/src/index.ts`,
+    // `${projectPath}/public/index.html`,
+    // `${projectPath}/package.json`,
     `${projectPath}/readme.md`,
     `${projectPath}/database.rules.json`,
     `${projectPath}/firestore.indexes.json`,
@@ -221,8 +233,9 @@ describe('nx-firebase e2e', () => {
         ),
       ).not.toThrow()
 
+      // SM: no longer needed in new plugin version
       // stash a copy of the default index.ts
-      indexTsFile = readFile(projectData.indexTsPath)
+      // indexTsFile = readFile(projectData.indexTsPath)
     },
     JEST_TIMEOUT,
   )
@@ -242,18 +255,21 @@ describe('nx-firebase e2e', () => {
     async () => {
       // test build executor
       const result = await runNxCommandAsync(`build ${appData.projectName}`)
-      expect(result.stdout).toContain(compileComplete)
-      expect(result.stdout).toContain(`${buildSuccess} ${appData.projectName}`)
-      expect(result.stdout).toContain('Updated firebase functions package.json')
+      expect(result.stdout).toContain("Build succeeded.")
 
-      const distDir = appData.distDir
-      expect(() =>
-        checkFilesExist(
-          `${distDir}/package.json`,
-          // `${distDir}/readme.md`, // we no longer copy .md files as a default asset
-          `${distDir}/src/index.js`,
-        ),
-      ).not.toThrow()
+      // these are now functions tests
+      // expect(result.stdout).toContain(compileComplete)
+      // expect(result.stdout).toContain(`${buildSuccess} ${appData.projectName}`)
+      // expect(result.stdout).toContain('Updated firebase functions package.json')
+
+      // const distDir = appData.distDir
+      // expect(() =>
+      //   checkFilesExist(
+      //     `${distDir}/package.json`,
+      //     // `${distDir}/readme.md`, // we no longer copy .md files as a default asset
+      //     `${distDir}/src/index.js`,
+      //   ),
+      // ).not.toThrow()
     },
     JEST_TIMEOUT,
   )
@@ -299,8 +315,8 @@ describe('nx-firebase e2e', () => {
         ).not.toThrow()
 
         // NX14/15 ONLY
-        // const project = readJson(`${projectData.projectDir}/project.json`)
-        // expect(project.name).toEqual(`${projectData.projectName}`)
+        const project = readJson(`${projectData.projectDir}/project.json`)
+        expect(project.name).toEqual(`${projectData.projectName}`)
       },
       JEST_TIMEOUT,
     )
