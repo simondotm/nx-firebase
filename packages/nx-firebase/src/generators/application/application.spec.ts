@@ -29,7 +29,7 @@ describe('application generator', () => {
         build: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=build --projects=tag:my-firebase-app --parallel=100`,
+            command: `echo Build succeeded.`,
           },
         },
         lint: {
@@ -65,7 +65,7 @@ describe('application generator', () => {
           options: {
             commands: [
               `nx run my-firebase-app:emulate`,
-              `nx build my-firebase-app --watch`,
+              `nx run-many --targets=build --projects=tag:my-firebase-app --parallel=100 --watch`,
             ],
           },
         },
