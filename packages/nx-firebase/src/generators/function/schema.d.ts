@@ -23,8 +23,8 @@ import { ProjectConfiguration } from '@nx/devkit'
 //   isNest?: boolean;
 // }
 
-// subset of @nx/node:application options
-interface NodeGeneratorOptions {
+// subset of @nx/node:application options that we forward to node app generator
+interface SupportedNodeGeneratorOptions {
   setParserOptionsProject?: boolean
   skipFormat?: boolean
   // unitTestRunner is always jest
@@ -32,12 +32,12 @@ interface NodeGeneratorOptions {
   // linter is always eslint
 }
 
-export interface FunctionGeneratorOptions extends NodeGeneratorOptions {
+export interface FunctionGeneratorOptions
+  extends SupportedNodeGeneratorOptions {
   name: string
   directory?: string
   tags?: string
 
-  firebaseProject?: string
   firebaseApp: string
   runTime?: '16' | '18' | '20'
   format?: 'esm' | 'cjs'

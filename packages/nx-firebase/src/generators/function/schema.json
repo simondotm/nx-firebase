@@ -34,28 +34,24 @@
       "type": "boolean",
       "default": false
     },
-    "firebaseApp": {
-      "description": "The name of the parent Nx firebase application project this function will be added to.",
-      "type": "string",
-      "x-prompt": "Which firebase Nx application project will this function be created for?"
-    },    
-    "firebaseProject": {
-      "description": "The name of the firebase project this function will be deployed to.",
-      "type": "string",
-      "x-prompt": "Which firebase project will this function be deployed to? (as declared in your .firebaserc file)?"
-    },        
-    "runTime": {
-      "description": "The node runtime target for this function.",
-      "type": "string",
-      "enum": ["16", "18", "20"],
-      "default": "16"
-    },        
     "format": {
       "description": "The module format for this function (esm or cjs).",
       "type": "string",
       "enum": ["esm", "cjs"],
       "default": "esm"
+    },
+    "firebaseApp": {
+      "description": "The name of the parent Nx firebase application project this function will be added to.",
+      "type": "string",
+      "x-prompt": "Which firebase Nx application project will this function be created for?"
+    },       
+    "runTime": {
+      "description": "The node runtime target for this function.",
+      "type": "string",
+      "enum": ["16", "18", "20"],
+      "default": "16"
     }
+
   },
   "additionalProperties": false,
   "required": ["name", "firebaseApp"]
