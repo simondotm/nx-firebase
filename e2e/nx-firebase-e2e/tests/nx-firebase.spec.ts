@@ -32,11 +32,14 @@ jest.setTimeout(JEST_TIMEOUT)
 // check dependent packages are installed
 
 
-const appName = 'functions'
+const appName = 'firebase'
+const functionName = 'function'
 
 const subDir = 'subdir'
 
 const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
+const functionGeneratorCommand = 'generate @simondotm/nx-firebase:function'
+
 const libGeneratorCommand = 'generate @nx/js:lib'
 const npmScope = '@proj'
 const pluginName = '@simondotm/nx-firebase'
@@ -44,55 +47,93 @@ const pluginPath = 'dist/packages/nx-firebase'
 const compileComplete = 'Done compiling TypeScript files for project'
 const buildSuccess = 'Successfully ran target build for project'
 
-function getAppDirectories(appName: string, appDir?: string) {
-  const appPrefix = appDir ? `${appDir}-` : ''
-  const appProjectName = `${appPrefix}${appName}`
-  const appSrcDir = appDir ? `${appDir}/` : ''
-  const distDir = `dist/apps/${appSrcDir}${appName}`
+
+interface ProjectData {
+  name: string
+  dir: string
+  projectName: string
+  projectDir: string
+  srcDir: string
+  distDir: string
+  mainTsPath: string
+  npmScope: string
+}
+
+
+// function getAppDirectories(appName: string, appDir?: string) {
+//   const appPrefix = appDir ? `${appDir}-` : ''
+//   const appProjectName = `${appPrefix}${appName}`
+//   const appSrcDir = appDir ? `${appDir}/` : ''
+//   const distDir = `dist/apps/${appSrcDir}${appName}`
+//   return {
+//     name: appName, // name passed to generator
+//     dir: appDir, // directory passed to generator
+//     projectName: appProjectName, // project name
+//     projectDir: `apps/${appSrcDir}${appName}`,
+//     srcDir: `apps/${appSrcDir}${appName}/src`,
+//     distDir: distDir,
+//     functionLibsDir: `libs`, // sub folder in distDir where the functions lib deps are copied
+//     indexTsPath: `apps/${appSrcDir}${appName}/src/index.ts`,
+//   }
+// }
+
+/**
+ * 
+ * @param name - project name (cannot be camel case)
+ * @param dir - project dir
+ * @returns - asset locations for this project
+ */
+function getDirectories(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
+  const prefix = dir ? `${dir}-` : ''
+  const projectName = `${prefix}${name}`
+  const rootDir = dir ? `${dir}/` : ''
+  const distDir = `dist/${type}/${rootDir}${appName}`
   return {
-    name: appName, // name passed to generator
-    dir: appDir, // directory passed to generator
-    projectName: appProjectName, // project name
-    projectDir: `apps/${appSrcDir}${appName}`,
-    srcDir: `apps/${appSrcDir}${appName}/src`,
+    name, // name passed to generator
+    dir, // directory passed to generator
+    projectName, // project name
+    projectDir: `${type}/${rootDir}${name}`,
+    srcDir: `${type}/${rootDir}${name}/src`,
     distDir: distDir,
-    functionLibsDir: `libs`, // sub folder in distDir where the functions lib deps are copied
-    indexTsPath: `apps/${appSrcDir}${appName}/src/index.ts`,
+    mainTsPath: `${type}/${rootDir}${appName}/src/main.ts`,
+    npmScope: `${npmScope}/${projectName}`,
   }
 }
 
-function getLibDirectories(libName: string, libDir?: string) {
-  const libPrefix = libDir ? `${libDir}-` : ''
-  const libProjectName = `${libPrefix}${libName}`
-  const libSrcDir = libDir ? `${libDir}/` : ''
-  return {
-    name: libName,
-    dir: libDir,
-    projectName: libProjectName,
-    projectDir: `libs/${libSrcDir}${libName}`,
-    srcDir: `libs/${libSrcDir}${libName}/src`,
-    npmScope: `${npmScope}/${libProjectName}`,
-    functionName: libDir
-      ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
-      : libName,
-  }
-}
 
-const appData = getAppDirectories(appName)
-const buildableLibData = getLibDirectories('buildablelib')
-const subDirBuildableLibData = getLibDirectories('buildablelib', 'subdir')
-const nonBuildableLibData = getLibDirectories('nonbuildablelib')
-const incompatibleLibData = getLibDirectories('incompatiblelib', 'subdir')
+// function getLibDirectories(libName: string, libDir?: string) {
+//   const libPrefix = libDir ? `${libDir}-` : ''
+//   const libProjectName = `${libPrefix}${libName}`
+//   const libSrcDir = libDir ? `${libDir}/` : ''
+//   return {
+//     name: libName,
+//     dir: libDir,
+//     projectName: libProjectName,
+//     projectDir: `libs/${libSrcDir}${libName}`,
+//     srcDir: `libs/${libSrcDir}${libName}/src`,
+//     npmScope: `${npmScope}/${libProjectName}`,
+//     functionName: libDir
+//       ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
+//       : libName,
+//   }
+// }
+
+// const appData = getAppDirectories(appName)
+// const functionsData = getDirectories()
+// const buildableLibData = getLibDirectories('buildablelib')
+// const subDirBuildableLibData = getLibDirectories('buildablelib', 'subdir')
+// const nonBuildableLibData = getLibDirectories('nonbuildablelib')
+// const incompatibleLibData = getLibDirectories('incompatiblelib', 'subdir')
 
 //const indexTs = `apps/${appName}/src/index.ts`
 // let indexTsFile
 const importMatch = `import * as functions from 'firebase-functions';`
 
-type AppDirectoryData = typeof appData
-type LibDirectoryData = typeof buildableLibData
+// type AppDirectoryData = typeof appData
+// type LibDirectoryData = typeof buildableLibData
 
-function expectedAppFiles(directoryData: AppDirectoryData) {
-  const projectPath = directoryData.projectDir
+function expectedAppFiles(projectData: ProjectData) {
+  const projectPath = projectData.projectDir
   return [
     // `${projectPath}/src/index.ts`,
     // `${projectPath}/public/index.html`,
@@ -107,13 +148,29 @@ function expectedAppFiles(directoryData: AppDirectoryData) {
   ]
 }
 
+function expectedFunctionFiles(projectData: ProjectData) {
+  const projectPath = projectData.projectDir
+  return [
+    `${projectPath}/src/main.ts`,
+    `${projectPath}/package.json`,
+    // `${projectPath}/public/index.html`,
+    // `${projectPath}/readme.md`,
+    // `${projectPath}/database.rules.json`,
+    // `${projectPath}/firestore.indexes.json`,
+    // `${projectPath}/firestore.rules`,
+    // `${projectPath}/storage.rules`,
+    // `firebase.json`,
+    // `.firebaserc`,
+  ]
+}
+
 function expectedConfigFiles(
-  directoryData: AppDirectoryData,
+  projectData: ProjectData,
   firstProject: boolean = false,
 ) {
   return firstProject
     ? ['firebase.json']
-    : [`firebase.${directoryData.projectName}.json`]
+    : [`firebase.${projectData.projectName}.json`]
 }
 
 /**
@@ -203,7 +260,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should create nx-firebase app',
       async () => {
-        const projectData = appData
+        const projectData = getDirectories('apps', appName)
         await runNxCommandAsync(`${appGeneratorCommand} ${projectData.name}`)
         // test generator output
         expect(() =>
@@ -222,9 +279,11 @@ describe('nx-firebase e2e', () => {
     it(
       'should build nx-firebase app',
       async () => {
+        const projectData = getDirectories('apps', appName)
+
         // test app builder
         // at this point there are no functions so it doe nothing
-        const result = await runNxCommandAsync(`build ${appData.projectName}`)
+        const result = await runNxCommandAsync(`build ${projectData.projectName}`)
         expect(result.stdout).toContain("Build succeeded.")
 
         // these are now functions tests
@@ -246,7 +305,7 @@ describe('nx-firebase e2e', () => {
       it(
         'should create nx-firebase app in the specified directory',
         async () => {
-          const projectData = getAppDirectories(uniq(appName), subDir)
+          const projectData = getDirectories('apps', uniq(appName), subDir)
           await runNxCommandAsync(
             `${appGeneratorCommand} ${projectData.name} --directory ${projectData.dir}`,
           )
@@ -267,7 +326,7 @@ describe('nx-firebase e2e', () => {
       it(
         'should add tags to the project',
         async () => {
-          const projectData = getAppDirectories(uniq(appName))
+          const projectData = getDirectories('apps', uniq(appName))
           await runNxCommandAsync(
             `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
           )
@@ -284,6 +343,51 @@ describe('nx-firebase e2e', () => {
   //--------------------------------------------------------------------------------------------------
 
   describe('nx-firebase function', () => {
+    it(
+      'should not create nx-firebase function without --app',
+      async () => {
+        const projectData = getDirectories('apps', functionName)
+
+        await expect(
+          runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name}`),
+        ).rejects.toThrow(
+          "Command failed: npx nx generate @simondotm/nx-firebase:function function",
+        )
+
+
+        // await runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name}`)
+        // // test generator output
+        // expect(() =>
+        //   checkFilesExist(
+        //     ...expectedFunctionFiles(projectData).concat(
+        //       expectedConfigFiles(projectData, true),
+        //     ),
+        //   ),
+        // ).not.toThrow()
+
+        // SM: no longer needed in new plugin version
+        // stash a copy of the default index.ts
+        // indexTsFile = readFile(projectData.indexTsPath)
+    })
+
+    it(
+      'should create nx-firebase function',
+      async () => {
+        const projectData = getDirectories('apps', functionName)
+        await runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name} --app ${appName}`)
+        // test generator output
+        expect(() =>
+          checkFilesExist(
+            ...expectedFunctionFiles(projectData).concat(
+              expectedConfigFiles(projectData, true),
+            ),
+          ),
+        ).not.toThrow()
+
+        // SM: no longer needed in new plugin version
+        // stash a copy of the default index.ts
+        // indexTsFile = readFile(projectData.indexTsPath)
+    })
 
 
     // SM: DOESNT WORK IN E2E FOR SOME REASON.
@@ -309,58 +413,61 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library',
       async () => {
+        const projectData = getDirectories('libs', 'buildablelib')        
         await runNxCommandAsync(
-          `${libGeneratorCommand} ${buildableLibData.name} --buildable --importPath="${buildableLibData.npmScope}"`,
+          `${libGeneratorCommand} ${projectData.name} --buildable --importPath="${projectData.npmScope}"`,
         )
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
-          checkFilesExist(`${buildableLibData.projectDir}/package.json`),
+          checkFilesExist(`${projectData.projectDir}/package.json`),
         ).not.toThrow()
 
         const result = await runNxCommandAsync(
-          `build ${buildableLibData.projectName}`,
+          `build ${projectData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
         expect(result.stdout).toContain(
-          `${buildSuccess} ${buildableLibData.projectName}`,
+          `${buildSuccess} ${projectData.projectName}`,
         )
     })
 
     it(
       'should create buildable typescript library in subdir',
       async () => {
+        const projectData = getDirectories('libs', 'buildablelib', 'subdir')           
         await runNxCommandAsync(
-          `${libGeneratorCommand} ${subDirBuildableLibData.name} --buildable --directory ${subDirBuildableLibData.dir} --importPath="${subDirBuildableLibData.npmScope}"`,
+          `${libGeneratorCommand} ${projectData.name} --buildable --directory ${projectData.dir} --importPath="${projectData.npmScope}"`,
         )
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
-          checkFilesExist(`${subDirBuildableLibData.projectDir}/package.json`),
+          checkFilesExist(`${projectData.projectDir}/package.json`),
         ).not.toThrow()
 
         const result = await runNxCommandAsync(
-          `build ${subDirBuildableLibData.projectName}`,
+          `build ${projectData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
         expect(result.stdout).toContain(
-          `${buildSuccess} ${subDirBuildableLibData.projectName}`,
+          `${buildSuccess} ${projectData.projectName}`,
         )
     })
 
     it(
       'should create non-buildable typescript library',
       async () => {
+        const projectData = getDirectories('libs', 'nonbuildablelib')          
         await runNxCommandAsync(
-          `${libGeneratorCommand} ${nonBuildableLibData.name} --buildable=false --importPath="${nonBuildableLibData.npmScope}"`,
+          `${libGeneratorCommand} ${projectData.name} --buildable=false --importPath="${projectData.npmScope}"`,
         )
 
         expect(() =>
-          checkFilesExist(`${nonBuildableLibData.projectDir}/package.json`),
+          checkFilesExist(`${projectData.projectDir}/package.json`),
         ).toThrow()
 
         const project = readJson(
-          `${nonBuildableLibData.projectDir}/project.json`,
+          `${projectData.projectDir}/project.json`,
         )
         expect(project.targets.build).not.toBeDefined()
     })
@@ -368,20 +475,22 @@ describe('nx-firebase e2e', () => {
     it(
       'should create incompatible typescript library',
       async () => {
+        const projectData = getDirectories('libs', 'incompatiblelib', 'subdir')          
+
         await runNxCommandAsync(
-          `${libGeneratorCommand} ${incompatibleLibData.name} --directory=${incompatibleLibData.dir}`,
+          `${libGeneratorCommand} ${projectData.name} --directory=${projectData.dir}`,
         )
 
         expect(() =>
-          checkFilesExist(`${incompatibleLibData.projectDir}/package.json`),
+          checkFilesExist(`${projectData.projectDir}/package.json`),
         ).not.toThrow()
 
         const result = await runNxCommandAsync(
-          `build ${incompatibleLibData.projectName}`,
+          `build ${projectData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
         expect(result.stdout).toContain(
-          `${buildSuccess} ${incompatibleLibData.projectName}`,
+          `${buildSuccess} ${projectData.projectName}`,
         )
     })
   })
