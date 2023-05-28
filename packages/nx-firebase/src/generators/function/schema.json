@@ -17,8 +17,7 @@
     },
     "directory": {
       "description": "The directory of the new function project.",
-      "type": "string",
-      "default": "functions"
+      "type": "string"
     },
     "tags": {
       "description": "Add tags to the application (used for linting).",
