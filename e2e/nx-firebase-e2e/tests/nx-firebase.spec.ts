@@ -14,14 +14,11 @@ const JEST_TIMEOUT = 120000
 jest.setTimeout(JEST_TIMEOUT)
 
 // TODO:
-// check that functions are added
-// check that functions build
 // check that libraries can be buildable and non-buildable
 // check that functions can be within firebase app folder
 // check all options
 // remove all tests related to old plugin
 // dont check anything that the generator tests already test, this is just e2e
-// check all build artefacts are correct
 // check that deploy runs the application deploy?
 // check that build includes building of dependent functions
 // check that lint works for functions & apps
@@ -30,6 +27,9 @@ jest.setTimeout(JEST_TIMEOUT)
 
 // DONE
 // check dependent packages are installed
+// check that functions are added
+// check that functions build
+// check all build artefacts are correct
 
 
 const appName = 'firebase'
@@ -81,41 +81,6 @@ function getDirectories(type: 'libs' | 'apps', name: string, dir?: string): Proj
   }
 }
 
-// function getAppDirectories(appName: string, appDir?: string) {
-//   const appPrefix = appDir ? `${appDir}-` : ''
-//   const appProjectName = `${appPrefix}${appName}`
-//   const appSrcDir = appDir ? `${appDir}/` : ''
-//   const distDir = `dist/apps/${appSrcDir}${appName}`
-//   return {
-//     name: appName, // name passed to generator
-//     dir: appDir, // directory passed to generator
-//     projectName: appProjectName, // project name
-//     projectDir: `apps/${appSrcDir}${appName}`,
-//     srcDir: `apps/${appSrcDir}${appName}/src`,
-//     distDir: distDir,
-//     functionLibsDir: `libs`, // sub folder in distDir where the functions lib deps are copied
-//     indexTsPath: `apps/${appSrcDir}${appName}/src/index.ts`,
-//   }
-// }
-
-
-
-// function getLibDirectories(libName: string, libDir?: string) {
-//   const libPrefix = libDir ? `${libDir}-` : ''
-//   const libProjectName = `${libPrefix}${libName}`
-//   const libSrcDir = libDir ? `${libDir}/` : ''
-//   return {
-//     name: libName,
-//     dir: libDir,
-//     projectName: libProjectName,
-//     projectDir: `libs/${libSrcDir}${libName}`,
-//     srcDir: `libs/${libSrcDir}${libName}/src`,
-//     npmScope: `${npmScope}/${libProjectName}`,
-//     functionName: libDir
-//       ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
-//       : libName,
-//   }
-// }
 
 // const appData = getAppDirectories(appName)
 // const functionsData = getDirectories()
@@ -394,11 +359,15 @@ describe('nx-firebase e2e', () => {
           ),
         ).not.toThrow()
 
-        // SM: no longer needed in new plugin version
-        // stash a copy of the default index.ts
-        // indexTsFile = readFile(projectData.indexTsPath)
+        // check dist files dont exist and we havent accidentally run this test out of sequence
+        const functionsProjectData = getDirectories('apps', functionName)
+        expect(() =>
+          checkFilesExist(
+            `dist/${functionsProjectData.projectDir}/main.js`,
+            `dist/${functionsProjectData.projectDir}/package.json`,
+            ),
+        ).toThrow()   
     })
-
 
     it(
       'should build nx-firebase function from the app',
@@ -406,6 +375,14 @@ describe('nx-firebase e2e', () => {
         const projectData = getDirectories('apps', appName)
         const result = await runNxCommandAsync(`build ${projectData.name}`)
         expect(result.stdout).toContain("Build succeeded.")        
+
+        const functionsProjectData = getDirectories('apps', functionName)
+        expect(() =>
+          checkFilesExist(
+            `dist/${functionsProjectData.projectDir}/main.js`,
+            `dist/${functionsProjectData.projectDir}/package.json`,
+            ),
+        ).not.toThrow()        
     })
 
     it(
@@ -463,7 +440,7 @@ describe('nx-firebase e2e', () => {
       async () => {
         const projectData = getDirectories('libs', 'buildablelib', 'subdir')           
         await runNxCommandAsync(
-          `${libGeneratorCommand} ${projectData.name} --buildable --directory ${projectData.dir} --importPath="${projectData.npmScope}"`,
+          `${libGeneratorCommand} ${projectData.name} --buildable --directory=${projectData.dir} --importPath="${projectData.npmScope}"`,
         )
 
         // no need to test the js library generator, only that it ran ok
@@ -499,25 +476,22 @@ describe('nx-firebase e2e', () => {
     })
 
     it(
-      'should create incompatible typescript library',
+      'should create non-buildable typescript library in subdir',
       async () => {
-        const projectData = getDirectories('libs', 'incompatiblelib', 'subdir')          
+        const projectData = getDirectories('libs', 'nonbuildablelib', 'subdir')          
 
         await runNxCommandAsync(
-          `${libGeneratorCommand} ${projectData.name} --directory=${projectData.dir}`,
+          `${libGeneratorCommand} ${projectData.name} --directory=${projectData.dir} --buildable=false --importPath="${projectData.npmScope}"`,
         )
 
         expect(() =>
           checkFilesExist(`${projectData.projectDir}/package.json`),
-        ).not.toThrow()
+        ).toThrow()
 
-        const result = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
+        const project = readJson(
+          `${projectData.projectDir}/project.json`,
         )
-        expect(result.stdout).toContain(compileComplete)
-        expect(result.stdout).toContain(
-          `${buildSuccess} ${projectData.projectName}`,
-        )
+        expect(project.targets.build).not.toBeDefined()
     })
   })
 
