@@ -11,9 +11,9 @@ import {
 } from '@nx/plugin/testing'
 
 const JEST_TIMEOUT = 120000
+jest.setTimeout(JEST_TIMEOUT)
 
 // TODO:
-// check dependent packages are installed
 // check that functions are added
 // check that functions build
 // check that libraries can be buildable and non-buildable
@@ -28,13 +28,9 @@ const JEST_TIMEOUT = 120000
 // check that test works for functions & apps
 // check that serve works for apps
 
+// DONE
+// check dependent packages are installed
 
-
-// NX14/15 ONLY
-// const USE_DAEMON = false
-// const daemonStatus = USE_DAEMON
-//   ? 'Nx Daemon is currently running'
-//   : 'Nx Daemon is not running'
 
 const appName = 'functions'
 
@@ -160,157 +156,154 @@ describe('nx-firebase e2e', () => {
     runNxCommandAsync('reset')
   })
 
-  it(
-    'should create workspace without firebase dependencies',
-    async () => {
-      // test that generator adds dependencies to workspace package.json
-      // should not be initially set
-      const packageJson = readJson(`package.json`)
-      expect(packageJson.dependencies['firebase']).toBeUndefined()
-      expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
-      expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
-      expect(
-        packageJson.devDependencies['firebase-functions-test'],
-      ).toBeUndefined()
-      expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
-    },
-    JEST_TIMEOUT,
-  )
+  describe('workspace setup', () => {
 
-  it(
-    'should run nx-firebase init',
-    async () => {
-      await runNxCommandAsync(`generate @simondotm/nx-firebase:init`)
-      // test that generator adds dependencies to workspace package.json
-      const packageJson = readJson(`package.json`)
-      expect(packageJson.dependencies['firebase']).toBeDefined()
-      expect(packageJson.dependencies['firebase-admin']).toBeDefined()
-      expect(packageJson.dependencies['firebase-functions']).toBeDefined()
-      expect(
-        packageJson.devDependencies['firebase-functions-test'],
-      ).toBeDefined()
-      expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/node']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/esbuild']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/linter']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/js']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
-    },
-    JEST_TIMEOUT,
-  )
-
-  // NX14/15 ONLY
-  // it(
-  //   'should have correct nx daemon status',
-  //   async () => {
-  //     const result = await runNxCommandAsync('daemon')
-  //     expect(result.stdout).toContain(daemonStatus)
-  //   },
-  //   JEST_TIMEOUT,
-  // )
-
-  it(
-    'should create nx-firebase app',
-    async () => {
-      const projectData = appData
-      await runNxCommandAsync(`${appGeneratorCommand} ${projectData.name}`)
-      // test generator output
-      expect(() =>
-        checkFilesExist(
-          ...expectedAppFiles(projectData).concat(
-            expectedConfigFiles(projectData, true),
-          ),
-        ),
-      ).not.toThrow()
-
-      // SM: no longer needed in new plugin version
-      // stash a copy of the default index.ts
-      // indexTsFile = readFile(projectData.indexTsPath)
-    },
-    JEST_TIMEOUT,
-  )
-
-  it(
-    'should build nx-firebase app',
-    async () => {
-      // test build executor
-      const result = await runNxCommandAsync(`build ${appData.projectName}`)
-      expect(result.stdout).toContain("Build succeeded.")
-
-      // these are now functions tests
-      // expect(result.stdout).toContain(compileComplete)
-      // expect(result.stdout).toContain(`${buildSuccess} ${appData.projectName}`)
-      // expect(result.stdout).toContain('Updated firebase functions package.json')
-
-      // const distDir = appData.distDir
-      // expect(() =>
-      //   checkFilesExist(
-      //     `${distDir}/package.json`,
-      //     // `${distDir}/readme.md`, // we no longer copy .md files as a default asset
-      //     `${distDir}/src/index.js`,
-      //   ),
-      // ).not.toThrow()
-    },
-    JEST_TIMEOUT,
-  )
-
-
-  // SM: DOESNT WORK IN E2E FOR SOME REASON.
-  // it(
-  //   'should add correct dependencies to output nx-firebase app',
-  //   async () => {
-  //     const distPackageFile = `${appData.distDir}/package.json`
-  //     const distPackage = readJson(distPackageFile)
-  //     const deps = distPackage['dependencies']
-  //     expect(deps).toBeDefined()
-  //     expect(deps['firebase-admin']).toBeDefined()
-  //     expect(deps['firebase-functions']).toBeDefined()
-  //   },
-  //   JEST_TIMEOUT,
-  // )
-
-  describe('--directory', () => {
     it(
-      'should create & build nx-firebase app in the specified directory',
+      'should create workspace without firebase dependencies',
       async () => {
-        const projectData = getAppDirectories(uniq(appName), subDir)
-        await runNxCommandAsync(
-          `${appGeneratorCommand} ${projectData.name} --directory ${projectData.dir}`,
-        )
+        // test that generator adds dependencies to workspace package.json
+        // should not be initially set
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.dependencies['firebase']).toBeUndefined()
+        expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
+        expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
+        expect(
+          packageJson.devDependencies['firebase-functions-test'],
+        ).toBeUndefined()
+        expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
+    })
+
+    it(
+      'should run nx-firebase init',
+      async () => {
+        await runNxCommandAsync(`generate @simondotm/nx-firebase:init`)
+        // test that generator adds dependencies to workspace package.json
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.dependencies['firebase']).toBeDefined()
+        expect(packageJson.dependencies['firebase-admin']).toBeDefined()
+        expect(packageJson.dependencies['firebase-functions']).toBeDefined()
+        expect(
+          packageJson.devDependencies['firebase-functions-test'],
+        ).toBeDefined()
+        expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/node']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/esbuild']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/linter']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/js']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
+    })
+  })
+  
+  //--------------------------------------------------------------------------------------------------
+  // Application generator e2e tests
+  //--------------------------------------------------------------------------------------------------
+
+  describe('nx-firebase application', () => {
+
+    it(
+      'should create nx-firebase app',
+      async () => {
+        const projectData = appData
+        await runNxCommandAsync(`${appGeneratorCommand} ${projectData.name}`)
+        // test generator output
         expect(() =>
           checkFilesExist(
             ...expectedAppFiles(projectData).concat(
-              expectedConfigFiles(projectData),
+              expectedConfigFiles(projectData, true),
             ),
           ),
         ).not.toThrow()
 
-        // NX14/15 ONLY
-        const project = readJson(`${projectData.projectDir}/project.json`)
-        expect(project.name).toEqual(`${projectData.projectName}`)
-      },
-      JEST_TIMEOUT,
-    )
-  })
+        // SM: no longer needed in new plugin version
+        // stash a copy of the default index.ts
+        // indexTsFile = readFile(projectData.indexTsPath)
+    })
 
-  describe('--tags', () => {
     it(
-      'should add tags to the project',
+      'should build nx-firebase app',
       async () => {
-        const projectData = getAppDirectories(uniq(appName))
-        //ensureNxProject(pluginName, pluginPath)
-        await runNxCommandAsync(
-          `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
-        )
-        const project = readJson(`${projectData.projectDir}/project.json`)
-        expect(project.tags).toEqual(['e2etag', 'e2ePackage'])
-      },
-      JEST_TIMEOUT,
-    )
+        // test app builder
+        // at this point there are no functions so it doe nothing
+        const result = await runNxCommandAsync(`build ${appData.projectName}`)
+        expect(result.stdout).toContain("Build succeeded.")
+
+        // these are now functions tests
+        // expect(result.stdout).toContain(compileComplete)
+        // expect(result.stdout).toContain(`${buildSuccess} ${appData.projectName}`)
+        // expect(result.stdout).toContain('Updated firebase functions package.json')
+
+        // const distDir = appData.distDir
+        // expect(() =>
+        //   checkFilesExist(
+        //     `${distDir}/package.json`,
+        //     // `${distDir}/readme.md`, // we no longer copy .md files as a default asset
+        //     `${distDir}/src/index.js`,
+        //   ),
+        // ).not.toThrow()
+    })
+
+    describe('--directory', () => {
+      it(
+        'should create nx-firebase app in the specified directory',
+        async () => {
+          const projectData = getAppDirectories(uniq(appName), subDir)
+          await runNxCommandAsync(
+            `${appGeneratorCommand} ${projectData.name} --directory ${projectData.dir}`,
+          )
+          expect(() =>
+            checkFilesExist(
+              ...expectedAppFiles(projectData).concat(
+                expectedConfigFiles(projectData),
+              ),
+            ),
+          ).not.toThrow()
+
+          const project = readJson(`${projectData.projectDir}/project.json`)
+          expect(project.name).toEqual(`${projectData.projectName}`)
+      })
+    })
+
+    describe('--tags', () => {
+      it(
+        'should add tags to the project',
+        async () => {
+          const projectData = getAppDirectories(uniq(appName))
+          await runNxCommandAsync(
+            `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
+          )
+          const project = readJson(`${projectData.projectDir}/project.json`)
+          expect(project.tags).toEqual(['e2etag', 'e2ePackage'])
+        }
+        
+      )
+    })
+  })
+  
+  //--------------------------------------------------------------------------------------------------
+  // Function generator e2e tests
+  //--------------------------------------------------------------------------------------------------
+
+  describe('nx-firebase function', () => {
+
+
+    // SM: DOESNT WORK IN E2E FOR SOME REASON.
+    // it(
+    //   'should add correct dependencies to output nx-firebase app',
+    //   async () => {
+    //     const distPackageFile = `${appData.distDir}/package.json`
+    //     const distPackage = readJson(distPackageFile)
+    //     const deps = distPackage['dependencies']
+    //     expect(deps).toBeDefined()
+    //     expect(deps['firebase-admin']).toBeDefined()
+    //     expect(deps['firebase-functions']).toBeDefined()
+    //   },
+    //   JEST_TIMEOUT,
+    // )
+
   })
 
   //--------------------------------------------------------------------------------------------------
-  // Create Libraries for e2e tests
+  // Create Libraries for e2e function generator tests
   //--------------------------------------------------------------------------------------------------
   describe('libraries', () => {
     it(
@@ -332,9 +325,7 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).toContain(
           `${buildSuccess} ${buildableLibData.projectName}`,
         )
-      },
-      JEST_TIMEOUT,
-    )
+    })
 
     it(
       'should create buildable typescript library in subdir',
@@ -355,9 +346,7 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).toContain(
           `${buildSuccess} ${subDirBuildableLibData.projectName}`,
         )
-      },
-      JEST_TIMEOUT,
-    )
+    })
 
     it(
       'should create non-buildable typescript library',
@@ -374,9 +363,7 @@ describe('nx-firebase e2e', () => {
           `${nonBuildableLibData.projectDir}/project.json`,
         )
         expect(project.targets.build).not.toBeDefined()
-      },
-      JEST_TIMEOUT,
-    )
+    })
 
     it(
       'should create incompatible typescript library',
@@ -396,9 +383,7 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).toContain(
           `${buildSuccess} ${incompatibleLibData.projectName}`,
         )
-      },
-      JEST_TIMEOUT,
-    )
+    })
   })
 
   //--------------------------------------------------------------------------------------------------
