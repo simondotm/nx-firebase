@@ -21,6 +21,12 @@ const JEST_TIMEOUT = 120000
 // check all options
 // remove all tests related to old plugin
 // dont check anything that the generator tests already test, this is just e2e
+// check all build artefacts are correct
+// check that deploy runs the application deploy?
+// check that build includes building of dependent functions
+// check that lint works for functions & apps
+// check that test works for functions & apps
+// check that serve works for apps
 
 
 
@@ -146,33 +152,12 @@ describe('nx-firebase e2e', () => {
   // are not dependant on one another.
   beforeAll(async () => {
     ensureNxProject(pluginName, pluginPath)
-
-    // NX14/15 ONLY
-    // if (USE_DAEMON) {
-    //   const result = await runNxCommandAsync('daemon --start')
-    //   expect(result.stdout).toContain(
-    //     'Daemon Server - Started in a background process',
-    //   )
-    // } else {
-    //   const nxJsonFile = tmpProjPath('nx.json')
-    //   const nxJson = readJsonFile(nxJsonFile)
-    //   // nxJson['pluginsConfig'] = {
-    //   //   '@nx/js': {
-    //   //     analyzeSourceFiles: true,
-    //   //   },
-    //   // }
-    //   // force local e2e tests to use same setup as CI environment
-    //   nxJson.tasksRunnerOptions.default.options.useDaemonProcess = false
-    //   writeJsonFile(nxJsonFile, nxJson)
-    // }
-
-    // await runNxCommandAsync('reset')
   }, JEST_TIMEOUT)
 
   afterAll(() => {
     // `nx reset` kills the daemon, and performs
     // some work which can help clean up e2e leftovers
-    // runNxCommandAsync('reset')
+    runNxCommandAsync('reset')
   })
 
   it(
@@ -205,6 +190,11 @@ describe('nx-firebase e2e', () => {
         packageJson.devDependencies['firebase-functions-test'],
       ).toBeDefined()
       expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/node']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/esbuild']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/linter']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/js']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
     },
     JEST_TIMEOUT,
   )
@@ -240,16 +230,6 @@ describe('nx-firebase e2e', () => {
     JEST_TIMEOUT,
   )
 
-  // NX14/15 ONLY
-  // it(
-  //   'should have correct nx daemon status',
-  //   async () => {
-  //     const result = await runNxCommandAsync('daemon')
-  //     expect(result.stdout).toContain(daemonStatus)
-  //   },
-  //   JEST_TIMEOUT,
-  // )
-
   it(
     'should build nx-firebase app',
     async () => {
@@ -274,19 +254,10 @@ describe('nx-firebase e2e', () => {
     JEST_TIMEOUT,
   )
 
-  // NX14/15 ONLY
-  // it(
-  //   'should have correct nx daemon status',
-  //   async () => {
-  //     const result = await runNxCommandAsync('daemon')
-  //     expect(result.stdout).toContain(daemonStatus)
-  //   },
-  //   JEST_TIMEOUT,
-  // )
 
   // SM: DOESNT WORK IN E2E FOR SOME REASON.
   // it(
-  //   'should add firebase dependencies to output nx-firebase app',
+  //   'should add correct dependencies to output nx-firebase app',
   //   async () => {
   //     const distPackageFile = `${appData.distDir}/package.json`
   //     const distPackage = readJson(distPackageFile)

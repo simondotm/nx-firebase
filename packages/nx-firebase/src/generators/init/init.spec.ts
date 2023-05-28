@@ -11,6 +11,7 @@ import {
 } from '../../utils/versions'
 import { initGenerator } from './init'
 import { gitIgnoreEntries } from './lib'
+import { workspaceNxVersion } from '../../utils'
 
 describe('init generator', () => {
   let tree: Tree
@@ -93,6 +94,13 @@ describe('init generator', () => {
     )
     expect(packageJson.devDependencies['firebase-tools']).toBe(testVersion)
     expect(packageJson.devDependencies['kill-port']).toBe(testVersion)
+
+    const nxVersion = workspaceNxVersion.version
+    expect(packageJson.devDependencies['@nx/node']).toBe(nxVersion)
+    expect(packageJson.devDependencies['@nx/linter']).toBe(nxVersion)
+    expect(packageJson.devDependencies['@nx/jest']).toBe(nxVersion)
+    expect(packageJson.devDependencies['@nx/esbuild']).toBe(nxVersion)
+    expect(packageJson.devDependencies['@nx/js']).toBe(nxVersion)
   })
 
   it('should add jest config when unitTestRunner is jest', async () => {
