@@ -47,7 +47,6 @@ const pluginPath = 'dist/packages/nx-firebase'
 const compileComplete = 'Done compiling TypeScript files for project'
 const buildSuccess = 'Successfully ran target build for project'
 
-
 interface ProjectData {
   name: string
   dir: string
@@ -59,6 +58,28 @@ interface ProjectData {
   npmScope: string
 }
 
+/**
+ * 
+ * @param name - project name (cannot be camel case)
+ * @param dir - project dir
+ * @returns - asset locations for this project
+ */
+function getDirectories(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
+  const prefix = dir ? `${dir}-` : ''
+  const projectName = `${prefix}${name}`
+  const rootDir = dir ? `${dir}/` : ''
+  const distDir = `dist/${type}/${rootDir}${name}`
+  return {
+    name, // name passed to generator
+    dir, // directory passed to generator
+    projectName, // project name
+    projectDir: `${type}/${rootDir}${name}`,
+    srcDir: `${type}/${rootDir}${name}/src`,
+    distDir: distDir,
+    mainTsPath: `${type}/${rootDir}${name}/src/main.ts`,
+    npmScope: `${npmScope}/${projectName}`,
+  }
+}
 
 // function getAppDirectories(appName: string, appDir?: string) {
 //   const appPrefix = appDir ? `${appDir}-` : ''
@@ -77,28 +98,6 @@ interface ProjectData {
 //   }
 // }
 
-/**
- * 
- * @param name - project name (cannot be camel case)
- * @param dir - project dir
- * @returns - asset locations for this project
- */
-function getDirectories(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
-  const prefix = dir ? `${dir}-` : ''
-  const projectName = `${prefix}${name}`
-  const rootDir = dir ? `${dir}/` : ''
-  const distDir = `dist/${type}/${rootDir}${appName}`
-  return {
-    name, // name passed to generator
-    dir, // directory passed to generator
-    projectName, // project name
-    projectDir: `${type}/${rootDir}${name}`,
-    srcDir: `${type}/${rootDir}${name}/src`,
-    distDir: distDir,
-    mainTsPath: `${type}/${rootDir}${appName}/src/main.ts`,
-    npmScope: `${npmScope}/${projectName}`,
-  }
-}
 
 
 // function getLibDirectories(libName: string, libDir?: string) {
@@ -135,13 +134,12 @@ const importMatch = `import * as functions from 'firebase-functions';`
 function expectedAppFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
   return [
-    // `${projectPath}/src/index.ts`,
-    // `${projectPath}/public/index.html`,
-    // `${projectPath}/package.json`,
-    `${projectPath}/readme.md`,
+    `${projectPath}/public/index.html`,
     `${projectPath}/database.rules.json`,
     `${projectPath}/firestore.indexes.json`,
     `${projectPath}/firestore.rules`,
+    `${projectPath}/project.json`,
+    `${projectPath}/readme.md`,
     `${projectPath}/storage.rules`,
     `firebase.json`,
     `.firebaserc`,
@@ -152,15 +150,14 @@ function expectedFunctionFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
   return [
     `${projectPath}/src/main.ts`,
+    `${projectPath}/.eslintrc.json`,
+    `${projectPath}/jest.config.ts`,
     `${projectPath}/package.json`,
-    // `${projectPath}/public/index.html`,
-    // `${projectPath}/readme.md`,
-    // `${projectPath}/database.rules.json`,
-    // `${projectPath}/firestore.indexes.json`,
-    // `${projectPath}/firestore.rules`,
-    // `${projectPath}/storage.rules`,
-    // `firebase.json`,
-    // `.firebaserc`,
+    `${projectPath}/project.json`,
+    `${projectPath}/readme.md`,
+    `${projectPath}/tsconfig.app.json`,
+    `${projectPath}/tsconfig.json`,
+    `${projectPath}/tsconfig.spec.json`,
   ]
 }
 
@@ -228,6 +225,19 @@ describe('nx-firebase e2e', () => {
           packageJson.devDependencies['firebase-functions-test'],
         ).toBeUndefined()
         expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
+    })
+
+    it(
+      'should create workspace without nx dependencies',
+      async () => {
+        // test that generator adds dependencies to workspace package.json
+        // should not be initially set
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.devDependencies['@nx/node']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/esbuild']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/linter']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/js']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/jest']).toBeUndefined()
     })
 
     it(
@@ -390,19 +400,35 @@ describe('nx-firebase e2e', () => {
     })
 
 
-    // SM: DOESNT WORK IN E2E FOR SOME REASON.
-    // it(
-    //   'should add correct dependencies to output nx-firebase app',
-    //   async () => {
-    //     const distPackageFile = `${appData.distDir}/package.json`
-    //     const distPackage = readJson(distPackageFile)
-    //     const deps = distPackage['dependencies']
-    //     expect(deps).toBeDefined()
-    //     expect(deps['firebase-admin']).toBeDefined()
-    //     expect(deps['firebase-functions']).toBeDefined()
-    //   },
-    //   JEST_TIMEOUT,
-    // )
+    it(
+      'should build nx-firebase function from the app',
+      async () => {
+        const projectData = getDirectories('apps', appName)
+        const result = await runNxCommandAsync(`build ${projectData.name}`)
+        expect(result.stdout).toContain("Build succeeded.")        
+    })
+
+    it(
+      'should build nx-firebase function directly',
+      async () => {
+        const projectData = getDirectories('apps', functionName)
+        const result = await runNxCommandAsync(`build ${projectData.name}`)
+        expect(result.stdout).toContain("dist/apps/function/main.js")        
+        expect(result.stdout).toContain("Successfully ran target build for project function")        
+    })
+
+
+    it(
+      'should add correct dependencies to the built function package.json',
+      async () => {
+        const projectData = getDirectories('apps', functionName)
+        const distPackageFile = `${projectData.distDir}/package.json`
+        const distPackage = readJson(distPackageFile)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()
+    })
 
   })
 
