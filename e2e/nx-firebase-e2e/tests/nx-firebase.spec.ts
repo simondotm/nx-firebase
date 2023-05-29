@@ -504,25 +504,48 @@ describe('nx-firebase e2e', () => {
 
   describe('nx-firebase dependencies', () => {
     it(
-      'should support buildable library as a dependency',
+      'should inline library dependencies into function bundle',
       async () => {
-        const libData = getDirectories('libs', uniq('buildable'))
-        const functionData = getDirectories('apps', uniq('function'))
-
-        // generate a buildable library
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${libData.name} --buildable --importPath="${libData.npmScope}"`,
-        )
+        // use libs we generated earler
+       
         // generate a function
+        const functionData = getDirectories('apps', 'functionwithdeps')
         await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app firebase`)
         
-        // add dependency
-        const libImport = getLibImport(libData)
-        const importAddition = `import { ${libImport} } from '${libData.npmScope}'\nconsole.log(${libData.name}())\n`
+        // add buildable & nonbuildable lib dependencies using import statements
         const mainTs = readFile(functionData.mainTsPath)
         expect(mainTs).toContain(importMatch)
-        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition)
-        expect(readFile(functionData.mainTsPath)).toContain(importAddition)
+
+        // import from a buildable lib
+        const buildableLibData = getDirectories('libs', 'buildablelib')
+        const libImport1 = getLibImport(buildableLibData)
+        const importAddition1 = `import { ${libImport1} } from '${buildableLibData.npmScope}'\nconsole.log(${libImport1}())\n`
+        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition1)
+
+        // import from a non buildable lib
+        const nonbuildableLibData = getDirectories('libs', 'nonbuildablelib')
+        const libImport2 = getLibImport(nonbuildableLibData)
+        const importAddition2 = `import { ${libImport2} } from '${nonbuildableLibData.npmScope}'\nconsole.log(${libImport2}())\n`
+        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition2)
+
+        // import from a buildable subdir lib
+        const subDirBuildableLibData = getDirectories('libs', 'buildablelib', 'subdir')
+        const libImport3 = getLibImport(subDirBuildableLibData)
+        const importAddition3 = `import { ${libImport3} } from '${subDirBuildableLibData.npmScope}'\nconsole.log(${libImport3}())\n`
+        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition3)
+
+        // import from a non buildable subdir lib
+        const subDirNonbuildableLibData = getDirectories('libs', 'nonbuildablelib', 'subdir')
+        const libImport4 = getLibImport(subDirNonbuildableLibData)
+        const importAddition4 = `import { ${libImport4} } from '${subDirNonbuildableLibData.npmScope}'\nconsole.log(${libImport4}())\n`
+        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition4)
+
+
+        // confirm the file changes
+        expect(readFile(functionData.mainTsPath)).toContain(importAddition1)
+        expect(readFile(functionData.mainTsPath)).toContain(importAddition2)
+        expect(readFile(functionData.mainTsPath)).toContain(importAddition3)
+        expect(readFile(functionData.mainTsPath)).toContain(importAddition4)
 
         // need to reset Nx here for e2e test to work
         // otherwise it bundles node modules in the main.js output too
@@ -543,13 +566,29 @@ describe('nx-firebase e2e', () => {
           ),
         ).not.toThrow()
 
+        // check dist package contains external imports
+        const distPackage = readJson(`${functionData.distDir}/package.json`)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()        
+
         // check bundled code contains the libcode we added
         const bundle = readFile(`${functionData.distDir}/main.js`)
+
         // check that node modules were not bundled, happens in e2e if nx reset not called
+        // probably the earlier check for deps in the package.json already detects this scenario too
         expect(bundle).not.toContain(`require_firebase_app`)  
-        // should be just our imported lib module inlined in the bundle
-        expect(bundle).toContain(`function ${libImport}`)  
-        expect(bundle).toContain(`return "${libImport}"`)  
+
+        // our imported lib modules should be inlined in the bundle
+        expect(bundle).toContain(`function ${libImport1}`)  
+        expect(bundle).toContain(`return "${buildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport2}`)  
+        expect(bundle).toContain(`return "${nonbuildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport3}`)  
+        expect(bundle).toContain(`return "${subDirBuildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport4}`)  
+        expect(bundle).toContain(`return "${subDirNonbuildableLibData.projectName}"`)  
     })
 
     /*
