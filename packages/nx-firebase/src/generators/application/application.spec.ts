@@ -32,6 +32,12 @@ describe('application generator', () => {
             command: `echo Build succeeded.`,
           },
         },
+        watch: {
+          executor: 'nx:run-commands',
+          options: {
+            command: `nx run-many --targets=build --projects=tag:my-firebase-app --parallel=100 --watch`,
+          },
+        },
         lint: {
           executor: 'nx:run-commands',
           options: {
@@ -64,8 +70,8 @@ describe('application generator', () => {
           executor: 'nx:run-commands',
           options: {
             commands: [
+              `nx run my-firebase-app:watch`,
               `nx run my-firebase-app:emulate`,
-              `nx run-many --targets=build --projects=tag:my-firebase-app --parallel=100 --watch`,
             ],
           },
         },

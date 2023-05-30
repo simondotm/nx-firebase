@@ -87,6 +87,12 @@ export async function applicationGenerator(
           command: `echo Build succeeded.`,
         },
       },
+      watch: {
+        executor: 'nx:run-commands',
+        options: {
+          command: `nx run-many --targets=build --projects=tag:${options.projectName} --parallel=100 --watch`,
+        },
+      },
       lint: {
         executor: 'nx:run-commands',
         options: {
@@ -119,8 +125,8 @@ export async function applicationGenerator(
         executor: 'nx:run-commands',
         options: {
           commands: [
+            `nx run ${options.projectName}:watch`,
             `nx run ${options.projectName}:emulate`,
-            `nx run-many --targets=build --projects=tag:${options.projectName} --parallel=100 --watch`,
           ],
         },
       },

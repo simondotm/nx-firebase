@@ -17,7 +17,6 @@ jest.setTimeout(JEST_TIMEOUT)
 // remove all tests related to old plugin
 // dont check anything that the generator tests already test, this is just e2e
 // check that deploy runs the application deploy?
-// check that build includes building of dependent functions
 // check that lint works for functions & apps
 // check that test works for functions & apps
 // check that serve works for apps
@@ -28,6 +27,7 @@ jest.setTimeout(JEST_TIMEOUT)
 // check that functions build
 // check all build artefacts are correct
 // check that libraries can be buildable and non-buildable
+// check that build includes building of dependent functions
 
 
 const appName = 'firebase'
@@ -36,6 +36,7 @@ const functionName = 'function'
 const subDir = 'subdir'
 
 const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
+// const functionGeneratorCommand = 'generate @simondotm/nx-firebase:function --format=cjs'
 const functionGeneratorCommand = 'generate @simondotm/nx-firebase:function'
 
 const libGeneratorCommand = 'generate @nx/js:lib'
