@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "Sync",
+  "title": "",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What Nx firebase application or function would you like to sync?"
+    },
+    "project": {
+      "type": "string",
+      "description": "The firebase project that should be associated with this application",
+      "default": ""
+    }
+  },
+  "required": ["name"]
+}

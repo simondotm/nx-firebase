@@ -20,6 +20,11 @@
       "schema": "./src/generators/function/schema.json",
       "description": "nx-firebase function generator",
       "aliases": ["func"]
+    },
+    "sync": {
+      "factory": "./src/generators/sync/generator",
+      "schema": "./src/generators/sync/schema.json",
+      "description": "Sync an Nx firebase application or function"
     }
   }
 }
