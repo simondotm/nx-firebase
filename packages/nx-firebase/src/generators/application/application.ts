@@ -76,6 +76,13 @@ export async function applicationGenerator(
   const firebaseProject = options.project ? ` --project=${options.project}` : ''
 
   // nx watch --projects=${options.projectName} --includeDependentProjects -- nx build ${options.projectName} --clean=false
+  const tags = [`firebase:app`]
+  if (options.tags) {
+    options.tags.split(',').map((s) => {
+      s.trim()
+      tags.push(s)
+    })
+  }
 
   addProjectConfiguration(tree, options.projectName, {
     root: options.projectRoot,
@@ -143,7 +150,7 @@ export async function applicationGenerator(
         },
       },
     },
-    tags: options.tags ? options.tags.split(',').map((s) => s.trim()) : [],
+    tags,
   })
 
   createFiles(tree, options)

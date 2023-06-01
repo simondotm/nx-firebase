@@ -286,7 +286,7 @@ describe('nx-firebase e2e', () => {
             `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
           )
           const project = readJson(`${projectData.projectDir}/project.json`)
-          expect(project.tags).toEqual(['e2etag', 'e2ePackage'])
+          expect(project.tags).toEqual(['firebase:app', 'e2etag', 'e2ePackage'])
         }
         
       )

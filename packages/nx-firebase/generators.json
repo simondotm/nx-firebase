@@ -24,7 +24,7 @@
     "sync": {
       "factory": "./src/generators/sync/generator",
       "schema": "./src/generators/sync/schema.json",
-      "description": "Sync an Nx firebase application or function"
+      "description": "nx-firebase project helper"
     }
   }
 }

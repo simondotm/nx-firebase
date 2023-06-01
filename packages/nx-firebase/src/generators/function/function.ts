@@ -108,7 +108,7 @@ export async function functionGenerator(
 
   // Function apps are tagged so that they can built/watched with run-many
   const tags =
-    `firebase:${options.firebaseAppProject.name}` +
+    `firebase:function:${options.firebaseAppProject.name}` +
     (options.tags ? `,${options.tags}` : '')
 
   const nodeApplicationTask = await nodeApplicationGenerator(tree, {

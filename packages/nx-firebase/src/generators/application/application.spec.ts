@@ -99,7 +99,7 @@ describe('application generator', () => {
     const projects = Object.fromEntries(getProjects(tree))
     expect(projects).toMatchObject({
       'my-firebase-app': {
-        tags: ['one', 'two'],
+        tags: ['firebase:app', 'one', 'two'],
       },
     })
   })
