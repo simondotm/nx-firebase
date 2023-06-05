@@ -4,14 +4,10 @@
   "title": "",
   "type": "object",
   "properties": {
-    "name": {
+    "app": {
       "type": "string",
-      "description": "",
-      "$default": {
-        "$source": "argv",
-        "index": 0
-      },
-      "x-prompt": "What Nx firebase application or function would you like to sync?"
+      "description": "The Nx firebase application you would like to sync",
+      "default": ""
     },
     "project": {
       "type": "string",
@@ -19,5 +15,5 @@
       "default": ""
     }
   },
-  "required": ["name"]
+  "required": []
 }

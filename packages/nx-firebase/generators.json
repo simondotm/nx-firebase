@@ -22,9 +22,9 @@
       "aliases": ["func"]
     },
     "sync": {
-      "factory": "./src/generators/sync/generator",
+      "factory": "./src/generators/sync/sync",
       "schema": "./src/generators/sync/schema.json",
-      "description": "nx-firebase project helper"
+      "description": "nx-firebase project sync tool"
     }
   }
 }

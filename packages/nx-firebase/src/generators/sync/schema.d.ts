@@ -1,4 +1,5 @@
 export interface SyncGeneratorSchema {
-  name: string
+  app?: string
   project?: string
+  // functions?: boolean
 }
