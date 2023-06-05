@@ -123,7 +123,13 @@ describe('function generator', () => {
         const projects = Object.fromEntries(getProjects(tree))
         expect(projects).toMatchObject({
           'my-firebase-function': {
-            tags: ['firebase:function:my-firebase-app', 'one', 'two'],
+            tags: [
+              'firebase:function',
+              'firebase:name:my-firebase-function',
+              'firebase:app:my-firebase-app',
+              'one',
+              'two',
+            ],
           },
         })
       })
@@ -159,7 +165,11 @@ describe('function generator', () => {
         const projects = Object.fromEntries(getProjects(tree))
         expect(projects).toMatchObject({
           'sub-dir-my-firebase-function': {
-            tags: ['firebase:function:my-firebase-app'],
+            tags: [
+              'firebase:function',
+              'firebase:name:sub-dir-my-firebase-function',
+              'firebase:app:my-firebase-app',
+            ],
           },
         })
 

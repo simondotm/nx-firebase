@@ -286,7 +286,7 @@ describe('nx-firebase e2e', () => {
             `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
           )
           const project = readJson(`${projectData.projectDir}/project.json`)
-          expect(project.tags).toEqual(['firebase:app', 'e2etag', 'e2ePackage'])
+          expect(project.tags).toEqual(['firebase:app', `firebase:name:${projectData.name}`, 'e2etag', 'e2ePackage'])
         }
         
       )
@@ -371,6 +371,26 @@ describe('nx-firebase e2e', () => {
         expect(deps['firebase-admin']).toBeDefined()
         expect(deps['firebase-functions']).toBeDefined()
     })
+
+    it(
+      'should add tags to the function project',
+      async () => {
+        const projectData = getDirectories('apps', uniq(functionName))
+        await runNxCommandAsync(
+          `${functionGeneratorCommand} ${projectData.name} --app ${appName} --tags e2etag,e2ePackage`,
+        )
+        const project = readJson(`${projectData.projectDir}/project.json`)
+        expect(project.tags).toEqual([
+          'firebase:function',
+          `firebase:name:${projectData.name}`,
+          `firebase:app:${appName}`,
+          'e2etag',
+          'e2ePackage',
+        ])
+      }
+      
+    )
+ 
 
   })
 

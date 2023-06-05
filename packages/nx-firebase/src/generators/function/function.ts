@@ -8,6 +8,7 @@ import {
   formatFiles,
   runTasksInSerial,
   names,
+  getProjects,
 } from '@nrwl/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 
@@ -87,6 +88,10 @@ export async function functionGenerator(
   tree: Tree,
   rawOptions: FunctionGeneratorOptions,
 ): Promise<GeneratorCallback> {
+  const projects = getProjects(tree)
+  console.log(JSON.stringify(tree))
+  console.log(`projects=${JSON.stringify(projects)}`)
+
   const tasks: GeneratorCallback[] = []
 
   const options = normalizeOptions(tree, rawOptions)
@@ -108,7 +113,7 @@ export async function functionGenerator(
 
   // Function apps are tagged so that they can built/watched with run-many
   const tags =
-    `firebase:function:${options.firebaseAppProject.name}` +
+    `firebase:function,firebase:name:${options.projectName},firebase:app:${options.firebaseAppProject.name}` +
     (options.tags ? `,${options.tags}` : '')
 
   const nodeApplicationTask = await nodeApplicationGenerator(tree, {

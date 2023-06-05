@@ -76,7 +76,7 @@ export async function applicationGenerator(
   const firebaseProject = options.project ? ` --project=${options.project}` : ''
 
   // nx watch --projects=${options.projectName} --includeDependentProjects -- nx build ${options.projectName} --clean=false
-  const tags = [`firebase:app`]
+  const tags = [`firebase:app`, `firebase:name:${options.projectName}`]
   if (options.tags) {
     options.tags.split(',').map((s) => {
       s.trim()
@@ -97,19 +97,19 @@ export async function applicationGenerator(
       watch: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run-many --targets=build --projects=tag:${options.projectName} --parallel=100 --watch`,
+          command: `nx run-many --targets=build --projects=tag:firebase:app:${options.projectName} --parallel=100 --watch`,
         },
       },
       lint: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run-many --targets=lint --projects=tag:${options.projectName} --parallel=100`,
+          command: `nx run-many --targets=lint --projects=tag:firebase:app:${options.projectName} --parallel=100`,
         },
       },
       test: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run-many --targets=test --projects=tag:${options.projectName} --parallel=100`,
+          command: `nx run-many --targets=test --projects=tag:firebase:app:${options.projectName} --parallel=100`,
         },
       },
       getconfig: {

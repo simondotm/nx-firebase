@@ -35,19 +35,19 @@ describe('application generator', () => {
         watch: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=build --projects=tag:my-firebase-app --parallel=100 --watch`,
+            command: `nx run-many --targets=build --projects=tag:firebase:app:my-firebase-app --parallel=100 --watch`,
           },
         },
         lint: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=lint --projects=tag:my-firebase-app --parallel=100`,
+            command: `nx run-many --targets=lint --projects=tag:firebase:app:my-firebase-app --parallel=100`,
           },
         },
         test: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=test --projects=tag:my-firebase-app --parallel=100`,
+            command: `nx run-many --targets=test --projects=tag:firebase:app:my-firebase-app --parallel=100`,
           },
         },
         getconfig: {
@@ -99,7 +99,7 @@ describe('application generator', () => {
     const projects = Object.fromEntries(getProjects(tree))
     expect(projects).toMatchObject({
       'my-firebase-app': {
-        tags: ['firebase:app', 'one', 'two'],
+        tags: ['firebase:app', 'firebase:name:my-firebase-app', 'one', 'two'],
       },
     })
   })
