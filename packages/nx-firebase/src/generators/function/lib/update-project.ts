@@ -55,5 +55,6 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
   // Add function project as implicit dep of firebase app project
   firebaseAppProject.implicitDependencies ||= []
   firebaseAppProject.implicitDependencies.push(options.projectName)
+  firebaseAppProject.implicitDependencies.sort()
   updateProjectConfiguration(tree, options.app, firebaseAppProject)
 }
