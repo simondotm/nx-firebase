@@ -1,4 +1,4 @@
-import { names, readJsonFile, writeJsonFile } from '@nx/devkit'
+import { names, readJsonFile, readProjectConfiguration, writeJsonFile } from '@nx/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
@@ -679,128 +679,199 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).not.toContain('DELETE')  
     })
 
-    it(
-      'should detect deleted firebase functions',
-      async () => {
-        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
-        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+    describe('--project', () => {
+      it(
+        'should set firebase app project using --project',
+        async () => {
+          // create firebase app without specifying firebase deploy --project
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
 
-        expectStrings((await removeProject(functionData.projectName)).stdout, [
-          `DELETE apps/${functionData.projectName}`,
-        ])
+          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).not.toContain(
+            `--project`
+          ) 
+          const result = await runNxCommandAsync(`${syncGeneratorCommand} --app=${appData.projectName} --project=test`)
+          console.debug(result.stdout)
+          expectStrings(result.stdout, [
+            `SYNC: setting firebase deploy project for '${appData.projectName}' to '--project=test'`,
+            `UPDATE apps/${appData.projectName}/project.json`,
+            // 'Sync successful',
+          ])
+          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--project=test`
+          )
+          // cleanup - app
+          expectStrings((await removeProject(appData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}`,
+          ])  
+      })    
 
-        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
-        console.debug(result.stdout)
-        expectStrings(result.stdout, [
-          `SYNC: deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
-          'Sync successful',
-        ])          
+      it(
+        'should update firebase app project using --project',
+        async () => {
+          
+          // create firebase app specifying firebase deploy --project        
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          await runNxCommandAsync(`${appGeneratorCommand} ${appData.name} --project=test`)
 
-        // cleanup - app only, already removed function
-        expectStrings((await removeProject(appData.projectName)).stdout, [
-          `DELETE apps/${appData.projectName}`,
-        ])        
-    })
+          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--project=test`
+          ) 
+          const result = await runNxCommandAsync(`${syncGeneratorCommand} --app=${appData.projectName} --project=test2`)
+          console.debug(result.stdout)
+          expectStrings(result.stdout, [
+            `SYNC: updating firebase deploy project for '${appData.projectName}' to '--project=test2'`,
+            `UPDATE apps/${appData.projectName}/project.json`,
+            // 'Sync successful',
+          ])
+          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--project=test2`
+          )
 
-    it(
-      'should detect deleted firebase apps',
-      async () => {
-        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
-        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
-
-        expectStrings((await removeProject(appData.projectName)).stdout, [
-          `DELETE apps/${appData.projectName}`,
-        ])
-
-        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
-        console.debug(result.stdout)
-        expectStrings(result.stdout, [
-          `SYNC: orphaned firebase function '${functionData.projectName}', cannot locate firebase application '${appData.projectName}'`,
-          'Sync successful',
-        ])
-    
-        // cleanup - function only, already removed app
-        expectStrings((await removeProject(functionData.projectName)).stdout, [
-          `DELETE apps/${functionData.projectName}`,
-        ])        
-    })
-
-    it(
-      'should detect renamed firebase functions',
-      async () => {
-        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-        const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
-        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
-
-        expectStrings((await renameProject(functionData.projectName, renamedFunctionData.projectName)).stdout, [
-          `DELETE apps/${functionData.projectName}/project.json`,
-          `CREATE apps/${renamedFunctionData.projectName}/project.json`,
-        ])
-
-        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
-        console.debug(result.stdout)
-
-        expectStrings(result.stdout, [
-          `SYNC: renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
-          `SYNC: updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
-          `SYNC: updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
-          'Sync successful',
-        ])
-    
-
-        // cleanup - function, then app
-        expectStrings((await removeProject(renamedFunctionData.projectName)).stdout, [
-          `DELETE apps/${renamedFunctionData.projectName}`,
-        ])        
-        expectStrings((await removeProject(appData.projectName)).stdout, [
-          `DELETE apps/${appData.projectName}`,
-        ])        
+          // cleanup - app
+          expectStrings((await removeProject(appData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}`,
+          ])  
 
       })
+    })
+
+    describe('deletions', () => {
+
+      it(
+        'should detect deleted firebase functions',
+        async () => {
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+          await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+          expectStrings((await removeProject(functionData.projectName)).stdout, [
+            `DELETE apps/${functionData.projectName}`,
+          ])
+
+          const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+          console.debug(result.stdout)
+          expectStrings(result.stdout, [
+            `SYNC: deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
+            `UPDATE ${appData.configName}`,
+            'Sync successful',
+          ])          
+
+          // cleanup - app only, already removed function
+          expectStrings((await removeProject(appData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}`,
+          ])        
+      })
+
+      it(
+        'should detect deleted firebase apps',
+        async () => {
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+          await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+          expectStrings((await removeProject(appData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}`,
+          ])
+
+          const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+          console.debug(result.stdout)
+          expectStrings(result.stdout, [
+            `SYNC: orphaned firebase function '${functionData.projectName}', cannot locate firebase application '${appData.projectName}'`,
+            'Sync successful',
+          ])
+      
+          // cleanup - function only, already removed app
+          expectStrings((await removeProject(functionData.projectName)).stdout, [
+            `DELETE apps/${functionData.projectName}`,
+          ])        
+      })
+    })
+
+    describe('renames', () => {    
+
+      it(
+        'should detect renamed firebase functions',
+        async () => {
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+          await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+          expectStrings((await renameProject(functionData.projectName, renamedFunctionData.projectName)).stdout, [
+            `DELETE apps/${functionData.projectName}/project.json`,
+            `CREATE apps/${renamedFunctionData.projectName}/project.json`,
+          ])
+
+          const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+          console.debug(result.stdout)
+
+          expectStrings(result.stdout, [
+            `SYNC: renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+            `SYNC: updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
+            `SYNC: updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
+            'Sync successful',
+            `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+            `UPDATE ${appData.configName}`,
+          ])
+      
+
+          // cleanup - function, then app
+          expectStrings((await removeProject(renamedFunctionData.projectName)).stdout, [
+            `DELETE apps/${renamedFunctionData.projectName}`,
+          ])        
+          expectStrings((await removeProject(appData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}`,
+          ])        
+
+        })
 
 
-    it(
-      'should detect renamed firebase apps',
-      async () => {
-        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-        const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
-        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
-        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+      it(
+        'should detect renamed firebase apps',
+        async () => {
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
+          await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+          await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
 
-        expectStrings((await renameProject(appData.projectName, renamedAppData.projectName)).stdout, [
-          `DELETE apps/${appData.projectName}/project.json`,
-          `CREATE apps/${renamedAppData.projectName}/project.json`,
-        ])
+          expectStrings((await renameProject(appData.projectName, renamedAppData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}/project.json`,
+            `CREATE apps/${renamedAppData.projectName}/project.json`,
+          ])
 
-        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
-        console.debug(result.stdout)
+          const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+          console.debug(result.stdout)
 
-        expectStrings(result.stdout, [
-          `SYNC: firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
-          `SYNC: updated firebase:app tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
-          'Sync successful',
-        ])
-    
-        // run another sync to check there should be no orphaned functions from an app rename
-        const result2 = await runNxCommandAsync(`${syncGeneratorCommand}`)
-        expect(result2.stdout).not.toContain('SYNC: orphaned')
-        expect(result2.stdout).not.toContain('UPDATE')
+          expectStrings(result.stdout, [
+            `SYNC: firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
+            `SYNC: updated firebase:app tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
+            'Sync successful',
+            `UPDATE apps/${renamedAppData.projectName}/project.json`,
+            `UPDATE apps/${functionData.projectName}/project.json`,
+          ])
+      
+          // run another sync to check there should be no orphaned functions from an app rename
+          const result2 = await runNxCommandAsync(`${syncGeneratorCommand}`)
+          expect(result2.stdout).not.toContain('SYNC: orphaned')
+          expect(result2.stdout).not.toContain('UPDATE')
 
-        // cleanup - function, then app
-        expectStrings((await removeProject(functionData.projectName)).stdout, [
-          `DELETE apps/${functionData.projectName}`,
-        ])        
-        expectStrings((await removeProject(renamedAppData.projectName)).stdout, [
-          `DELETE apps/${renamedAppData.projectName}`,
-        ])        
-      })      
+          // cleanup - function, then app
+          expectStrings((await removeProject(functionData.projectName)).stdout, [
+            `DELETE apps/${functionData.projectName}`,
+          ])        
+          expectStrings((await removeProject(renamedAppData.projectName)).stdout, [
+            `DELETE apps/${renamedAppData.projectName}`,
+          ])        
+        })      
+      })
+
+      // check we handle renamed app & renamed function
+      // check that sync --app parameter will filter
 
   })
 

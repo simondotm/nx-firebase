@@ -7,6 +7,7 @@ import {
   readJson,
   readProjectConfiguration,
   runTasksInSerial,
+  TargetConfiguration,
   Tree,
   updateJson,
   updateProjectConfiguration,
@@ -23,31 +24,42 @@ import {
 import initGenerator from '../init/init'
 
 function updateFirebaseAppDeployProject(
-  parent: Record<string, string>,
+  target: TargetConfiguration,
   options: SyncGeneratorSchema,
 ) {
-  for (const key in parent) {
-    if (typeof key === 'object') {
-      updateFirebaseAppDeployProject(
-        parent.key as unknown as Record<string, string>,
-        options,
+  const command: string = target.options.command
+  if (command.includes('firebase deploy')) {
+    console.log('- found deploy command')
+    console.log(`- command=${command}`)
+    if (command.includes('--project')) {
+      console.log('- found --project in deploy command')
+      // already set, so update
+      target.options.command = command.replace(
+        /(--project[ =])([A-Z0-9a-z-_]+)/,
+        '$1' + options.project,
       )
+      console.log(`- new command: ${target.options.command}`)
+
+      logger.info(
+        `SYNC: updating firebase deploy project for '${options.app}' to '--project=${options.project}'`,
+      )
+      return true
     } else {
-      // check for --project updates
-      const v = parent[key]
-      if (v.includes('firebase deploy')) {
-        if (v.includes('--project')) {
-          // already set, so update
-          const regex = /(--profile[ =])([A-Za-z-]+)/
-          v.replace(regex, '$1' + options.project)
-        } else {
-          // no set, so add
-          const regex = /(firebase deploy)/
-          v.replace(regex, '$1' + ' ' + `--deploy=${options.project}`)
-        }
-      }
+      console.log('- did not find --project in deploy command')
+
+      // no set, so add
+      target.options.command = command.replace(
+        /(firebase deploy)/,
+        '$1' + ' ' + `--project=${options.project}`,
+      )
+      console.log(`- new command: ${target.options.command}`)
+      logger.info(
+        `SYNC: setting firebase deploy project for '${options.app}' to '--project=${options.project}'`,
+      )
+      return true
     }
   }
+  return false
 }
 
 // for specific or all apps
@@ -102,20 +114,21 @@ export async function syncGenerator(
   options: SyncGeneratorSchema,
 ): Promise<GeneratorCallback> {
   const tasks: GeneratorCallback[] = []
+
   // initialise plugin
   const initTask = await initGenerator(tree, {})
   tasks.push(initTask)
 
   // change the firebase project for an nx firebase app project
   if (options.project) {
+    console.log(`changing project for ${options.app} to ${options.project}`)
     const project = readProjectConfiguration(tree, options.app)
     if (!project.tags || project.tags.includes['firebase:app']) {
       throw new Error(`Project '${options.app}' is not a Firebase application.`)
     }
-
-    const deploy = project.targets.deploy as Record<string, string>
-    updateFirebaseAppDeployProject(deploy, options)
-    updateProjectConfiguration(tree, options.app, project)
+    if (updateFirebaseAppDeployProject(project.targets.deploy, options)) {
+      updateProjectConfiguration(tree, options.app, project)
+    }
     return
   }
 
@@ -300,29 +313,36 @@ export async function syncGenerator(
   // now sync the selected firebase apps
   for (const firebaseAppName in firebaseAppProjects) {
     const firebaseAppProject = firebaseAppProjects[firebaseAppName]
-    const implicitDependencies: string[] = []
+    // const implicitDependencies: string[] = []
 
     // what if function renamed AND app is renamed?
     let firebaseAppUpdated = false
 
-    // 1. handle deleted or renamed functions in the app by rewriting app implicit dependencies
-    firebaseAppProject.implicitDependencies?.map((dep) => {
-      if (dep in renamedFunctions) {
-        const renamedDep = renamedFunctions[dep]
-        implicitDependencies.push(renamedDep)
-        logger.info(
-          `SYNC: firebase app '${firebaseAppName}' dependency for firebase function renamed from '${dep}' to '${renamedDep}'`,
-        )
-        firebaseAppUpdated = true
-      } else if (dep in deletedFunctions) {
-        logger.info(
-          `SYNC: removed firebase app '${firebaseAppName}' dependency for deleted firebase function '${dep}'`,
-        )
-        firebaseAppUpdated = true
-      } else {
-        implicitDependencies.push(dep)
-      }
-    })
+    // Nx automatically:
+    //  - updates implicitDependencies when projects are renamed
+    //  - deletes implicitDependencies when projects are deleted
+
+    // // 1. handle deleted or renamed functions in the app by rewriting app implicit dependencies
+    // console.log(`- checking for renamed app dependencies`)
+    // firebaseAppProject.implicitDependencies?.map((dep) => {
+    //   console.log(`- checking if app dependency '${dep}' is renamed`)
+    //   if (dep in renamedFunctions) {
+    //     console.log(`- app dependency '${dep}' is renamed`)
+    //     const renamedDep = renamedFunctions[dep]
+    //     implicitDependencies.push(renamedDep)
+    //     logger.info(
+    //       `SYNC: firebase app '${firebaseAppName}' dependency for firebase function renamed from '${dep}' to '${renamedDep}'`,
+    //     )
+    //     firebaseAppUpdated = true
+    //   } else if (dep in deletedFunctions) {
+    //     logger.info(
+    //       `SYNC: removed firebase app '${firebaseAppName}' dependency for deleted firebase function '${dep}'`,
+    //     )
+    //     firebaseAppUpdated = true
+    //   } else {
+    //     implicitDependencies.push(dep)
+    //   }
+    // })
 
     // 2. update the firebase app name tag if it has been renamed
     const appNameTag = getFirebaseScopeFromTag(
@@ -339,7 +359,8 @@ export async function syncGenerator(
     }
 
     if (firebaseAppUpdated) {
-      firebaseAppProject.implicitDependencies = implicitDependencies.sort()
+      //firebaseAppProject.implicitDependencies = implicitDependencies.sort()
+      firebaseAppProject.implicitDependencies.sort()
       updateProjectConfiguration(tree, firebaseAppName, firebaseAppProject)
     }
 
