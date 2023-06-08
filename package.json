@@ -7,7 +7,7 @@
     "build": "nx run nx-firebase:build",
     "test": "nx run nx-firebase:test",
     "lint": "nx run nx-firebase:lint",
-    "e2e": "nx run nx-firebase-e2e:e2e",
+    "e2e": "nx run nx-firebase-e2e:e2e --silent=false",
     "release": "cd packages/nx-firebase && npm version",
     "release-help": "echo `npm run version -- v1.2.3` to set package version & commit tag",
     "compat:test": "npm run build && nx run compat:build && node dist/e2e/compat/main.js",

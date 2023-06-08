@@ -88,9 +88,11 @@ export async function functionGenerator(
   tree: Tree,
   rawOptions: FunctionGeneratorOptions,
 ): Promise<GeneratorCallback> {
+  console.log(`functionGenerator with options: ${rawOptions}`)
+
   const projects = getProjects(tree)
-  console.log(JSON.stringify(tree))
-  console.log(`projects=${JSON.stringify(projects)}`)
+  console.log(Object.keys(projects))
+  // console.log(`projects=${JSON.stringify(projects)}`)
 
   const tasks: GeneratorCallback[] = []
 

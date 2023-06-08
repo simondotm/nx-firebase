@@ -4,6 +4,7 @@ import {
   convertNxGenerator,
   runTasksInSerial,
   addProjectConfiguration,
+  getProjects,
 } from '@nx/devkit'
 
 import { createFiles } from './lib'
@@ -69,6 +70,13 @@ export async function applicationGenerator(
   tree: Tree,
   rawOptions: ApplicationGeneratorOptions,
 ): Promise<GeneratorCallback> {
+  console.log(`applicationGenerator with options: ${rawOptions}`)
+
+  {
+    const projects = getProjects(tree)
+    console.log(Object.keys(projects))
+  }
+
   const options = normalizeOptions(tree, rawOptions)
   const initTask = await initGenerator(tree, {})
 

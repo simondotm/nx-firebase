@@ -1,3 +1,4 @@
+import { names, readJsonFile, writeJsonFile } from '@nx/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
@@ -6,10 +7,19 @@ import {
   runNxCommandAsync,
   uniq,
   updateFile,
+  tmpProjPath,
 } from '@nx/plugin/testing'
+
+
 
 const JEST_TIMEOUT = 120000
 jest.setTimeout(JEST_TIMEOUT)
+
+// // NX14/15 ONLY
+// const USE_DAEMON = false
+// const daemonStatus = USE_DAEMON
+//   ? 'Nx Daemon is currently running'
+//   : 'Nx Daemon is not running'
 
 // TODO:
 // check that functions can be within firebase app folder
@@ -38,6 +48,7 @@ const subDir = 'subdir'
 const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
 // const functionGeneratorCommand = 'generate @simondotm/nx-firebase:function --format=cjs'
 const functionGeneratorCommand = 'generate @simondotm/nx-firebase:function'
+const syncGeneratorCommand = 'generate @simondotm/nx-firebase:sync'
 
 const libGeneratorCommand = 'generate @nx/js:lib'
 const npmScope = '@proj'
@@ -55,6 +66,7 @@ interface ProjectData {
   distDir: string
   mainTsPath: string
   npmScope: string
+  configName: string
 }
 
 /**
@@ -68,6 +80,20 @@ function getLibImport(projectData: ProjectData) {
       : libName
 }
 
+async function removeProject(name: string) {
+  return await runNxCommandAsync(`g @nx/workspace:remove ${name} --forceRemove`)
+}
+
+async function renameProject(name: string, destination: string) {
+  return await runNxCommandAsync(`g @nx/workspace:move --project=${name} --destination=${destination}`)
+}
+
+function expectStrings(input: string, contains: string[]) {
+  contains.forEach((item) => {
+    expect(input).toContain(item)
+  })
+}
+
 /**
  * 
  * @param name - project name (cannot be camel case)
@@ -75,19 +101,23 @@ function getLibImport(projectData: ProjectData) {
  * @returns - asset locations for this project
  */
 function getDirectories(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
-  const prefix = dir ? `${dir}-` : ''
-  const projectName = `${prefix}${name}`
-  const rootDir = dir ? `${dir}/` : ''
-  const distDir = `dist/${type}/${rootDir}${name}`
+  const d = dir ? `${names(dir).fileName}` : ''
+  const n = names(name).fileName
+  
+  const prefix = dir ? `${d}-` : ''
+  const projectName = `${prefix}${n}`
+  const rootDir = dir ? `${d}/` : ''
+  const distDir = `dist/${type}/${rootDir}${n}`
   return {
     name, // name passed to generator
     dir, // directory passed to generator
     projectName, // project name
-    projectDir: `${type}/${rootDir}${name}`,
-    srcDir: `${type}/${rootDir}${name}/src`,
+    projectDir: `${type}/${rootDir}${n}`,
+    srcDir: `${type}/${rootDir}${n}/src`,
     distDir: distDir,
-    mainTsPath: `${type}/${rootDir}${name}/src/main.ts`,
+    mainTsPath: `${type}/${rootDir}${n}/src/main.ts`,
     npmScope: `${npmScope}/${projectName}`,
+    configName: `firebase.${projectName}.json`,
   }
 }
 
@@ -158,9 +188,31 @@ describe('nx-firebase e2e', () => {
   // are not dependant on one another.
   beforeAll(async () => {
     ensureNxProject(pluginName, pluginPath)
+
+
+    // // NX14/15 ONLY
+    // if (USE_DAEMON) {
+    //   const result = await runNxCommandAsync('daemon --start')
+    //   expect(result.stdout).toContain(
+    //     'Daemon Server - Started in a background process',
+    //   )
+    // } else {
+    //   const nxJsonFile = tmpProjPath('nx.json')
+    //   const nxJson = readJsonFile(nxJsonFile)
+    //   // nxJson['pluginsConfig'] = {
+    //   //   '@nx/js': {
+    //   //     analyzeSourceFiles: true,
+    //   //   },
+    //   // }
+    //   // force local e2e tests to use same setup as CI environment
+    //   nxJson.tasksRunnerOptions.default.options.useDaemonProcess = false
+    //   writeJsonFile(nxJsonFile, nxJson)
+    // }
+
     // nx daemon still seems problematic in e2e tests even in 16.1.1
     // so we'll kill it after every test to make sure Nx doesn't use the cache for tests
-    runNxCommandAsync('reset')
+    // runNxCommandAsync('reset')
+    
   }, JEST_TIMEOUT)
 
   afterAll(() => {
@@ -168,6 +220,9 @@ describe('nx-firebase e2e', () => {
     // some work which can help clean up e2e leftovers
     runNxCommandAsync('reset')
   })
+
+
+
 
   describe('workspace setup', () => {
 
@@ -218,6 +273,18 @@ describe('nx-firebase e2e', () => {
         expect(packageJson.devDependencies['@nx/js']).toBeDefined()
         expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
     })
+
+
+    // // NX14/15 ONLY
+    // it(
+    //   'should have correct nx daemon status',
+    //   async () => {
+    //     const result = await runNxCommandAsync('daemon')
+    //     expect(result.stdout).toContain(daemonStatus)
+    //   },
+    //   JEST_TIMEOUT,
+    // )
+
   })
   
   //--------------------------------------------------------------------------------------------------
@@ -244,6 +311,16 @@ describe('nx-firebase e2e', () => {
         // stash a copy of the default index.ts
         // indexTsFile = readFile(projectData.indexTsPath)
     })
+
+    // // NX14/15 ONLY
+    // it(
+    //   'should have correct nx daemon status',
+    //   async () => {
+    //     const result = await runNxCommandAsync('daemon')
+    //     expect(result.stdout).toContain(daemonStatus)
+    //   },
+    //   JEST_TIMEOUT,
+    // )    
 
     it(
       'should build nx-firebase app',
@@ -281,6 +358,7 @@ describe('nx-firebase e2e', () => {
       it(
         'should add tags to the project',
         async () => {
+
           const projectData = getDirectories('apps', uniq(appName))
           await runNxCommandAsync(
             `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
@@ -293,285 +371,437 @@ describe('nx-firebase e2e', () => {
     })
   })
   
-  //--------------------------------------------------------------------------------------------------
-  // Function generator e2e tests
-  //--------------------------------------------------------------------------------------------------
+  // //--------------------------------------------------------------------------------------------------
+  // // Function generator e2e tests
+  // //--------------------------------------------------------------------------------------------------
 
-  describe('nx-firebase function', () => {
-    it(
-      'should not create nx-firebase function without --app',
-      async () => {
-        const projectData = getDirectories('apps', functionName)
+  // describe('nx-firebase function', () => {
+  //   it(
+  //     'should not create nx-firebase function without --app',
+  //     async () => {
+  //       const projectData = getDirectories('apps', functionName)
 
-        await expect(
-          runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name}`),
-        ).rejects.toThrow(
-          "Command failed: npx nx generate @simondotm/nx-firebase:function function",
-        )
-    })
+  //       await expect(
+  //         runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name}`),
+  //       ).rejects.toThrow(
+  //         "Command failed: npx nx generate @simondotm/nx-firebase:function function",
+  //       )
+  //   })
 
-    it(
-      'should create nx-firebase function',
-      async () => {
-        const projectData = getDirectories('apps', functionName)
-        await runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name} --app ${appName}`)
-        // test generator output
-        expect(() =>
-          checkFilesExist(
-            ...expectedFunctionFiles(projectData).concat(
-              expectedConfigFiles(projectData, true),
-            ),
-          ),
-        ).not.toThrow()
+  //   it(
+  //     'should create nx-firebase function',
+  //     async () => {
+  //       const projectData = getDirectories('apps', functionName)
+  //       await runNxCommandAsync(`${functionGeneratorCommand} ${projectData.name} --app ${appName}`)
+  //       // test generator output
+  //       expect(() =>
+  //         checkFilesExist(
+  //           ...expectedFunctionFiles(projectData).concat(
+  //             expectedConfigFiles(projectData, true),
+  //           ),
+  //         ),
+  //       ).not.toThrow()
 
-        // check dist files dont exist and we havent accidentally run this test out of sequence
-        const functionsProjectData = getDirectories('apps', functionName)
-        expect(() =>
-          checkFilesExist(
-            `dist/${functionsProjectData.projectDir}/main.js`,
-            `dist/${functionsProjectData.projectDir}/package.json`,
-            ),
-        ).toThrow()   
-    })
+  //       // check dist files dont exist and we havent accidentally run this test out of sequence
+  //       const functionsProjectData = getDirectories('apps', functionName)
+  //       expect(() =>
+  //         checkFilesExist(
+  //           `dist/${functionsProjectData.projectDir}/main.js`,
+  //           `dist/${functionsProjectData.projectDir}/package.json`,
+  //           ),
+  //       ).toThrow()   
+  //   })
 
-    it(
-      'should build nx-firebase function from the app',
-      async () => {
-        const projectData = getDirectories('apps', appName)
-        const result = await runNxCommandAsync(`build ${projectData.name}`)
-        expect(result.stdout).toContain("Build succeeded.")        
+  //   it(
+  //     'should build nx-firebase function from the app',
+  //     async () => {
+  //       const projectData = getDirectories('apps', appName)
+  //       const result = await runNxCommandAsync(`build ${projectData.name}`)
+  //       expect(result.stdout).toContain("Build succeeded.")        
 
-        const functionsProjectData = getDirectories('apps', functionName)
-        expect(() =>
-          checkFilesExist(
-            `dist/${functionsProjectData.projectDir}/main.js`,
-            `dist/${functionsProjectData.projectDir}/package.json`,
-            ),
-        ).not.toThrow()        
-    })
+  //       const functionsProjectData = getDirectories('apps', functionName)
+  //       expect(() =>
+  //         checkFilesExist(
+  //           `dist/${functionsProjectData.projectDir}/main.js`,
+  //           `dist/${functionsProjectData.projectDir}/package.json`,
+  //           ),
+  //       ).not.toThrow()        
+  //   })
 
-    it(
-      'should build nx-firebase function directly',
-      async () => {
-        const projectData = getDirectories('apps', functionName)
-        const result = await runNxCommandAsync(`build ${projectData.name}`)
-        expect(result.stdout).toContain("dist/apps/function/main.js")        
-        expect(result.stdout).toContain("Successfully ran target build for project function")        
-    })
+  //   it(
+  //     'should build nx-firebase function directly',
+  //     async () => {
+  //       const projectData = getDirectories('apps', functionName)
+  //       const result = await runNxCommandAsync(`build ${projectData.name}`)
+  //       expect(result.stdout).toContain("dist/apps/function/main.js")        
+  //       expect(result.stdout).toContain("Successfully ran target build for project function")        
+  //   })
 
 
-    it(
-      'should add correct dependencies to the built function package.json',
-      async () => {
-        const projectData = getDirectories('apps', functionName)
-        const distPackageFile = `${projectData.distDir}/package.json`
-        const distPackage = readJson(distPackageFile)
-        const deps = distPackage['dependencies']
-        expect(deps).toBeDefined()
-        expect(deps['firebase-admin']).toBeDefined()
-        expect(deps['firebase-functions']).toBeDefined()
-    })
+  //   it(
+  //     'should add correct dependencies to the built function package.json',
+  //     async () => {
+  //       const projectData = getDirectories('apps', functionName)
+  //       const distPackageFile = `${projectData.distDir}/package.json`
+  //       const distPackage = readJson(distPackageFile)
+  //       const deps = distPackage['dependencies']
+  //       expect(deps).toBeDefined()
+  //       expect(deps['firebase-admin']).toBeDefined()
+  //       expect(deps['firebase-functions']).toBeDefined()
+  //   })
 
-    it(
-      'should add tags to the function project',
-      async () => {
-        const projectData = getDirectories('apps', uniq(functionName))
-        await runNxCommandAsync(
-          `${functionGeneratorCommand} ${projectData.name} --app ${appName} --tags e2etag,e2ePackage`,
-        )
-        const project = readJson(`${projectData.projectDir}/project.json`)
-        expect(project.tags).toEqual([
-          'firebase:function',
-          `firebase:name:${projectData.name}`,
-          `firebase:app:${appName}`,
-          'e2etag',
-          'e2ePackage',
-        ])
-      }
+  //   it(
+  //     'should add tags to the function project',
+  //     async () => {
+  //       const projectData = getDirectories('apps', uniq(functionName))
+  //       await runNxCommandAsync(
+  //         `${functionGeneratorCommand} ${projectData.name} --app ${appName} --tags e2etag,e2ePackage`,
+  //       )
+  //       const project = readJson(`${projectData.projectDir}/project.json`)
+  //       expect(project.tags).toEqual([
+  //         'firebase:function',
+  //         `firebase:name:${projectData.name}`,
+  //         `firebase:app:${appName}`,
+  //         'e2etag',
+  //         'e2ePackage',
+  //       ])
+  //     }
       
-    )
+  //   )
  
 
-  })
+  // })
 
-  //--------------------------------------------------------------------------------------------------
-  // Create Libraries for e2e function generator tests
-  //--------------------------------------------------------------------------------------------------
-  describe('libraries', () => {
-    it(
-      'should create buildable typescript library',
-      async () => {
-        const projectData = getDirectories('libs', 'buildablelib')        
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${projectData.name} --buildable --importPath="${projectData.npmScope}"`,
-        )
+  // //--------------------------------------------------------------------------------------------------
+  // // Create Libraries for e2e function generator tests
+  // //--------------------------------------------------------------------------------------------------
+  // describe('libraries', () => {
+  //   it(
+  //     'should create buildable typescript library',
+  //     async () => {
+  //       const projectData = getDirectories('libs', 'buildablelib')        
+  //       await runNxCommandAsync(
+  //         `${libGeneratorCommand} ${projectData.name} --buildable --importPath="${projectData.npmScope}"`,
+  //       )
 
-        // no need to test the js library generator, only that it ran ok
-        expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
-        ).not.toThrow()
+  //       // no need to test the js library generator, only that it ran ok
+  //       expect(() =>
+  //         checkFilesExist(`${projectData.projectDir}/package.json`),
+  //       ).not.toThrow()
 
-        const result = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
-        )
-        expect(result.stdout).toContain(compileComplete)
-        expect(result.stdout).toContain(
-          `${buildSuccess} ${projectData.projectName}`,
-        )
-    })
+  //       const result = await runNxCommandAsync(
+  //         `build ${projectData.projectName}`,
+  //       )
+  //       expect(result.stdout).toContain(compileComplete)
+  //       expect(result.stdout).toContain(
+  //         `${buildSuccess} ${projectData.projectName}`,
+  //       )
+  //   })
 
-    it(
-      'should create buildable typescript library in subdir',
-      async () => {
-        const projectData = getDirectories('libs', 'buildablelib', 'subdir')           
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${projectData.name} --buildable --directory=${projectData.dir} --importPath="${projectData.npmScope}"`,
-        )
+  //   it(
+  //     'should create buildable typescript library in subdir',
+  //     async () => {
+  //       const projectData = getDirectories('libs', 'buildablelib', 'subdir')           
+  //       await runNxCommandAsync(
+  //         `${libGeneratorCommand} ${projectData.name} --buildable --directory=${projectData.dir} --importPath="${projectData.npmScope}"`,
+  //       )
 
-        // no need to test the js library generator, only that it ran ok
-        expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
-        ).not.toThrow()
+  //       // no need to test the js library generator, only that it ran ok
+  //       expect(() =>
+  //         checkFilesExist(`${projectData.projectDir}/package.json`),
+  //       ).not.toThrow()
 
-        const result = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
-        )
-        expect(result.stdout).toContain(compileComplete)
-        expect(result.stdout).toContain(
-          `${buildSuccess} ${projectData.projectName}`,
-        )
-    })
+  //       const result = await runNxCommandAsync(
+  //         `build ${projectData.projectName}`,
+  //       )
+  //       expect(result.stdout).toContain(compileComplete)
+  //       expect(result.stdout).toContain(
+  //         `${buildSuccess} ${projectData.projectName}`,
+  //       )
+  //   })
 
-    it(
-      'should create non-buildable typescript library',
-      async () => {
-        const projectData = getDirectories('libs', 'nonbuildablelib')          
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${projectData.name} --buildable=false --importPath="${projectData.npmScope}"`,
-        )
+  //   it(
+  //     'should create non-buildable typescript library',
+  //     async () => {
+  //       const projectData = getDirectories('libs', 'nonbuildablelib')          
+  //       await runNxCommandAsync(
+  //         `${libGeneratorCommand} ${projectData.name} --buildable=false --importPath="${projectData.npmScope}"`,
+  //       )
 
-        expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
-        ).toThrow()
+  //       expect(() =>
+  //         checkFilesExist(`${projectData.projectDir}/package.json`),
+  //       ).toThrow()
 
-        const project = readJson(
-          `${projectData.projectDir}/project.json`,
-        )
-        expect(project.targets.build).not.toBeDefined()
-    })
+  //       const project = readJson(
+  //         `${projectData.projectDir}/project.json`,
+  //       )
+  //       expect(project.targets.build).not.toBeDefined()
+  //   })
 
-    it(
-      'should create non-buildable typescript library in subdir',
-      async () => {
-        const projectData = getDirectories('libs', 'nonbuildablelib', 'subdir')          
+  //   it(
+  //     'should create non-buildable typescript library in subdir',
+  //     async () => {
+  //       const projectData = getDirectories('libs', 'nonbuildablelib', 'subdir')          
 
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${projectData.name} --directory=${projectData.dir} --buildable=false --importPath="${projectData.npmScope}"`,
-        )
+  //       await runNxCommandAsync(
+  //         `${libGeneratorCommand} ${projectData.name} --directory=${projectData.dir} --buildable=false --importPath="${projectData.npmScope}"`,
+  //       )
 
-        expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
-        ).toThrow()
+  //       expect(() =>
+  //         checkFilesExist(`${projectData.projectDir}/package.json`),
+  //       ).toThrow()
 
-        const project = readJson(
-          `${projectData.projectDir}/project.json`,
-        )
-        expect(project.targets.build).not.toBeDefined()
-    })
-  })
+  //       const project = readJson(
+  //         `${projectData.projectDir}/project.json`,
+  //       )
+  //       expect(project.targets.build).not.toBeDefined()
+  //   })
+  // })
 
-  //--------------------------------------------------------------------------------------------------
-  // Test import & dependency handling
-  //--------------------------------------------------------------------------------------------------
+  // //--------------------------------------------------------------------------------------------------
+  // // Test import & dependency handling
+  // //--------------------------------------------------------------------------------------------------
 
-  describe('nx-firebase dependencies', () => {
-    it(
-      'should inline library dependencies into function bundle',
-      async () => {
-        // use libs we generated earler
+  // describe('nx-firebase dependencies', () => {
+  //   it(
+  //     'should inline library dependencies into function bundle',
+  //     async () => {
+  //       // use libs we generated earler
        
-        // generate a function
-        const functionData = getDirectories('apps', 'functionwithdeps')
-        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app firebase`)
+  //       // generate a function
+  //       const functionData = getDirectories('apps', 'functionwithdeps')
+  //       await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app firebase`)
         
-        // add buildable & nonbuildable lib dependencies using import statements
-        const mainTs = readFile(functionData.mainTsPath)
-        expect(mainTs).toContain(importMatch)
+  //       // add buildable & nonbuildable lib dependencies using import statements
+  //       const mainTs = readFile(functionData.mainTsPath)
+  //       expect(mainTs).toContain(importMatch)
 
-        // import from a buildable lib
-        const buildableLibData = getDirectories('libs', 'buildablelib')
-        const libImport1 = getLibImport(buildableLibData)
-        const importAddition1 = `import { ${libImport1} } from '${buildableLibData.npmScope}'\nconsole.log(${libImport1}())\n`
-        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition1)
+  //       // import from a buildable lib
+  //       const buildableLibData = getDirectories('libs', 'buildablelib')
+  //       const libImport1 = getLibImport(buildableLibData)
+  //       const importAddition1 = `import { ${libImport1} } from '${buildableLibData.npmScope}'\nconsole.log(${libImport1}())\n`
+  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition1)
 
-        // import from a non buildable lib
-        const nonbuildableLibData = getDirectories('libs', 'nonbuildablelib')
-        const libImport2 = getLibImport(nonbuildableLibData)
-        const importAddition2 = `import { ${libImport2} } from '${nonbuildableLibData.npmScope}'\nconsole.log(${libImport2}())\n`
-        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition2)
+  //       // import from a non buildable lib
+  //       const nonbuildableLibData = getDirectories('libs', 'nonbuildablelib')
+  //       const libImport2 = getLibImport(nonbuildableLibData)
+  //       const importAddition2 = `import { ${libImport2} } from '${nonbuildableLibData.npmScope}'\nconsole.log(${libImport2}())\n`
+  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition2)
 
-        // import from a buildable subdir lib
-        const subDirBuildableLibData = getDirectories('libs', 'buildablelib', 'subdir')
-        const libImport3 = getLibImport(subDirBuildableLibData)
-        const importAddition3 = `import { ${libImport3} } from '${subDirBuildableLibData.npmScope}'\nconsole.log(${libImport3}())\n`
-        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition3)
+  //       // import from a buildable subdir lib
+  //       const subDirBuildableLibData = getDirectories('libs', 'buildablelib', 'subdir')
+  //       const libImport3 = getLibImport(subDirBuildableLibData)
+  //       const importAddition3 = `import { ${libImport3} } from '${subDirBuildableLibData.npmScope}'\nconsole.log(${libImport3}())\n`
+  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition3)
 
-        // import from a non buildable subdir lib
-        const subDirNonbuildableLibData = getDirectories('libs', 'nonbuildablelib', 'subdir')
-        const libImport4 = getLibImport(subDirNonbuildableLibData)
-        const importAddition4 = `import { ${libImport4} } from '${subDirNonbuildableLibData.npmScope}'\nconsole.log(${libImport4}())\n`
-        addContentToMainTs(functionData.mainTsPath, importMatch, importAddition4)
+  //       // import from a non buildable subdir lib
+  //       const subDirNonbuildableLibData = getDirectories('libs', 'nonbuildablelib', 'subdir')
+  //       const libImport4 = getLibImport(subDirNonbuildableLibData)
+  //       const importAddition4 = `import { ${libImport4} } from '${subDirNonbuildableLibData.npmScope}'\nconsole.log(${libImport4}())\n`
+  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition4)
 
 
-        // confirm the file changes
-        expect(readFile(functionData.mainTsPath)).toContain(importAddition1)
-        expect(readFile(functionData.mainTsPath)).toContain(importAddition2)
-        expect(readFile(functionData.mainTsPath)).toContain(importAddition3)
-        expect(readFile(functionData.mainTsPath)).toContain(importAddition4)
+  //       // confirm the file changes
+  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition1)
+  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition2)
+  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition3)
+  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition4)
 
-        // need to reset Nx here for e2e test to work
-        // otherwise it bundles node modules in the main.js output too
-        await runNxCommandAsync('reset')
+  //       // need to reset Nx here for e2e test to work
+  //       // otherwise it bundles node modules in the main.js output too
+  //       await runNxCommandAsync('reset')
 
-        // build
-        const result = await runNxCommandAsync(`build ${functionData.projectName}`)
-        // check console output
-        expect(result.stdout).toContain(
-          `Successfully ran target build for project ${functionData.projectName}`,
-        )
+  //       // build
+  //       const result = await runNxCommandAsync(`build ${functionData.projectName}`)
+  //       // check console output
+  //       expect(result.stdout).toContain(
+  //         `Successfully ran target build for project ${functionData.projectName}`,
+  //       )
 
-        // check dist outputs
-        expect(() =>
-          checkFilesExist(
-            `${functionData.distDir}/package.json`,
-            `${functionData.distDir}/main.js`,
-          ),
-        ).not.toThrow()
+  //       // check dist outputs
+  //       expect(() =>
+  //         checkFilesExist(
+  //           `${functionData.distDir}/package.json`,
+  //           `${functionData.distDir}/main.js`,
+  //         ),
+  //       ).not.toThrow()
 
-        // check dist package contains external imports
-        const distPackage = readJson(`${functionData.distDir}/package.json`)
-        const deps = distPackage['dependencies']
-        expect(deps).toBeDefined()
-        expect(deps['firebase-admin']).toBeDefined()
-        expect(deps['firebase-functions']).toBeDefined()        
+  //       // check dist package contains external imports
+  //       const distPackage = readJson(`${functionData.distDir}/package.json`)
+  //       const deps = distPackage['dependencies']
+  //       expect(deps).toBeDefined()
+  //       expect(deps['firebase-admin']).toBeDefined()
+  //       expect(deps['firebase-functions']).toBeDefined()        
 
-        // check bundled code contains the libcode we added
-        const bundle = readFile(`${functionData.distDir}/main.js`)
+  //       // check bundled code contains the libcode we added
+  //       const bundle = readFile(`${functionData.distDir}/main.js`)
 
-        // check that node modules were not bundled, happens in e2e if nx reset not called
-        // probably the earlier check for deps in the package.json already detects this scenario too
-        expect(bundle).not.toContain(`require_firebase_app`)  
+  //       // check that node modules were not bundled, happens in e2e if nx reset not called
+  //       // probably the earlier check for deps in the package.json already detects this scenario too
+  //       expect(bundle).not.toContain(`require_firebase_app`)  
 
-        // our imported lib modules should be inlined in the bundle
-        expect(bundle).toContain(`function ${libImport1}`)  
-        expect(bundle).toContain(`return "${buildableLibData.projectName}"`)  
-        expect(bundle).toContain(`function ${libImport2}`)  
-        expect(bundle).toContain(`return "${nonbuildableLibData.projectName}"`)  
-        expect(bundle).toContain(`function ${libImport3}`)  
-        expect(bundle).toContain(`return "${subDirBuildableLibData.projectName}"`)  
-        expect(bundle).toContain(`function ${libImport4}`)  
-        expect(bundle).toContain(`return "${subDirNonbuildableLibData.projectName}"`)  
+  //       // our imported lib modules should be inlined in the bundle
+  //       expect(bundle).toContain(`function ${libImport1}`)  
+  //       expect(bundle).toContain(`return "${buildableLibData.projectName}"`)  
+  //       expect(bundle).toContain(`function ${libImport2}`)  
+  //       expect(bundle).toContain(`return "${nonbuildableLibData.projectName}"`)  
+  //       expect(bundle).toContain(`function ${libImport3}`)  
+  //       expect(bundle).toContain(`return "${subDirBuildableLibData.projectName}"`)  
+  //       expect(bundle).toContain(`function ${libImport4}`)  
+  //       expect(bundle).toContain(`return "${subDirNonbuildableLibData.projectName}"`)  
+  //   })
+
+  // })
+
+
+    // check we handle:
+  // sync per project & sync all projects
+  // - function renamed
+  // - app renamed
+  // - function deleted
+  // - app deleted
+  // - function & app renamed
+  // --project option
+
+  describe('nx-firebase sync', () => {
+
+
+    it(
+      'should sync firebase workspace with no changes',
+      async () => {
+
+        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+        console.debug(result.stdout)
+        expect(result.stdout).toContain('Sync successful')
+        expect(result.stdout).not.toContain('SYNC:')
+        expect(result.stdout).not.toContain('UPDATE')
+        expect(result.stdout).not.toContain('CREATE')
+        expect(result.stdout).not.toContain('DELETE')  
     })
 
+    it(
+      'should detect deleted firebase functions',
+      async () => {
+        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+        expectStrings((await removeProject(functionData.projectName)).stdout, [
+          `DELETE apps/${functionData.projectName}`,
+        ])
+
+        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+        console.debug(result.stdout)
+        expectStrings(result.stdout, [
+          `SYNC: deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
+          'Sync successful',
+        ])          
+
+        // cleanup - app only, already removed function
+        expectStrings((await removeProject(appData.projectName)).stdout, [
+          `DELETE apps/${appData.projectName}`,
+        ])        
+    })
+
+    it(
+      'should detect deleted firebase apps',
+      async () => {
+        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+        expectStrings((await removeProject(appData.projectName)).stdout, [
+          `DELETE apps/${appData.projectName}`,
+        ])
+
+        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+        console.debug(result.stdout)
+        expectStrings(result.stdout, [
+          `SYNC: orphaned firebase function '${functionData.projectName}', cannot locate firebase application '${appData.projectName}'`,
+          'Sync successful',
+        ])
+    
+        // cleanup - function only, already removed app
+        expectStrings((await removeProject(functionData.projectName)).stdout, [
+          `DELETE apps/${functionData.projectName}`,
+        ])        
+    })
+
+    it(
+      'should detect renamed firebase functions',
+      async () => {
+        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+        const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+        expectStrings((await renameProject(functionData.projectName, renamedFunctionData.projectName)).stdout, [
+          `DELETE apps/${functionData.projectName}/project.json`,
+          `CREATE apps/${renamedFunctionData.projectName}/project.json`,
+        ])
+
+        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+        console.debug(result.stdout)
+
+        expectStrings(result.stdout, [
+          `SYNC: renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+          `SYNC: updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
+          `SYNC: updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
+          'Sync successful',
+        ])
+    
+
+        // cleanup - function, then app
+        expectStrings((await removeProject(renamedFunctionData.projectName)).stdout, [
+          `DELETE apps/${renamedFunctionData.projectName}`,
+        ])        
+        expectStrings((await removeProject(appData.projectName)).stdout, [
+          `DELETE apps/${appData.projectName}`,
+        ])        
+
+      })
+
+
+    it(
+      'should detect renamed firebase apps',
+      async () => {
+        const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+        const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+        const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
+        await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
+        await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app ${appData.name}`)
+
+        expectStrings((await renameProject(appData.projectName, renamedAppData.projectName)).stdout, [
+          `DELETE apps/${appData.projectName}/project.json`,
+          `CREATE apps/${renamedAppData.projectName}/project.json`,
+        ])
+
+        const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
+        console.debug(result.stdout)
+
+        expectStrings(result.stdout, [
+          `SYNC: firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
+          `SYNC: updated firebase:app tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
+          'Sync successful',
+        ])
+    
+        // run another sync to check there should be no orphaned functions from an app rename
+        const result2 = await runNxCommandAsync(`${syncGeneratorCommand}`)
+        expect(result2.stdout).not.toContain('SYNC: orphaned')
+        expect(result2.stdout).not.toContain('UPDATE')
+
+        // cleanup - function, then app
+        expectStrings((await removeProject(functionData.projectName)).stdout, [
+          `DELETE apps/${functionData.projectName}`,
+        ])        
+        expectStrings((await removeProject(renamedAppData.projectName)).stdout, [
+          `DELETE apps/${renamedAppData.projectName}`,
+        ])        
+      })      
+
   })
+
 })

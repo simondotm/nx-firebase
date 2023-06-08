@@ -56,6 +56,14 @@ export interface FirebaseConfig {
   }
 }
 
+/**
+ * Generate a firebase config file name for the given project
+ * If `firebase.json` doesnt already exist in the workspace, use that
+ * Otherwise use `firebase.<projectname>.json`
+ * @param tree
+ * @param projectName
+ * @returns firebase config name for this project
+ */
 export function generateFirebaseConfigName(tree: Tree, projectName: string) {
   const firebaseConfigName = tree.exists('firebase.json')
     ? `firebase.${projectName}.json`
@@ -64,4 +72,20 @@ export function generateFirebaseConfigName(tree: Tree, projectName: string) {
   //   `generateFirebaseConfigName for ${projectName} config=${firebaseConfigName}`,
   // )
   return firebaseConfigName
+}
+
+/**
+ * Determine the firebase config file name for the given project
+ * If `firebase.<projectname>.json` exists in the workspace, then use that
+ * Otherwise use `firebase.json`
+ * @param tree
+ * @param projectName
+ * @returns firebase config file name
+ */
+export function calculateFirebaseConfigName(tree: Tree, projectName: string) {
+  const firebaseConfigName = `firebase.${projectName}.json`
+  if (tree.exists(firebaseConfigName)) {
+    return firebaseConfigName
+  }
+  return 'firebase.json'
 }
