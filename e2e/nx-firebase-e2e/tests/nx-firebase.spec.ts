@@ -672,8 +672,7 @@ describe('nx-firebase e2e', () => {
 
         const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
         console.debug(result.stdout)
-        expect(result.stdout).toContain('Sync successful')
-        expect(result.stdout).not.toContain('SYNC:')
+        expect(result.stdout).not.toContain('  SYNC')
         expect(result.stdout).not.toContain('UPDATE')
         expect(result.stdout).not.toContain('CREATE')
         expect(result.stdout).not.toContain('DELETE')  
@@ -693,9 +692,8 @@ describe('nx-firebase e2e', () => {
           const result = await runNxCommandAsync(`${syncGeneratorCommand} --app=${appData.projectName} --project=test`)
           console.debug(result.stdout)
           expectStrings(result.stdout, [
-            `SYNC: setting firebase deploy project for '${appData.projectName}' to '--project=test'`,
+            `  SYNC setting firebase deploy project for '${appData.projectName}' to '--project=test'`,
             `UPDATE apps/${appData.projectName}/project.json`,
-            // 'Sync successful',
           ])
           expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
             `--project=test`
@@ -720,9 +718,8 @@ describe('nx-firebase e2e', () => {
           const result = await runNxCommandAsync(`${syncGeneratorCommand} --app=${appData.projectName} --project=test2`)
           console.debug(result.stdout)
           expectStrings(result.stdout, [
-            `SYNC: updating firebase deploy project for '${appData.projectName}' to '--project=test2'`,
+            `  SYNC updating firebase deploy project for '${appData.projectName}' to '--project=test2'`,
             `UPDATE apps/${appData.projectName}/project.json`,
-            // 'Sync successful',
           ])
           expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
             `--project=test2`
@@ -753,9 +750,8 @@ describe('nx-firebase e2e', () => {
           const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
           console.debug(result.stdout)
           expectStrings(result.stdout, [
-            `SYNC: deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
+            `  SYNC deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
             `UPDATE ${appData.configName}`,
-            'Sync successful',
           ])          
 
           // cleanup - app only, already removed function
@@ -779,8 +775,7 @@ describe('nx-firebase e2e', () => {
           const result = await runNxCommandAsync(`${syncGeneratorCommand}`)
           console.debug(result.stdout)
           expectStrings(result.stdout, [
-            `SYNC: orphaned firebase function '${functionData.projectName}', cannot locate firebase application '${appData.projectName}'`,
-            'Sync successful',
+            `  SYNC orphaned firebase function '${functionData.projectName}', cannot locate firebase application '${appData.projectName}'`,
           ])
       
           // cleanup - function only, already removed app
@@ -810,10 +805,9 @@ describe('nx-firebase e2e', () => {
           console.debug(result.stdout)
 
           expectStrings(result.stdout, [
-            `SYNC: renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
-            `SYNC: updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
-            `SYNC: updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
-            'Sync successful',
+            `  SYNC renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+            `  SYNC updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
+            `  SYNC updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
             `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
             `UPDATE ${appData.configName}`,
           ])
@@ -848,16 +842,15 @@ describe('nx-firebase e2e', () => {
           console.debug(result.stdout)
 
           expectStrings(result.stdout, [
-            `SYNC: firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
-            `SYNC: updated firebase:app tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
-            'Sync successful',
+            `  SYNC firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
+            `  SYNC updated firebase:app tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${functionData.projectName}/project.json`,
           ])
       
           // run another sync to check there should be no orphaned functions from an app rename
           const result2 = await runNxCommandAsync(`${syncGeneratorCommand}`)
-          expect(result2.stdout).not.toContain('SYNC: orphaned')
+          expect(result2.stdout).not.toContain('  SYNC orphaned')
           expect(result2.stdout).not.toContain('UPDATE')
 
           // cleanup - function, then app
