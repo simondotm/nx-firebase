@@ -11,7 +11,11 @@ import {
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 
 import { initGenerator } from '../init/init'
-import { getProjectName, updateTsConfig } from '../../utils'
+import {
+  calculateFirebaseConfigName,
+  getProjectName,
+  updateTsConfig,
+} from '../../utils'
 
 import { addFunction, createFiles, updateProject } from './lib'
 import type { FunctionGeneratorOptions, NormalizedOptions } from './schema'
@@ -38,6 +42,7 @@ export function normalizeOptions(
   }
 
   // use firebase.<project>.json if it exists, otherwise fall back to firebase.json
+  // const firebaseConfigName = calculateFirebaseConfigName(tree, firebaseApp)
   let firebaseConfigName = `firebase.${firebaseApp}.json`
   if (!tree.exists(firebaseConfigName)) {
     // console.log(`looking for ${firebaseConfigName} failed, using fallback`)

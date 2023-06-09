@@ -153,7 +153,7 @@ export function getFirebaseWorkspaceChanges(
     }
   }
 
-  debugInfo(`checking for renamed apps`)
+  debugInfo(`- checking for renamed apps`)
 
   // determine renamed apps
   for (const firebaseAppProjectName in projects.firebaseAppProjects) {

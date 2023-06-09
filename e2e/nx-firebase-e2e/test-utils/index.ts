@@ -46,6 +46,25 @@ export async function syncGeneratorAsync(params: string = '') {
 }
 
 
+export async function cleanProjectAsync(projectData: ProjectData) {
+  expectStrings((await removeProjectAsync(projectData.projectName)).stdout, [
+    `DELETE apps/${projectData.projectName}`,
+  ])    
+}
+
+export async function cleanAppAsync(projectData: ProjectData) {
+  console.log(`- cleanAppAsync ${projectData.projectName}`)
+  await cleanProjectAsync(projectData)
+  // expectStrings((await syncGeneratorAsync(projectData.projectName)).stdout, [
+  //     `DELETE ${projectData.configName}`,
+  //   ]) 
+}  
+export async function cleanFunctionAsync(projectData: ProjectData) {
+  console.log(`- cleanFunctionAsync ${projectData.projectName}`)
+  await cleanProjectAsync(projectData)
+}  
+
+
 export function expectStrings(input: string, contains: string[]) {
   contains.forEach((item) => {
     expect(input).toContain(item)

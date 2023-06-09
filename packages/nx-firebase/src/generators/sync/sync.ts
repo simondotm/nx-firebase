@@ -65,6 +65,15 @@ export async function syncGenerator(
   // build lists of firebase apps & functions that have been deleted or renamed
   debugInfo('- Syncing workspace')
 
+  // 1. Delete firebase config for any deleted apps
+  // for (const deletedApp in changes.deletedApps) {
+  //   const deletedAppConfigName = calculateFirebaseConfigName(tree, deletedApp)
+  //   tree.delete(deletedAppConfigName)
+  //   logger.info(
+  //     `CHANGE ${deletedApp} app was deleted, removing its firebase config file ${deletedAppConfigName}`,
+  //   )
+  // }
+
   // now sync the selected firebase apps
   for (const firebaseAppName in projects.firebaseAppProjects) {
     const firebaseAppProject = projects.firebaseAppProjects[firebaseAppName]
@@ -94,7 +103,7 @@ export async function syncGenerator(
     }
 
     if (firebaseAppUpdated) {
-      firebaseAppProject.implicitDependencies.sort()
+      firebaseAppProject.implicitDependencies.sort() // just sort it anyway
       updateProjectConfiguration(tree, firebaseAppName, firebaseAppProject)
     }
 
@@ -104,24 +113,28 @@ export async function syncGenerator(
       let firebaseFunctionUpdated = false
       const firebaseFunctionProject =
         projects.firebaseFunctionProjects[firebaseFunctionName]
-      const { tagValue, tagIndex } = getFirebaseScopeFromTag(
-        firebaseFunctionProject,
-        'firebase:dep',
-      )
-      if (tagValue) {
-        if (tagValue in changes.renamedApps) {
-          const renamedFunctionName = changes.renamedApps[tagValue]
-          firebaseFunctionProject.tags[
-            tagIndex
-          ] = `firebase:dep:${renamedFunctionName}`
-          logger.info(
-            `  SYNC updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
-          )
-          firebaseFunctionUpdated = true
-        } else if (tagValue in changes.deletedApps) {
-          logger.warn(
-            `  SYNC ORPHANED firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
-          )
+      // only investigate deps that are function projects
+      // user might add other deps, or it might be the firebase config
+      if (firebaseFunctionProject) {
+        const { tagValue, tagIndex } = getFirebaseScopeFromTag(
+          firebaseFunctionProject,
+          'firebase:dep',
+        )
+        if (tagValue) {
+          if (tagValue in changes.renamedApps) {
+            const renamedFunctionName = changes.renamedApps[tagValue]
+            firebaseFunctionProject.tags[
+              tagIndex
+            ] = `firebase:dep:${renamedFunctionName}`
+            logger.info(
+              `  SYNC updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
+            )
+            firebaseFunctionUpdated = true
+          } else if (tagValue in changes.deletedApps) {
+            logger.warn(
+              `  SYNC ORPHANED firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
+            )
+          }
         }
       }
 
@@ -163,12 +176,18 @@ export async function syncGenerator(
     })
 
     // 3. Update firebase.json config for this app if any of its functions have been renamed or deleted
+    debugInfo(`- checking for updates to firebase.json`)
     const firebaseConfigName = calculateFirebaseConfigName(
       tree,
       firebaseAppName,
     )
 
     const config = readJson<FirebaseConfig>(tree, firebaseConfigName)
+    // if (!config) {
+    //   throw new Error(
+    //     `Could not load firebase config file '${firebaseConfigName}' for firebase app '${firebaseAppName}'`,
+    //   )
+    // }
     let configUpdated = false
 
     const functions = config.functions as FirebaseFunction[]
@@ -185,19 +204,27 @@ export async function syncGenerator(
         updatedFunctions.push(func)
       }
     }
+
+    debugInfo(`- checking for renamed codebases in '${firebaseConfigName}'`)
+    debugInfo(`- updatedFunctions=${JSON.stringify(updatedFunctions)}`)
+
     // update renamed functions
     for (let i = 0; i < updatedFunctions.length; ++i) {
       const func = updatedFunctions[i]
-      const funcName = func.codebase
-      if (funcName in changes.renamedFunctions) {
+      const codebase = func.codebase
+      debugInfo(`- checking if codebase '${codebase}' is renamed`)
+      if (codebase in changes.renamedFunctions) {
         // change name
-        const newFuncName = changes.renamedFunctions[funcName]
-        func.codebase = newFuncName
+        const newCodebase = changes.renamedFunctions[codebase]
+
+        debugInfo(`- codebase '${codebase}' is renamed to ${newCodebase}`)
+
+        func.codebase = newCodebase
         // change source dir
-        const project = projects.firebaseFunctionProjects[newFuncName]
+        const project = projects.firebaseFunctionProjects[newCodebase]
         func.source = project.targets.build.options.outputPath
         logger.info(
-          `  SYNC renamed firebase function codebase from '${funcName}' to '${newFuncName}' in '${firebaseConfigName}'`,
+          `  SYNC renamed firebase function codebase from '${codebase}' to '${newCodebase}' in '${firebaseConfigName}'`,
         )
         configUpdated = true
       }
@@ -217,7 +244,7 @@ export async function syncGenerator(
       firebaseFunctionProject,
       'firebase:dep',
     )
-    debugInfo(`checking for ${tagValue} in deleted Apps`)
+    debugInfo(`- checking for ${tagValue} in deleted Apps`)
     if (tagValue && tagValue in changes.deletedApps) {
       logger.info(
         `  SYNC orphaned firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,

@@ -65,12 +65,12 @@ export interface FirebaseConfig {
  * @returns firebase config name for this project
  */
 export function generateFirebaseConfigName(tree: Tree, projectName: string) {
+  // return `firebase.${projectName}.json`
+
   const firebaseConfigName = tree.exists('firebase.json')
     ? `firebase.${projectName}.json`
     : 'firebase.json'
-  // console.log(
-  //   `generateFirebaseConfigName for ${projectName} config=${firebaseConfigName}`,
-  // )
+
   return firebaseConfigName
 }
 
@@ -84,6 +84,7 @@ export function generateFirebaseConfigName(tree: Tree, projectName: string) {
  */
 export function calculateFirebaseConfigName(tree: Tree, projectName: string) {
   const firebaseConfigName = `firebase.${projectName}.json`
+  // return firebaseConfigName
   if (tree.exists(firebaseConfigName)) {
     return firebaseConfigName
   }

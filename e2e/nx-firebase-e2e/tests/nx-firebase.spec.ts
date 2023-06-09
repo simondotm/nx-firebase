@@ -10,7 +10,7 @@ import {
   tmpProjPath,
 } from '@nx/plugin/testing'
 
-import { ProjectData, appGeneratorAsync, expectStrings, functionGeneratorAsync, getDirectories, removeProjectAsync, renameProjectAsync, syncGeneratorAsync } from '../test-utils'
+import { ProjectData, appGeneratorAsync, cleanAppAsync, cleanFunctionAsync, expectStrings, functionGeneratorAsync, getDirectories, removeProjectAsync, renameProjectAsync, syncGeneratorAsync } from '../test-utils'
 
 
 const JEST_TIMEOUT = 120000
@@ -647,9 +647,10 @@ describe('nx-firebase e2e', () => {
             `--project=test`
           )
           // cleanup - app
-          expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
-            `DELETE apps/${appData.projectName}`,
-          ])  
+          cleanAppAsync(appData)
+          // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
+          //   `DELETE apps/${appData.projectName}`,
+          // ])  
       })    
 
       it(
@@ -674,9 +675,10 @@ describe('nx-firebase e2e', () => {
           )
 
           // cleanup - app
-          expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
-            `DELETE apps/${appData.projectName}`,
-          ])  
+          cleanAppAsync(appData)
+          // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
+          //   `DELETE apps/${appData.projectName}`,
+          // ])  
 
       })
     })
@@ -703,9 +705,10 @@ describe('nx-firebase e2e', () => {
           ])          
 
           // cleanup - app only, already removed function
-          expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
-            `DELETE apps/${appData.projectName}`,
-          ])        
+          cleanAppAsync(appData)
+          // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
+          //   `DELETE apps/${appData.projectName}`,
+          // ])        
       })
 
       it(
@@ -723,13 +726,16 @@ describe('nx-firebase e2e', () => {
           const result = await syncGeneratorAsync()
           console.debug(result.stdout)
           expectStrings(result.stdout, [
+            // `CHANGE ${appData.projectName} app was deleted, removing its firebase config file ${appData.configName}`,  
             `  SYNC orphaned firebase function '${functionData.projectName}', cannot locate firebase application '${appData.projectName}'`,
+            // `DELETE ${appData.configName}`,
           ])
       
           // cleanup - function only, already removed app
-          expectStrings((await removeProjectAsync(functionData.projectName)).stdout, [
-            `DELETE apps/${functionData.projectName}`,
-          ])        
+          cleanFunctionAsync(functionData)
+          // expectStrings((await removeProjectAsync(functionData.projectName)).stdout, [
+          //   `DELETE apps/${functionData.projectName}`,
+          // ])        
       })
     })
 
@@ -762,12 +768,14 @@ describe('nx-firebase e2e', () => {
       
 
           // cleanup - function, then app
-          expectStrings((await removeProjectAsync(renamedFunctionData.projectName)).stdout, [
-            `DELETE apps/${renamedFunctionData.projectName}`,
-          ])        
-          expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
-            `DELETE apps/${appData.projectName}`,
-          ])        
+          cleanFunctionAsync(renamedFunctionData)
+          cleanAppAsync(appData)
+          // expectStrings((await removeProjectAsync(renamedFunctionData.projectName)).stdout, [
+          //   `DELETE apps/${renamedFunctionData.projectName}`,
+          // ])        
+          // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
+          //   `DELETE apps/${appData.projectName}`,
+          // ])        
 
         })
 
@@ -802,18 +810,72 @@ describe('nx-firebase e2e', () => {
           expect(result2.stdout).not.toContain('UPDATE')
 
           // cleanup - function, then app
-          expectStrings((await removeProjectAsync(functionData.projectName)).stdout, [
-            `DELETE apps/${functionData.projectName}`,
-          ])        
-          expectStrings((await removeProjectAsync(renamedAppData.projectName)).stdout, [
-            `DELETE apps/${renamedAppData.projectName}`,
-          ])        
+          cleanFunctionAsync(functionData)
+          cleanAppAsync(renamedAppData)
+
+          // expectStrings((await removeProjectAsync(functionData.projectName)).stdout, [
+          //   `DELETE apps/${functionData.projectName}`,
+          // ])        
+          // expectStrings((await removeProjectAsync(renamedAppData.projectName)).stdout, [
+          //   `DELETE apps/${renamedAppData.projectName}`,
+          // ])        
         })      
       })
 
-      // check we handle renamed app & renamed function
-      // check that sync --app parameter will filter
+
+
+      // it(
+      //   'should detect renamed firebase apps & functions',
+      //   async () => {
+
+      //     const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+      //     const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+      //     const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+      //     const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
+
+      //     await appGeneratorAsync(`${appData.name}`)
+      //     await functionGeneratorAsync(`${functionData.name} --app ${appData.name}`)
+
+      //     // rename app & function
+      //     expectStrings((await renameProjectAsync(appData.projectName, renamedAppData.projectName)).stdout, [
+      //       `DELETE apps/${appData.projectName}/project.json`,
+      //       `CREATE apps/${renamedAppData.projectName}/project.json`,
+      //     ])
+      //     expectStrings((await renameProjectAsync(functionData.projectName, renamedFunctionData.projectName)).stdout, [
+      //       `DELETE apps/${functionData.projectName}/project.json`,
+      //       `CREATE apps/${renamedFunctionData.projectName}/project.json`,
+      //     ])
+
+      //     const result = await syncGeneratorAsync()
+      //     console.debug(result.stdout)
+
+      //     expectStrings(result.stdout, [
+      //       `  SYNC firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
+      //       `  SYNC updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
+      //       `  SYNC renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+      //       `  SYNC updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
+      //       `  SYNC updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
+      //       `UPDATE apps/${renamedAppData.projectName}/project.json`,
+      //       `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+      //       `UPDATE ${appData.configName}`,            
+      //     ])          
+          
+
+      //     // cleanup - function, then app
+      //     cleanFunctionAsync(renamedFunctionData)
+      //     cleanAppAsync(renamedAppData)
+      //     // expectStrings((await removeProjectAsync(renamedFunctionData.projectName)).stdout, [
+      //     //   `DELETE apps/${renamedFunctionData.projectName}`,
+      //     // ])        
+      //     // expectStrings((await removeProjectAsync(renamedAppData.projectName)).stdout, [
+      //     //   `DELETE apps/${renamedAppData.projectName}`,
+      //     // ])     
+
+      // })
 
   })
+
+        // check we handle removed firebase configs from deleted apps
+        // if app is renamed, shouldnt we rename firebase config too?!! :(
 
 })
