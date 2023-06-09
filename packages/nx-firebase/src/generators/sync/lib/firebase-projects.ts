@@ -142,7 +142,7 @@ export function getFirebaseWorkspaceChanges(
       projects.firebaseFunctionProjects[firebaseFunctionName]
     const { tagValue } = getFirebaseScopeFromTag(
       firebaseFunctionProject,
-      'firebase:app',
+      'firebase:dep',
     )
     if (!(tagValue in projects.firebaseAppProjects)) {
       debugInfo(

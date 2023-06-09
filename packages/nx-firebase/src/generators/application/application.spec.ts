@@ -35,19 +35,19 @@ describe('application generator', () => {
         watch: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=build --projects=tag:firebase:app:my-firebase-app --parallel=100 --watch`,
+            command: `nx run-many --targets=build --projects=tag:firebase:dep:my-firebase-app --parallel=100 --watch`,
           },
         },
         lint: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=lint --projects=tag:firebase:app:my-firebase-app --parallel=100`,
+            command: `nx run-many --targets=lint --projects=tag:firebase:dep:my-firebase-app --parallel=100`,
           },
         },
         test: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run-many --targets=test --projects=tag:firebase:app:my-firebase-app --parallel=100`,
+            command: `nx run-many --targets=test --projects=tag:firebase:dep:my-firebase-app --parallel=100`,
           },
         },
         getconfig: {

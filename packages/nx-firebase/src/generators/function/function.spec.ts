@@ -126,7 +126,7 @@ describe('function generator', () => {
             tags: [
               'firebase:function',
               'firebase:name:my-firebase-function',
-              'firebase:app:my-firebase-app',
+              'firebase:dep:my-firebase-app',
               'one',
               'two',
             ],
@@ -168,7 +168,7 @@ describe('function generator', () => {
             tags: [
               'firebase:function',
               'firebase:name:sub-dir-my-firebase-function',
-              'firebase:app:my-firebase-app',
+              'firebase:dep:my-firebase-app',
             ],
           },
         })

@@ -99,7 +99,7 @@ export async function syncGenerator(
       updateProjectConfiguration(tree, firebaseAppName, firebaseAppProject)
     }
 
-    // 2. handle deleted or renamed firebase apps by updating firebase:app:<name> tags in functions
+    // 2. handle deleted or renamed firebase apps by updating firebase:dep:<name> tags in functions
     // also update the deploy command
     firebaseAppProject.implicitDependencies?.map((firebaseFunctionName) => {
       let firebaseFunctionUpdated = false
@@ -107,16 +107,16 @@ export async function syncGenerator(
         projects.firebaseFunctionProjects[firebaseFunctionName]
       const { tagValue, tagIndex } = getFirebaseScopeFromTag(
         firebaseFunctionProject,
-        'firebase:app',
+        'firebase:dep',
       )
       if (tagValue) {
         if (tagValue in changes.renamedApps) {
           const renamedFunctionName = changes.renamedApps[tagValue]
           firebaseFunctionProject.tags[
             tagIndex
-          ] = `firebase:app:${renamedFunctionName}`
+          ] = `firebase:dep:${renamedFunctionName}`
           logger.info(
-            `  SYNC updated firebase:app tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
+            `  SYNC updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
           )
           firebaseFunctionUpdated = true
         } else if (tagValue in changes.deletedApps) {
@@ -216,7 +216,7 @@ export async function syncGenerator(
       projects.firebaseFunctionProjects[firebaseFunctionName]
     const { tagValue } = getFirebaseScopeFromTag(
       firebaseFunctionProject,
-      'firebase:app',
+      'firebase:dep',
     )
     debugInfo(`checking for ${tagValue} in deleted Apps`)
     if (tagValue && tagValue in changes.deletedApps) {

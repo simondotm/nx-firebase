@@ -105,19 +105,19 @@ export async function applicationGenerator(
       watch: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run-many --targets=build --projects=tag:firebase:app:${options.projectName} --parallel=100 --watch`,
+          command: `nx run-many --targets=build --projects=tag:firebase:dep:${options.projectName} --parallel=100 --watch`,
         },
       },
       lint: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run-many --targets=lint --projects=tag:firebase:app:${options.projectName} --parallel=100`,
+          command: `nx run-many --targets=lint --projects=tag:firebase:dep:${options.projectName} --parallel=100`,
         },
       },
       test: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run-many --targets=test --projects=tag:firebase:app:${options.projectName} --parallel=100`,
+          command: `nx run-many --targets=test --projects=tag:firebase:dep:${options.projectName} --parallel=100`,
         },
       },
       getconfig: {

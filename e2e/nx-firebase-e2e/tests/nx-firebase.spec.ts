@@ -461,7 +461,7 @@ describe('nx-firebase e2e', () => {
   //       expect(project.tags).toEqual([
   //         'firebase:function',
   //         `firebase:name:${projectData.name}`,
-  //         `firebase:app:${appName}`,
+  //         `firebase:dep:${appName}`,
   //         'e2etag',
   //         'e2ePackage',
   //       ])
@@ -843,7 +843,7 @@ describe('nx-firebase e2e', () => {
 
           expectStrings(result.stdout, [
             `  SYNC firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
-            `  SYNC updated firebase:app tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
+            `  SYNC updated firebase:dep tag in firebase function '${functionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${functionData.projectName}/project.json`,
           ])
