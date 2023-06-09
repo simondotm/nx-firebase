@@ -1,4 +1,3 @@
-// import '../../utils/e2ePatch' // intentional side effects
 import type { GeneratorCallback, Tree } from '@nx/devkit'
 import { convertNxGenerator, formatFiles, runTasksInSerial } from '@nx/devkit'
 import { initGenerator as nodeInitGenerator } from '@nx/node'
@@ -20,7 +19,6 @@ export async function initGenerator(
   tree: Tree,
   rawOptions: InitGeneratorOptions,
 ): Promise<GeneratorCallback> {
-
   const options = normalizeOptions(rawOptions)
   const nodeInitTask = await nodeInitGenerator(tree, options)
   const installPackagesTask = addDependencies(tree)

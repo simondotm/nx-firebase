@@ -1,4 +1,3 @@
-// import '../../utils/e2ePatch' // intentional side effects
 import { createProjectGraphAsync, ExecutorContext, logger } from '@nx/devkit'
 import type { ExecutorOptions } from '@nx/js/src/utils/schema'
 import { tscExecutor } from '@nx/js/src/executors/tsc/tsc.impl'
