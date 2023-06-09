@@ -1,4 +1,3 @@
-// import '../../utils/e2ePatch' // intentional side effects
 import {
   GeneratorCallback,
   ProjectConfiguration,
@@ -12,11 +11,7 @@ import {
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 
 import { initGenerator } from '../init/init'
-import {
-  generateFirebaseConfigName,
-  getProjectName,
-  updateTsConfig,
-} from '../../utils'
+import { getProjectName, updateTsConfig } from '../../utils'
 
 import { addFunction, createFiles, updateProject } from './lib'
 import type { FunctionGeneratorOptions, NormalizedOptions } from './schema'
@@ -31,13 +26,8 @@ export function normalizeOptions(
     options.directory,
   )
 
-  // console.log(`projectName=${projectName}`)
-  // console.log(`options=${options}`)
-  // console.log(options)
-
-  const firebaseApp = names(options.app).fileName
-  // console.log(`options.firebaseApp ${firebaseApp}`)
   // get/validate the firebase app project this function will be attached to
+  const firebaseApp = names(options.app).fileName
   let firebaseAppProject: ProjectConfiguration
   try {
     firebaseAppProject = readProjectConfiguration(tree, firebaseApp)
@@ -53,10 +43,6 @@ export function normalizeOptions(
     // console.log(`looking for ${firebaseConfigName} failed, using fallback`)
     firebaseConfigName = `firebase.json`
   }
-
-  // console.log(
-  //   `project=${options.name} firebaseConfigName=${firebaseConfigName}`,
-  // )
 
   if (!tree.exists(firebaseConfigName)) {
     throw new Error(

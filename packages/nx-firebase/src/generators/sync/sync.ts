@@ -59,7 +59,6 @@ export async function syncGenerator(
 
   // otherwise, sync the workspace.
   // build list of firebase apps and functions in the workspace
-  // const workspace = getAllFirebaseProjects(tree)
   const projects = getFirebaseProjects(tree)
   const changes = getFirebaseWorkspaceChanges(tree, projects)
 
