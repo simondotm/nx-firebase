@@ -236,7 +236,7 @@ export function updateFirebaseAppDeployProject(
       debugInfo(`- new command: ${target.options.command}`)
 
       logger.info(
-        `  SYNC updating firebase deploy project for '${options.app}' to '--project=${options.project}'`,
+        `CHANGE updating firebase deploy project for '${options.app}' to '--project=${options.project}'`,
       )
       return true
     } else {
@@ -249,7 +249,7 @@ export function updateFirebaseAppDeployProject(
       )
       debugInfo(`- new command: ${target.options.command}`)
       logger.info(
-        `  SYNC setting firebase deploy project for '${options.app}' to '--project=${options.project}'`,
+        `CHANGE setting firebase deploy project for '${options.app}' to '--project=${options.project}'`,
       )
       return true
     }

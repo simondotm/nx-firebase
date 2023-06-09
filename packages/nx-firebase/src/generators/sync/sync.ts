@@ -97,7 +97,7 @@ export async function syncGenerator(
       }`
       firebaseAppProject.tags[appNameTag.tagIndex] = newAppNameTag
       logger.info(
-        `  SYNC firebase app name tag for renamed firebase app '${firebaseAppName}' from '${appNameTag.tagValue}' to '${newAppNameTag}'`,
+        `CHANGE firebase app name tag for renamed firebase app '${firebaseAppName}' from '${appNameTag.tagValue}' to '${newAppNameTag}'`,
       )
       firebaseAppUpdated = true
     }
@@ -127,12 +127,12 @@ export async function syncGenerator(
               tagIndex
             ] = `firebase:dep:${renamedFunctionName}`
             logger.info(
-              `  SYNC updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
+              `CHANGE updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
             )
             firebaseFunctionUpdated = true
           } else if (tagValue in changes.deletedApps) {
             logger.warn(
-              `  SYNC ORPHANED firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
+              `CHANGE ORPHANED firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
             )
           }
         }
@@ -150,7 +150,7 @@ export async function syncGenerator(
         firebaseFunctionProject.tags[functionNameTag.tagIndex] =
           newFunctionNameTag
         logger.info(
-          `  SYNC updated firebase function name tag for firebase function '${firebaseFunctionName}', renamed from '${functionNameTag.tagValue}' to '${newFunctionNameTag}'`,
+          `CHANGE updated firebase function name tag for firebase function '${firebaseFunctionName}', renamed from '${functionNameTag.tagValue}' to '${newFunctionNameTag}'`,
         )
 
         // need to update the deploy command on the function too
@@ -160,7 +160,7 @@ export async function syncGenerator(
         firebaseFunctionProject.targets.deploy.options.command =
           deployCommand.replace(regex, '$1' + newFunctionName)
         logger.info(
-          `  SYNC updated deploy command for firebase function, renamed from '${functionNameTag.tagValue}' to '${newFunctionName}'`,
+          `CHANGE updated deploy command for firebase function, renamed from '${functionNameTag.tagValue}' to '${newFunctionName}'`,
         )
 
         firebaseFunctionUpdated = true
@@ -197,7 +197,7 @@ export async function syncGenerator(
       const func = functions[i]
       if (func.codebase in changes.deletedFunctions) {
         logger.info(
-          `  SYNC deleted firebase function '${func.codebase}' from '${firebaseConfigName}'`,
+          `CHANGE deleted firebase function '${func.codebase}' from '${firebaseConfigName}'`,
         )
         configUpdated = true
       } else {
@@ -224,7 +224,7 @@ export async function syncGenerator(
         const project = projects.firebaseFunctionProjects[newCodebase]
         func.source = project.targets.build.options.outputPath
         logger.info(
-          `  SYNC renamed firebase function codebase from '${codebase}' to '${newCodebase}' in '${firebaseConfigName}'`,
+          `CHANGE renamed firebase function codebase from '${codebase}' to '${newCodebase}' in '${firebaseConfigName}'`,
         )
         configUpdated = true
       }
@@ -247,7 +247,7 @@ export async function syncGenerator(
     debugInfo(`- checking for ${tagValue} in deleted Apps`)
     if (tagValue && tagValue in changes.deletedApps) {
       logger.info(
-        `  SYNC orphaned firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
+        `CHANGE orphaned firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
       )
     }
   }
