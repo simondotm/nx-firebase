@@ -6,6 +6,7 @@ import {
 } from '@nx/devkit'
 
 import type { NormalizedOptions } from '../schema'
+import { calculateFirebaseConfigName } from '../../../utils'
 
 /**
  * Generate the firebase app specific files
@@ -56,7 +57,13 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
   // create firebase config file in the root of the workspace.
   // use `firebase.json` as the first firebase project config
   // use `firebase.<project-name>.json` for subsequent project configs
-  if (!tree.exists('firebase.json')) {
+
+  const firebaseConfigName = calculateFirebaseConfigName(
+    tree,
+    options.projectName,
+  )
+  if (firebaseConfigName === 'firebase.json') {
+    //  if (!tree.exists('firebase.json')) {
     generateFiles(
       tree,
       joinPathFragments(__dirname, '..', 'files_firebase'),

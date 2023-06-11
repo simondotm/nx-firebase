@@ -81,7 +81,8 @@ function expectedAppFiles(projectData: ProjectData) {
     `${projectPath}/project.json`,
     `${projectPath}/readme.md`,
     `${projectPath}/storage.rules`,
-    `firebase.json`,
+    `${projectData.configName}`,
+    // `firebase.json`,
     `.firebaserc`,
   ]
 }
@@ -105,9 +106,10 @@ function expectedConfigFiles(
   projectData: ProjectData,
   firstProject: boolean = false,
 ) {
-  return firstProject
-    ? ['firebase.json']
-    : [`firebase.${projectData.projectName}.json`]
+  return `firebase.${projectData.projectName}.json`
+  // return firstProject
+  //   ? ['firebase.json']
+  //   : [`firebase.${projectData.projectName}.json`]
 }
 
 /**
@@ -244,16 +246,19 @@ describe('nx-firebase e2e', () => {
     it(
       'should create nx-firebase app',
       async () => {
-        const projectData = getDirectories('apps', appName)
-        await appGeneratorAsync(`${projectData.name}`)
+        const appData = getDirectories('apps', uniq(appName))
+        await appGeneratorAsync(`${appData.name}`)
         // test generator output
         expect(() =>
           checkFilesExist(
-            ...expectedAppFiles(projectData).concat(
-              expectedConfigFiles(projectData, true),
+            ...expectedAppFiles(appData).concat(
+              expectedConfigFiles(appData, true),
             ),
           ),
         ).not.toThrow()
+
+        // cleanup - app
+        await cleanAppAsync(appData)
 
         // SM: no longer needed in new plugin version
         // stash a copy of the default index.ts
@@ -273,32 +278,39 @@ describe('nx-firebase e2e', () => {
     it(
       'should build nx-firebase app',
       async () => {
-        const projectData = getDirectories('apps', appName)
+        const appData = getDirectories('apps', uniq(appName))
+        await appGeneratorAsync(`${appData.name}`)
 
         // test app builder
         // at this point there are no functions so it doe nothing
-        const result = await runNxCommandAsync(`build ${projectData.projectName}`)
+        const result = await runNxCommandAsync(`build ${appData.projectName}`)
         expect(result.stdout).toContain("Build succeeded.")
+
+        // cleanup - app
+        await cleanAppAsync(appData)        
     })
 
     describe('--directory', () => {
       it(
         'should create nx-firebase app in the specified directory',
         async () => {
-          const projectData = getDirectories('apps', uniq(appName), subDir)
+          const appData = getDirectories('apps', uniq(appName), subDir)
           await appGeneratorAsync(
-            `${projectData.name} --directory ${projectData.dir}`,
+            `${appData.name} --directory ${appData.dir}`,
           )
           expect(() =>
             checkFilesExist(
-              ...expectedAppFiles(projectData).concat(
-                expectedConfigFiles(projectData),
+              ...expectedAppFiles(appData).concat(
+                expectedConfigFiles(appData),
               ),
             ),
           ).not.toThrow()
 
-          const project = readJson(`${projectData.projectDir}/project.json`)
-          expect(project.name).toEqual(`${projectData.projectName}`)
+          const project = readJson(`${appData.projectDir}/project.json`)
+          expect(project.name).toEqual(`${appData.projectName}`)
+
+          // cleanup - app
+          await cleanAppAsync(appData)                
       })
     })
 
@@ -307,12 +319,17 @@ describe('nx-firebase e2e', () => {
         'should add tags to the project',
         async () => {
 
-          const projectData = getDirectories('apps', uniq(appName))
+          const appData = getDirectories('apps', uniq(appName))
           await appGeneratorAsync(
-            `${projectData.name} --tags e2etag,e2ePackage`,
+            `${appData.name} --tags e2etag,e2ePackage`,
           )
-          const project = readJson(`${projectData.projectDir}/project.json`)
-          expect(project.tags).toEqual(['firebase:app', `firebase:name:${projectData.name}`, 'e2etag', 'e2ePackage'])
+          const project = readJson(`${appData.projectDir}/project.json`)
+          expect(project.tags).toEqual(['firebase:app', `firebase:name:${appData.name}`, 'e2etag', 'e2ePackage'])
+
+
+          // cleanup - app
+          await cleanAppAsync(appData)  
+
         }
         
       )
@@ -634,20 +651,20 @@ describe('nx-firebase e2e', () => {
           const appData = getDirectories('apps', uniq('firebaseSyncApp'))
           await appGeneratorAsync(`${appData.name}`)
 
-          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).not.toContain(
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).not.toContain(
             `--project`
           ) 
           const result = await syncGeneratorAsync(`--app=${appData.projectName} --project=test`)
           console.debug(result.stdout)
           expectStrings(result.stdout, [
-            `CHANGE setting firebase deploy project for '${appData.projectName}' to '--project=test'`,
+            `CHANGE setting firebase target --project for '${appData.projectName}' to '--project=test'`,
             `UPDATE apps/${appData.projectName}/project.json`,
           ])
-          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--project=test`
           )
           // cleanup - app
-          cleanAppAsync(appData)
+          await cleanAppAsync(appData)
           // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
           //   `DELETE apps/${appData.projectName}`,
           // ])  
@@ -661,21 +678,21 @@ describe('nx-firebase e2e', () => {
           const appData = getDirectories('apps', uniq('firebaseSyncApp'))
           await appGeneratorAsync(`${appData.name} --project=test`)
 
-          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--project=test`
           ) 
           const result = await syncGeneratorAsync(`--app=${appData.projectName} --project=test2`)
           console.debug(result.stdout)
           expectStrings(result.stdout, [
-            `CHANGE updating firebase deploy project for '${appData.projectName}' to '--project=test2'`,
+            `CHANGE updating firebase target --project for '${appData.projectName}' to '--project=test2'`,
             `UPDATE apps/${appData.projectName}/project.json`,
           ])
-          expect(readJson(`${appData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--project=test2`
           )
 
           // cleanup - app
-          cleanAppAsync(appData)
+          await cleanAppAsync(appData)
           // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
           //   `DELETE apps/${appData.projectName}`,
           // ])  
@@ -705,7 +722,7 @@ describe('nx-firebase e2e', () => {
           ])          
 
           // cleanup - app only, already removed function
-          cleanAppAsync(appData)
+          await cleanAppAsync(appData)
           // expectStrings((await removeProjectAsync(appData.projectName)).stdout, [
           //   `DELETE apps/${appData.projectName}`,
           // ])        
@@ -732,7 +749,7 @@ describe('nx-firebase e2e', () => {
           ])
       
           // cleanup - function only, already removed app
-          cleanFunctionAsync(functionData)
+          await cleanFunctionAsync(functionData)
           // expectStrings((await removeProjectAsync(functionData.projectName)).stdout, [
           //   `DELETE apps/${functionData.projectName}`,
           // ])        
@@ -768,8 +785,8 @@ describe('nx-firebase e2e', () => {
       
 
           // cleanup - function, then app
-          cleanFunctionAsync(renamedFunctionData)
-          cleanAppAsync(appData)
+          await cleanFunctionAsync(renamedFunctionData)
+          await cleanAppAsync(appData)
           // expectStrings((await removeProjectAsync(renamedFunctionData.projectName)).stdout, [
           //   `DELETE apps/${renamedFunctionData.projectName}`,
           // ])        
@@ -810,8 +827,8 @@ describe('nx-firebase e2e', () => {
           expect(result2.stdout).not.toContain('UPDATE')
 
           // cleanup - function, then app
-          cleanFunctionAsync(functionData)
-          cleanAppAsync(renamedAppData)
+          await cleanFunctionAsync(functionData)
+          await cleanAppAsync(renamedAppData)
 
           // expectStrings((await removeProjectAsync(functionData.projectName)).stdout, [
           //   `DELETE apps/${functionData.projectName}`,
@@ -819,59 +836,63 @@ describe('nx-firebase e2e', () => {
           // expectStrings((await removeProjectAsync(renamedAppData.projectName)).stdout, [
           //   `DELETE apps/${renamedAppData.projectName}`,
           // ])        
-        })      
+        })     
+        
+        
+
+      it(
+        'should detect renamed firebase apps & functions',
+        async () => {
+
+          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
+          const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
+
+          await appGeneratorAsync(`${appData.name}`)
+          await functionGeneratorAsync(`${functionData.name} --app ${appData.name}`)
+
+          // rename app & function
+          expectStrings((await renameProjectAsync(appData.projectName, renamedAppData.projectName)).stdout, [
+            `DELETE apps/${appData.projectName}/project.json`,
+            `CREATE apps/${renamedAppData.projectName}/project.json`,
+          ])
+          expectStrings((await renameProjectAsync(functionData.projectName, renamedFunctionData.projectName)).stdout, [
+            `DELETE apps/${functionData.projectName}/project.json`,
+            `CREATE apps/${renamedFunctionData.projectName}/project.json`,
+          ])
+
+          const result = await syncGeneratorAsync()
+          console.debug(result.stdout)
+
+          expectStrings(result.stdout, [
+            `CHANGE firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
+            `CHANGE updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
+            `CHANGE renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+            `CHANGE updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
+            `CHANGE updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
+            `UPDATE apps/${renamedAppData.projectName}/project.json`,
+            `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+            `UPDATE ${appData.configName}`,            
+          ])          
+          
+
+          // cleanup - function, then app
+          await cleanFunctionAsync(renamedFunctionData)
+          await cleanAppAsync(renamedAppData)
+          // expectStrings((await removeProjectAsync(renamedFunctionData.projectName)).stdout, [
+          //   `DELETE apps/${renamedFunctionData.projectName}`,
+          // ])        
+          // expectStrings((await removeProjectAsync(renamedAppData.projectName)).stdout, [
+          //   `DELETE apps/${renamedAppData.projectName}`,
+          // ])     
+
       })
 
 
+    })
 
-      // it(
-      //   'should detect renamed firebase apps & functions',
-      //   async () => {
 
-      //     const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-      //     const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-      //     const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-      //     const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
-
-      //     await appGeneratorAsync(`${appData.name}`)
-      //     await functionGeneratorAsync(`${functionData.name} --app ${appData.name}`)
-
-      //     // rename app & function
-      //     expectStrings((await renameProjectAsync(appData.projectName, renamedAppData.projectName)).stdout, [
-      //       `DELETE apps/${appData.projectName}/project.json`,
-      //       `CREATE apps/${renamedAppData.projectName}/project.json`,
-      //     ])
-      //     expectStrings((await renameProjectAsync(functionData.projectName, renamedFunctionData.projectName)).stdout, [
-      //       `DELETE apps/${functionData.projectName}/project.json`,
-      //       `CREATE apps/${renamedFunctionData.projectName}/project.json`,
-      //     ])
-
-      //     const result = await syncGeneratorAsync()
-      //     console.debug(result.stdout)
-
-      //     expectStrings(result.stdout, [
-      //       `CHANGE firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
-      //       `CHANGE updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
-      //       `CHANGE renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
-      //       `CHANGE updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
-      //       `CHANGE updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
-      //       `UPDATE apps/${renamedAppData.projectName}/project.json`,
-      //       `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
-      //       `UPDATE ${appData.configName}`,            
-      //     ])          
-          
-
-      //     // cleanup - function, then app
-      //     cleanFunctionAsync(renamedFunctionData)
-      //     cleanAppAsync(renamedAppData)
-      //     // expectStrings((await removeProjectAsync(renamedFunctionData.projectName)).stdout, [
-      //     //   `DELETE apps/${renamedFunctionData.projectName}`,
-      //     // ])        
-      //     // expectStrings((await removeProjectAsync(renamedAppData.projectName)).stdout, [
-      //     //   `DELETE apps/${renamedAppData.projectName}`,
-      //     // ])     
-
-      // })
 
   })
 

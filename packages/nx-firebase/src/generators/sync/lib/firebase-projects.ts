@@ -7,11 +7,20 @@ import {
   readJson,
 } from '@nx/devkit'
 
-import { calculateFirebaseConfigName, FirebaseFunction } from '../../../utils'
+import { FirebaseConfig } from '../../../utils'
 
 import { SyncGeneratorSchema } from '../schema'
-import { debugInfo } from './debug'
-import { getFirebaseScopeFromTag } from './tags'
+import { debugInfo, mapEntries, mapKeys } from './debug'
+import { CONFIG_NO_APP, FirebaseProjects } from './types'
+
+// const FIREBASE_CONFIG_FILE_MATCHER = /firebase.([^.]+).json/ // TODO: enhance this to match firebase.json or firebase.*.json
+const FIREBASE_CONFIG_FILE_MATCHER = /(firebase)(\S*)(.json)/
+
+const FIREBASE_TARGET_CONFIG_MATCHER = /--config[ =]([^\s]+)/
+const FIREBASE_PROJECT_MATCHER = /(--project[ =])([^\s]+)/
+//TODO: this will be replaced with the new firebase target
+// const FIREBASE_DEPLOY_MATCHER = /(firebase deploy)/
+const FIREBASE_COMMAND_MATCHER = /(firebase)/
 
 export function isFirebaseApp(project: ProjectConfiguration) {
   return project.tags?.includes('firebase:app')
@@ -21,18 +30,27 @@ export function isFirebaseFunction(project: ProjectConfiguration) {
   return project.tags?.includes('firebase:function')
 }
 
-export interface FirebaseProjects {
-  firebaseAppProjects: Record<string, ProjectConfiguration>
-  firebaseFunctionProjects: Record<string, ProjectConfiguration>
-}
-
-export interface FirebaseWorkspaceChanges {
-  // map of project name -> deletion status
-  deletedApps: Record<string, boolean>
-  deletedFunctions: Record<string, boolean>
-  // map of previous name -> new name
-  renamedApps: Record<string, string>
-  renamedFunctions: Record<string, string>
+function getFirebaseConfigFromCommand(
+  command: string,
+  project: ProjectConfiguration,
+  firebaseConfigs: Map<string, FirebaseConfig>,
+) {
+  // debugInfo(`- getFirebaseConfigFromCommand checking command '${command}'`)
+  const match = command.match(FIREBASE_TARGET_CONFIG_MATCHER)
+  // debugInfo(`- match=${match}`)
+  if (match && match.length === 2) {
+    const configName = match[1]
+    // check the config we've parsed actually resolves to a firebase config file in the workspace
+    if (!firebaseConfigs.has(configName)) {
+      throw new Error(
+        `Firebase app project ${project.name} is using a firebase config file ${configName} that does not exist in the workspace.`,
+      )
+    }
+    return configName
+  }
+  throw new Error(
+    `Firebase app project ${project.name} does not have --config set in its 'firebase' target.`,
+  )
 }
 
 /**
@@ -44,171 +62,112 @@ export interface FirebaseWorkspaceChanges {
  */
 export function getFirebaseProjects(tree: Tree): FirebaseProjects {
   const projects = getProjects(tree)
-  const firebaseAppProjects: Record<string, ProjectConfiguration> = {}
-  const firebaseFunctionProjects: Record<string, ProjectConfiguration> = {}
+  const firebaseAppProjects = new Map<string, ProjectConfiguration>()
+  const firebaseFunctionProjects = new Map<string, ProjectConfiguration>()
+  const firebaseConfigs = new Map<string, FirebaseConfig>()
+  const firebaseAppConfigs = new Map<string, string>()
+  const firebaseConfigProjects = new Map<string, string>()
 
   debugInfo('- building list of firebase apps & functions')
-
-  for (const p of projects) {
-    const projectName = p[0]
-    const project = p[1]
+  projects.forEach((project, projectName) => {
     if (isFirebaseApp(project)) {
-      firebaseAppProjects[projectName] = project
+      firebaseAppProjects.set(projectName, project)
     }
     if (isFirebaseFunction(project)) {
-      firebaseFunctionProjects[projectName] = project
+      firebaseFunctionProjects.set(projectName, project)
     }
-  }
+  })
 
+  // debugInfo(`- firebaseAppProjects=${[...firebaseAppProjects.keys()]}`)
+  // debugInfo(
+  //   `- firebaseFunctionProjects=${[...firebaseFunctionProjects.keys()]}`,
+  // )
+
+  debugInfo(`- firebaseAppProjects=${mapKeys(firebaseAppProjects)}`)
+  debugInfo(`- firebaseFunctionProjects=${mapKeys(firebaseFunctionProjects)}`)
+
+  // collect all firebase[.*].json config files in workspace
+  const rootFiles = tree.children('')
+  rootFiles.map((child) => {
+    if (tree.isFile(child)) {
+      // debugInfo(`- checking rootfile ${child} for config`)
+      // if (child.includes('firebase.')) {
+      //   debugInfo(`- !!! it should match this one`)
+      //   debugInfo(`- match=${child.match(FIREBASE_CONFIG_FILE_MATCHER)}`)
+      // }
+
+      if (
+        // child === 'firebase.json' ||
+        child.match(FIREBASE_CONFIG_FILE_MATCHER)
+      ) {
+        // debugInfo(`- found firebase config file ${child}`)
+
+        firebaseConfigs.set(child, readJson<FirebaseConfig>(tree, child))
+        // set an firebaseConfigProjects as null for now, later we will add the project
+        firebaseConfigProjects.set(child, CONFIG_NO_APP)
+      }
+    }
+  })
+  // debugInfo(`- firebaseConfigs=${[...firebaseConfigs.keys()]}`)
+  debugInfo(`- firebaseConfigs=${mapKeys(firebaseConfigs)}`)
+
+  // map firebase configs to their apps
+  // we do this by reading the --config setting directly from each firebase app's firebase target
+  // this is more robust & flexible than using filename assumptions for configs
+  // it also means users can freely rename their firebase configs and the plugin will work
+  firebaseAppProjects.forEach((project, name) => {
+    const firebaseTarget = project.targets.firebase
+    if (!firebaseTarget) {
+      throw new Error(
+        `Firebase app project ${name} does not have a 'firebase' target. Sync will no longer work.`,
+      )
+    }
+    const firebaseCommand = firebaseTarget.options.command
+    const firebaseConfigName = getFirebaseConfigFromCommand(
+      firebaseCommand,
+      project,
+      firebaseConfigs,
+    )
+    firebaseAppConfigs.set(name, firebaseConfigName)
+    firebaseConfigProjects.set(firebaseConfigName, name)
+
+    // bit opinionated, but we need to sanity check that
+    // production configurations on this target use the same config file.
+    // since we cant rename configs safely with this scenario
+    // different build configs should only differ in --project
+    const configurations = firebaseTarget.configurations
+    for (const configuration in configurations) {
+      const additionalConfigName = getFirebaseConfigFromCommand(
+        configurations[configuration].command,
+        project,
+        firebaseConfigs,
+      )
+      if (additionalConfigName !== firebaseConfigName) {
+        throw new Error(
+          `Firebase app project ${name} target firebase.configurations.${configuration} has a different --config setting which is unsupported by this plugin.`,
+        )
+      }
+    }
+  })
+
+  // debugInfo(`firebaseAppConfigs=${[...firebaseAppConfigs.entries()]}`)
+  // debugInfo(
+  //   `firebaseConfigProjects=${[...firebaseConfigProjects.entries()]},
+  //   )}`,
+  // )
+
+  debugInfo(`- firebaseAppConfigs=${mapEntries(firebaseAppConfigs)}`)
   debugInfo(
-    `- firebaseAppProjects=${JSON.stringify(Object.keys(firebaseAppProjects))}`,
-  )
-  debugInfo(
-    `- firebaseFunctionProjects=${JSON.stringify(
-      Object.keys(firebaseFunctionProjects),
+    `- firebaseConfigProjects=${mapEntries(firebaseConfigProjects)},
     )}`,
   )
 
   return {
     firebaseAppProjects,
     firebaseFunctionProjects,
-  }
-}
-
-export function getFirebaseWorkspaceChanges(
-  tree: Tree,
-  projects: FirebaseProjects,
-): FirebaseWorkspaceChanges {
-  // map of project name -> deletion status
-  const deletedApps: Record<string, boolean> = {}
-  const deletedFunctions: Record<string, boolean> = {}
-  // map of previous name -> new name
-  const renamedApps: Record<string, string> = {}
-  const renamedFunctions: Record<string, string> = {}
-
-  // determine deleted functions
-  debugInfo(`- checking apps for deleted function deps`)
-  for (const firebaseAppProjectName in projects.firebaseAppProjects) {
-    const firebaseAppProject =
-      projects.firebaseAppProjects[firebaseAppProjectName]
-    firebaseAppProject.implicitDependencies?.map((dep) => {
-      if (!(dep in projects.firebaseFunctionProjects)) {
-        debugInfo(
-          `- function ${dep} is a dep, but cannot be located so deleted`,
-        )
-        deletedFunctions[dep] = true
-      }
-    })
-    //TODO: functions may also be removed using nx g rm <function> --forceRemove
-    // which removes the implicitDep, but doesnt update the firebase config
-    // so we need to check the firebase config too, and determine any projects that are in there
-    // but not in the workspace and mark them as deleted
-
-    const firebaseConfigName = calculateFirebaseConfigName(
-      tree,
-      firebaseAppProjectName,
-    )
-
-    debugInfo(
-      `- checking config ${firebaseConfigName} to see if it contains a function that doesnt exist`,
-    )
-
-    const config = readJson(tree, firebaseConfigName)
-    const functions = config.functions as FirebaseFunction[]
-    // remove deleted functions
-    for (let i = 0; i < functions.length; ++i) {
-      const func = functions[i]
-      const funcName = func.codebase
-      if (!(funcName in projects.firebaseFunctionProjects)) {
-        debugInfo(
-          `- function ${funcName} is in config ${firebaseConfigName}, but cannot be located so function must be deleted`,
-        )
-
-        deletedFunctions[funcName] = true
-      }
-    }
-  }
-
-  debugInfo(`- checking functions for deleted apps`)
-
-  // nx g mv --project=source --destination=dstname
-  // DOES update implicitDeps
-  // Again, this means implicitDep wont be wrong, but we cant use it to detect renames
-  // This is ok though because we detect renamed functions via tags
-
-  // determine deleted apps
-  for (const firebaseFunctionName in projects.firebaseFunctionProjects) {
-    const firebaseFunctionProject =
-      projects.firebaseFunctionProjects[firebaseFunctionName]
-    const { tagValue } = getFirebaseScopeFromTag(
-      firebaseFunctionProject,
-      'firebase:dep',
-    )
-    if (!(tagValue in projects.firebaseAppProjects)) {
-      debugInfo(
-        `- function ${firebaseFunctionName} points to app ${tagValue} which doesnt exist, so app must be deleted`,
-      )
-
-      deletedApps[tagValue] = true
-    }
-  }
-
-  debugInfo(`- checking for renamed apps`)
-
-  // determine renamed apps
-  for (const firebaseAppProjectName in projects.firebaseAppProjects) {
-    const firebaseAppProject =
-      projects.firebaseAppProjects[firebaseAppProjectName]
-    const { tagValue } = getFirebaseScopeFromTag(
-      firebaseAppProject,
-      'firebase:name',
-    )
-    if (tagValue && tagValue !== firebaseAppProject.name) {
-      debugInfo(
-        `- app ${tagValue} has been renamed to ${firebaseAppProject.name} `,
-      )
-
-      renamedApps[tagValue] = firebaseAppProject.name
-      // it might have been flagged as deleted earlier, but was actually renamed, so remove from deleted list
-      delete deletedApps[tagValue]
-    }
-  }
-
-  debugInfo(`- checking for renamed functions`)
-
-  // determine renamed functions
-  for (const firebaseFunctionName in projects.firebaseFunctionProjects) {
-    const firebaseFunctionProject =
-      projects.firebaseFunctionProjects[firebaseFunctionName]
-    const { tagValue } = getFirebaseScopeFromTag(
-      firebaseFunctionProject,
-      'firebase:name',
-    )
-    if (tagValue && tagValue !== firebaseFunctionProject.name) {
-      debugInfo(
-        `- function ${tagValue} has been renamed to ${firebaseFunctionProject.name} `,
-      )
-
-      renamedFunctions[tagValue] = firebaseFunctionProject.name
-      // it might have been flagged as deleted earlier, but was actually renamed, so remove from deleted list
-      delete deletedFunctions[tagValue]
-    }
-  }
-
-  debugInfo(`- deletedApps=${JSON.stringify(Object.keys(deletedApps))}`)
-  debugInfo(
-    `- deletedFunctions=${JSON.stringify(Object.keys(deletedFunctions))}`,
-  )
-  debugInfo(`- renamedApps=${JSON.stringify(Object.keys(renamedApps))}`)
-  debugInfo(
-    `- renamedFunctions=${JSON.stringify(Object.keys(renamedFunctions))}`,
-  )
-
-  return {
-    deletedApps,
-    deletedFunctions,
-    renamedApps,
-    renamedFunctions,
+    firebaseConfigs,
+    firebaseAppConfigs,
+    firebaseConfigProjects,
   }
 }
 
@@ -223,20 +182,20 @@ export function updateFirebaseAppDeployProject(
   options: SyncGeneratorSchema,
 ) {
   const command: string = target.options.command
-  if (command.includes('firebase deploy')) {
-    debugInfo('- found deploy command')
+  if (command.includes('firebase')) {
+    debugInfo('- found firebase target command')
     debugInfo(`- command=${command}`)
     if (command.includes('--project')) {
-      debugInfo('- found --project in deploy command')
+      debugInfo('- found --project in firebase target command')
       // already set, so update
       target.options.command = command.replace(
-        /(--project[ =])([A-Z0-9a-z-_]+)/,
+        FIREBASE_PROJECT_MATCHER,
         '$1' + options.project,
       )
       debugInfo(`- new command: ${target.options.command}`)
 
       logger.info(
-        `CHANGE updating firebase deploy project for '${options.app}' to '--project=${options.project}'`,
+        `CHANGE updating firebase target --project for '${options.app}' to '--project=${options.project}'`,
       )
       return true
     } else {
@@ -244,12 +203,12 @@ export function updateFirebaseAppDeployProject(
 
       // no set, so add
       target.options.command = command.replace(
-        /(firebase deploy)/,
+        FIREBASE_COMMAND_MATCHER,
         '$1' + ' ' + `--project=${options.project}`,
       )
       debugInfo(`- new command: ${target.options.command}`)
       logger.info(
-        `CHANGE setting firebase deploy project for '${options.app}' to '--project=${options.project}'`,
+        `CHANGE setting firebase target --project for '${options.app}' to '--project=${options.project}'`,
       )
       return true
     }

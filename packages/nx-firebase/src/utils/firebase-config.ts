@@ -1,5 +1,7 @@
 import { Tree } from '@nx/devkit'
 
+const USE_CONFIG_FALLBACK = false
+
 export interface FirebaseFunction {
   predeploy?: string[]
   source: string
@@ -65,13 +67,15 @@ export interface FirebaseConfig {
  * @returns firebase config name for this project
  */
 export function generateFirebaseConfigName(tree: Tree, projectName: string) {
-  // return `firebase.${projectName}.json`
+  if (USE_CONFIG_FALLBACK) {
+    const firebaseConfigName = tree.exists('firebase.json')
+      ? `firebase.${projectName}.json`
+      : 'firebase.json'
 
-  const firebaseConfigName = tree.exists('firebase.json')
-    ? `firebase.${projectName}.json`
-    : 'firebase.json'
-
-  return firebaseConfigName
+    return firebaseConfigName
+  } else {
+    return `firebase.${projectName}.json`
+  }
 }
 
 /**
@@ -83,10 +87,18 @@ export function generateFirebaseConfigName(tree: Tree, projectName: string) {
  * @returns firebase config file name
  */
 export function calculateFirebaseConfigName(tree: Tree, projectName: string) {
-  const firebaseConfigName = `firebase.${projectName}.json`
-  // return firebaseConfigName
-  if (tree.exists(firebaseConfigName)) {
-    return firebaseConfigName
+  let firebaseConfigName = `firebase.${projectName}.json`
+  if (USE_CONFIG_FALLBACK) {
+    if (!tree.exists(firebaseConfigName)) {
+      firebaseConfigName = 'firebase.json'
+    }
   }
-  return 'firebase.json'
+
+  // if (!tree.exists(firebaseConfigName)) {
+  //   throw new Error(
+  //     `Could not find firebase config called '${firebaseConfigName}' in this workspace.`,
+  //   )
+  // }
+
+  return firebaseConfigName
 }

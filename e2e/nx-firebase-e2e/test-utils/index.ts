@@ -48,19 +48,24 @@ export async function syncGeneratorAsync(params: string = '') {
 
 export async function cleanProjectAsync(projectData: ProjectData) {
   expectStrings((await removeProjectAsync(projectData.projectName)).stdout, [
-    `DELETE apps/${projectData.projectName}`,
+    `DELETE ${projectData.projectDir}/project.json`,
+    `DELETE ${projectData.projectDir}`,
   ])    
 }
 
 export async function cleanAppAsync(projectData: ProjectData) {
-  console.log(`- cleanAppAsync ${projectData.projectName}`)
+  console.debug(`- cleanAppAsync ${projectData.projectName}`)
   await cleanProjectAsync(projectData)
+  const result = await syncGeneratorAsync(projectData.projectName)
+  console.debug(result.stdout)
+  expect(result.stdout).toContain('This workspace has 0 firebase apps and 0 firebase functions')
+  expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
   // expectStrings((await syncGeneratorAsync(projectData.projectName)).stdout, [
   //     `DELETE ${projectData.configName}`,
   //   ]) 
 }  
 export async function cleanFunctionAsync(projectData: ProjectData) {
-  console.log(`- cleanFunctionAsync ${projectData.projectName}`)
+  console.debug(`- cleanFunctionAsync ${projectData.projectName}`)
   await cleanProjectAsync(projectData)
 }  
 
@@ -94,6 +99,8 @@ export function getDirectories(type: 'libs' | 'apps', name: string, dir?: string
     distDir: distDir,
     mainTsPath: `${type}/${rootDir}${n}/src/main.ts`,
     npmScope: `${NPM_SCOPE}/${projectName}`,
-    configName: `firebase.${projectName}.json`,
+    // for testing, configName is always derived from project name when app is generated
+    // apart from first project which is firebase.json
+    configName: `firebase.${projectName}.json`, 
   }
 }

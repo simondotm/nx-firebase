@@ -102,18 +102,35 @@ export async function applicationGenerator(
           command: `nx run-many --targets=test --projects=tag:firebase:dep:${options.projectName} --parallel=100`,
         },
       },
+      firebase: {
+        executor: 'nx:run-commands',
+        options: {
+          command: `firebase --config=${options.firebaseConfigName}${firebaseCliProject}`,
+        },
+        configurations: {
+          production: {
+            command: `firebase --config=${options.firebaseConfigName}${firebaseCliProject}`,
+          },
+        },
+      },
+      killports: {
+        executor: 'nx:run-commands',
+        options: {
+          command: `kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500`,
+        },
+      },
       getconfig: {
         executor: 'nx:run-commands',
         options: {
-          command: `firebase functions:config:get${firebaseCliProject} --config=${options.firebaseConfigName} > ${options.projectRoot}/.runtimeconfig.json`,
+          command: `nx run ${options.projectName}:firebase functions:config:get > ${options.projectRoot}/.runtimeconfig.json`,
         },
       },
       emulate: {
         executor: 'nx:run-commands',
         options: {
           commands: [
-            'kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500',
-            `firebase emulators:start${firebaseCliProject} --config=${options.firebaseConfigName} --import=${options.projectRoot}/.emulators --export-on-exit`,
+            `nx run ${options.projectName}:killports`,
+            `nx run ${options.projectName}:firebase emulators:start --import=${options.projectRoot}/.emulators --export-on-exit`,
           ],
           parallel: false,
         },
@@ -131,12 +148,7 @@ export async function applicationGenerator(
         executor: 'nx:run-commands',
         dependsOn: ['build'],
         options: {
-          command: `firebase deploy${firebaseCliProject} --config=${options.firebaseConfigName}`,
-        },
-        configurations: {
-          production: {
-            command: `firebase deploy${firebaseCliProject} --config=${options.firebaseConfigName}`,
-          },
+          command: `nx run ${options.projectName}:firebase deploy`,
         },
       },
     },

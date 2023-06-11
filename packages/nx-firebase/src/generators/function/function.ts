@@ -42,18 +42,18 @@ export function normalizeOptions(
   }
 
   // use firebase.<project>.json if it exists, otherwise fall back to firebase.json
-  // const firebaseConfigName = calculateFirebaseConfigName(tree, firebaseApp)
-  let firebaseConfigName = `firebase.${firebaseApp}.json`
-  if (!tree.exists(firebaseConfigName)) {
-    // console.log(`looking for ${firebaseConfigName} failed, using fallback`)
-    firebaseConfigName = `firebase.json`
-  }
+  const firebaseConfigName = calculateFirebaseConfigName(tree, firebaseApp)
+  // let firebaseConfigName = `firebase.${firebaseApp}.json`
+  // if (!tree.exists(firebaseConfigName)) {
+  //   // console.log(`looking for ${firebaseConfigName} failed, using fallback`)
+  //   firebaseConfigName = `firebase.json`
+  // }
 
-  if (!tree.exists(firebaseConfigName)) {
-    throw new Error(
-      `Could not find firebase config called '${firebaseConfigName}' in this workspace.`,
-    )
-  }
+  // if (!tree.exists(firebaseConfigName)) {
+  //   throw new Error(
+  //     `Could not find firebase config called '${firebaseConfigName}' in this workspace.`,
+  //   )
+  // }
 
   return {
     ...options,
