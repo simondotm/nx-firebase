@@ -16,7 +16,7 @@ export interface FirebaseProjects {
   firebaseConfigProjects: Map<string, string>
 }
 
-export interface FirebaseWorkspaceChanges {
+export interface FirebaseChanges {
   // map of project name -> deletion status
   deletedApps: Map<string, boolean>
   deletedFunctions: Map<string, boolean>
@@ -24,3 +24,5 @@ export interface FirebaseWorkspaceChanges {
   renamedApps: Map<string, string>
   renamedFunctions: Map<string, string>
 }
+
+export type FirebaseWorkspace = FirebaseProjects & FirebaseChanges

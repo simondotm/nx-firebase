@@ -4,7 +4,7 @@ import { calculateFirebaseConfigName, FirebaseFunction } from '../../../utils'
 
 import { debugInfo, mapKeys } from './debug'
 import { getFirebaseScopeFromTag } from './tags'
-import { FirebaseProjects, FirebaseWorkspaceChanges } from './types'
+import { FirebaseProjects, FirebaseChanges } from './types'
 
 /**
  * Check if the given firebase project has been renamed by checking its `firebase:name` tag
@@ -28,7 +28,7 @@ function isRenamed(project: ProjectConfiguration): string | undefined {
 export function getFirebaseWorkspaceChanges(
   tree: Tree,
   projects: FirebaseProjects,
-): FirebaseWorkspaceChanges {
+): FirebaseChanges {
   // map of project name -> deletion status
   const deletedApps = new Map<string, boolean>()
   const deletedFunctions = new Map<string, boolean>()
