@@ -1,15 +1,6 @@
 
-import { names, readJsonFile, readProjectConfiguration, writeJsonFile } from '@nx/devkit'
-import {
-  checkFilesExist,
-  ensureNxProject,
-  readFile,
-  readJson,
-  runNxCommandAsync,
-  uniq,
-  updateFile,
-  tmpProjPath,
-} from '@nx/plugin/testing'
+import { names } from '@nx/devkit'
+import { runNxCommandAsync } from '@nx/plugin/testing'
 
 const NPM_SCOPE = '@proj'
 
@@ -25,12 +16,32 @@ export interface ProjectData {
   configName: string
 }
 
-export async function removeProjectAsync(name: string) {
-  return await runNxCommandAsync(`g @nx/workspace:remove ${name} --forceRemove`)
+const ENABLE_DEBUG_INFO = false
+
+export function debugInfo(info: string) {
+  if (ENABLE_DEBUG_INFO) {
+    console.debug(info)
+  }
 }
 
-export async function renameProjectAsync(name: string, destination: string) {
-  return await runNxCommandAsync(`g @nx/workspace:move --project=${name} --destination=${destination}`)
+export async function removeProjectAsync(projectData: ProjectData) {
+  const result = await runNxCommandAsync(`g @nx/workspace:remove ${projectData.projectName} --forceRemove`)
+  expectStrings(result.stdout, [
+    `DELETE ${projectData.projectDir}/project.json`,
+    `DELETE ${projectData.projectDir}`,
+  ])   
+  return result 
+}
+
+export async function renameProjectAsync(projectData: ProjectData, renameProjectData: ProjectData) {
+  //TODO: this wont work if destination project is in a subdir
+  const result = await runNxCommandAsync(`g @nx/workspace:move --project=${projectData.projectName} --destination=${renameProjectData.projectName}`)
+  expectStrings(result.stdout, [
+    `DELETE apps/${projectData.projectName}/project.json`,
+    `DELETE apps/${projectData.projectName}`,
+    `CREATE apps/${renameProjectData.projectName}/project.json`,
+  ])   
+  return result 
 }
 
 export async function appGeneratorAsync(params: string = '') {
@@ -45,28 +56,21 @@ export async function syncGeneratorAsync(params: string = '') {
   return await runNxCommandAsync(`g @simondotm/nx-firebase:sync ${params}`)
 }
 
-
-export async function cleanProjectAsync(projectData: ProjectData) {
-  expectStrings((await removeProjectAsync(projectData.projectName)).stdout, [
-    `DELETE ${projectData.projectDir}/project.json`,
-    `DELETE ${projectData.projectDir}`,
-  ])    
-}
-
 export async function cleanAppAsync(projectData: ProjectData) {
-  console.debug(`- cleanAppAsync ${projectData.projectName}`)
-  await cleanProjectAsync(projectData)
+  debugInfo(`- cleanAppAsync ${projectData.projectName}`)
+  await removeProjectAsync(projectData)
   const result = await syncGeneratorAsync(projectData.projectName)
-  console.debug(result.stdout)
-  expect(result.stdout).toContain('This workspace has 0 firebase apps and 0 firebase functions')
+  debugInfo(result.stdout)
   expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
-  // expectStrings((await syncGeneratorAsync(projectData.projectName)).stdout, [
-  //     `DELETE ${projectData.configName}`,
-  //   ]) 
+  expectStrings(result.stdout, [
+    'This workspace has 0 firebase apps and 0 firebase functions',
+    `CHANGE ${projectData.configName} firebase config, deleted as no longer linked to a firebase app`,
+  ])
 }  
+
 export async function cleanFunctionAsync(projectData: ProjectData) {
-  console.debug(`- cleanFunctionAsync ${projectData.projectName}`)
-  await cleanProjectAsync(projectData)
+  debugInfo(`- cleanFunctionAsync ${projectData.projectName}`)
+  await removeProjectAsync(projectData)
 }  
 
 

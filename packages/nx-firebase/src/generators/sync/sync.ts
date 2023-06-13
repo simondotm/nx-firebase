@@ -1,7 +1,6 @@
 import {
   GeneratorCallback,
   logger,
-  readJson,
   readProjectConfiguration,
   runTasksInSerial,
   Tree,
@@ -10,11 +9,7 @@ import {
 } from '@nx/devkit'
 
 import { SyncGeneratorSchema } from './schema'
-import {
-  calculateFirebaseConfigName,
-  FirebaseConfig,
-  FirebaseFunction,
-} from '../../utils'
+import { FirebaseFunction } from '../../utils'
 import initGenerator from '../init/init'
 
 import {
@@ -72,19 +67,19 @@ export async function syncGenerator(
   )
 
   changes.deletedApps.forEach((deleted, projectName) => {
-    logger.info(`  SYNC ${projectName} firebase app has been deleted`)
+    logger.info(`  SYNC Firebase app '${projectName}' has been deleted`)
   })
   changes.deletedFunctions.forEach((deleted, projectName) => {
-    logger.info(`  SYNC ${projectName} firebase function has been deleted`)
+    logger.info(`  SYNC Firebase function '${projectName}' has been deleted`)
   })
   changes.renamedApps.forEach((newProjectName, oldProjectName) => {
     logger.info(
-      `  SYNC ${oldProjectName} firebase app has been renamed to ${newProjectName}`,
+      `  SYNC Firebase app '${newProjectName}' has been renamed from '${oldProjectName}'`,
     )
   })
   changes.renamedFunctions.forEach((newProjectName, oldProjectName) => {
     logger.info(
-      `  SYNC ${oldProjectName} firebase function has been renamed to ${newProjectName}`,
+      `  SYNC Firebase function '${newProjectName}' has been renamed from '${oldProjectName}'`,
     )
   })
 
