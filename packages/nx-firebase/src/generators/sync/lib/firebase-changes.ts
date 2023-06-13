@@ -1,10 +1,10 @@
-import { ProjectConfiguration, Tree, logger, readJson } from '@nx/devkit'
+import { ProjectConfiguration, Tree } from '@nx/devkit'
 
-import { calculateFirebaseConfigName, FirebaseFunction } from '../../../utils'
+import { FirebaseFunction } from '../../../utils'
 
 import { debugInfo, mapKeys } from './debug'
 import { getFirebaseScopeFromTag } from './tags'
-import { FirebaseProjects, FirebaseChanges } from './types'
+import { FirebaseProjects, FirebaseChanges, FirebaseConfigs } from './types'
 
 /**
  * Check if the given firebase project has been renamed by checking its `firebase:name` tag
@@ -25,9 +25,10 @@ function isRenamed(project: ProjectConfiguration): string | undefined {
   return undefined
 }
 
-export function getFirebaseWorkspaceChanges(
+export function getFirebaseChanges(
   tree: Tree,
   projects: FirebaseProjects,
+  configs: FirebaseConfigs,
 ): FirebaseChanges {
   // map of project name -> deletion status
   const deletedApps = new Map<string, boolean>()
@@ -55,38 +56,6 @@ export function getFirebaseWorkspaceChanges(
     checkRenamedProject(project, renamedFunctions),
   )
 
-  // for (const firebaseAppProjectName in projects.firebaseAppProjects) {
-  //   const firebaseAppProject =
-  //     projects.firebaseAppProjects[firebaseAppProjectName]
-  //   const renamedProject = isRenamed(firebaseAppProject)
-  //   if (renamedProject) {
-  //     debugInfo(
-  //       `- app ${renamedProject} has been renamed to ${firebaseAppProject.name} `,
-  //     )
-
-  //     renamedApps[renamedProject] = firebaseAppProject.name
-  //     // // it might have been flagged as deleted earlier, but was actually renamed, so remove from deleted list
-  //     // delete deletedApps[tagValue]
-  //   }
-  // }
-
-  // // 2. determine renamed functions
-  // debugInfo(`- checking for renamed functions`)
-  // for (const firebaseFunctionName in projects.firebaseFunctionProjects) {
-  //   const firebaseFunctionProject =
-  //     projects.firebaseFunctionProjects[firebaseFunctionName]
-  //   const renamedProject = isRenamed(firebaseFunctionProject)
-  //   if (renamedProject) {
-  //     debugInfo(
-  //       `- function ${renamedProject} has been renamed to ${firebaseFunctionProject.name} `,
-  //     )
-
-  //     renamedFunctions[renamedProject] = firebaseFunctionProject.name
-  //     // // it might have been flagged as deleted earlier, but was actually renamed, so remove from deleted list
-  //     // delete deletedFunctions[tagValue]
-  //   }
-  // }
-
   // determine deleted functions
   debugInfo(`- checking apps for deleted function deps`)
   projects.firebaseAppProjects.forEach(
@@ -104,28 +73,19 @@ export function getFirebaseWorkspaceChanges(
         }
       })
 
-      //TODO: functions may also be removed using nx g rm <function> --forceRemove
-      // which removes the implicitDep, but doesnt update the firebase config
+      // functions may also be removed using nx g rm <function> --forceRemove
+      // which removes the implicitDep from the app, but doesnt update the firebase config
       // so we need to check the firebase config too, and determine any projects that are in there
       // but not in the workspace and mark them as deleted
 
-      // const firebaseConfigName = calculateFirebaseConfigName(
-      //   tree,
-      //   firebaseAppProjectName,
-      // )
-
-      const firebaseConfigName = projects.firebaseAppConfigs.get(
+      const firebaseConfigName = configs.firebaseAppConfigs.get(
         firebaseAppProjectName,
       )
 
       debugInfo(
         `- checking config ${firebaseConfigName} to see if it contains a function that doesnt exist`,
       )
-
-      // STOP! use configs from earlier?
-      // const config = readJson(tree, firebaseConfigName)
-
-      const config = projects.firebaseConfigs.get(firebaseConfigName)
+      const config = configs.firebaseConfigs.get(firebaseConfigName)
       if (!config) {
         throw new Error(`Could not get firebase config '${firebaseConfigName}'`)
       }

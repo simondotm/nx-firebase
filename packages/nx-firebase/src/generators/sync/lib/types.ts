@@ -8,6 +8,9 @@ export interface FirebaseProjects {
   // projectName -> ProjectConfig
   firebaseAppProjects: Map<string, ProjectConfiguration>
   firebaseFunctionProjects: Map<string, ProjectConfiguration>
+}
+
+export interface FirebaseConfigs {
   // configFilename -> FirebaseConfig
   firebaseConfigs: Map<string, FirebaseConfig>
   // projectName -> configFileName
@@ -25,4 +28,6 @@ export interface FirebaseChanges {
   renamedFunctions: Map<string, string>
 }
 
-export type FirebaseWorkspace = FirebaseProjects & FirebaseChanges
+export type FirebaseWorkspace = FirebaseProjects &
+  FirebaseChanges &
+  FirebaseConfigs

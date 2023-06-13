@@ -98,11 +98,13 @@ export async function syncGenerator(
     }
   })
 
-  // TODO: rename firebase config files too
-  // renamedApps.forEach((projectName, oldProjectName) => {
-  //   // rename the config file
-  //   // update the --config in the project
-  // })
+  // TODO: rename firebase config files too if app is renamed
+  workspace.renamedApps.forEach((projectName, oldProjectName) => {
+    // rename the config file
+    // tree.delete(oldProjectName)
+    // tree.write()
+    // update the --config in the project
+  })
 
   // 1. Delete firebase config for any deleted apps
   // for (const deletedApp in workspace.deletedApps) {
