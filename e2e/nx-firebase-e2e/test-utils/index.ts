@@ -64,7 +64,7 @@ export async function cleanAppAsync(projectData: ProjectData) {
   expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
   expectStrings(result.stdout, [
     'This workspace has 0 firebase apps and 0 firebase functions',
-    `CHANGE ${projectData.configName} firebase config, deleted as no longer linked to a firebase app`,
+    `CHANGE Firebase config '${projectData.configName}' is no longer referenced by any firebase app, deleted`
   ])
 }  
 

@@ -34,18 +34,18 @@ export function getFirebaseChanges(
   const deletedApps = new Map<string, boolean>()
   const deletedFunctions = new Map<string, boolean>()
   // map of previous name -> new name
-  const renamedApps = new Map<string, string>()
-  const renamedFunctions = new Map<string, string>()
+  const renamedApps = new Map<string, ProjectConfiguration>()
+  const renamedFunctions = new Map<string, ProjectConfiguration>()
 
   // 1. determine renamed apps using the firebase:name tag
   function checkRenamedProject(
     project: ProjectConfiguration,
-    renamedCollection: Map<string, string>,
+    renamedCollection: Map<string, ProjectConfiguration>,
   ) {
     const renamedProject = isRenamed(project)
     if (renamedProject) {
       debugInfo(`- ${renamedProject} has been renamed to ${project.name} `)
-      renamedCollection.set(renamedProject, project.name)
+      renamedCollection.set(renamedProject, project)
     }
   }
   debugInfo(`- checking for renamed apps & functions`)
@@ -56,7 +56,8 @@ export function getFirebaseChanges(
     checkRenamedProject(project, renamedFunctions),
   )
 
-  // determine deleted functions
+  // 2. determine deleted functions
+  // do this either by detecting a dependency
   debugInfo(`- checking apps for deleted function deps`)
   projects.firebaseAppProjects.forEach(
     (firebaseAppProject, firebaseAppProjectName) => {

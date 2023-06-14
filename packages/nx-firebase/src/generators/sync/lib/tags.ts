@@ -1,4 +1,9 @@
-import { ProjectConfiguration, logger } from '@nx/devkit'
+import {
+  ProjectConfiguration,
+  Tree,
+  logger,
+  updateProjectConfiguration,
+} from '@nx/devkit'
 import { debugInfo } from './debug'
 
 /**
@@ -55,3 +60,13 @@ export function getFirebaseScopeFromTag(
 // ) {
 
 // }
+
+export function updateFirebaseProjectNameTag(
+  tree: Tree,
+  project: ProjectConfiguration,
+) {
+  const appNameTag = getFirebaseScopeFromTag(project, 'firebase:name')
+  const newAppNameTag = `firebase:name:${project.name}`
+  project.tags[appNameTag.tagIndex] = newAppNameTag
+  updateProjectConfiguration(tree, project.name, project)
+}
