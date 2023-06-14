@@ -116,19 +116,47 @@ export async function syncGenerator(
   //   )
   // }
 
-  // update the firebase:name tag for all renamed projects
+  // update the firebase:name tag for renamed apps
   workspace.renamedApps.forEach((project, oldName) => {
     updateFirebaseProjectNameTag(tree, project)
     logger.info(
       `CHANGE Firebase app '${oldName}' was renamed to '${project.name}', updated firebase:name tag`,
     )
   })
+
+  // update the firebase:dep tag for functions linked to renamed apps
+  workspace.firebaseFunctionProjects.forEach((project, name) => {
+    const { tagValue, tagIndex } = getFirebaseScopeFromTag(
+      project,
+      'firebase:dep',
+    )
+    if (workspace.renamedApps.has(tagValue)) {
+      const renamedApp = workspace.renamedApps.get(tagValue)
+      project.tags[tagIndex] = `firebase:dep:${renamedApp.name}`
+      logger.info(
+        `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated firebase:dep tag in firebase function '${name}'`,
+      )
+      updateProjectConfiguration(tree, project.name, project)
+    } else {
+      if (
+        workspace.deletedApps.has(tagValue) ||
+        !workspace.firebaseAppProjects.has(tagValue)
+      ) {
+        logger.info(
+          `CHANGE Firebase app '${tagValue}' was deleted, firebase:dep tag for firebase function '${name}' is no longer linked to a Firebase app.`,
+        )
+      }
+    }
+  })
+
+  // update the firebase:name tag for renamed functions
   workspace.renamedFunctions.forEach((project, oldName) => {
     updateFirebaseProjectNameTag(tree, project)
     logger.info(
       `CHANGE Firebase function '${oldName}' was renamed to '${project.name}', updated firebase:name tag`,
     )
   })
+
   // update the deploy command for renamed functions
   workspace.renamedFunctions.forEach((project, oldName) => {
     const deployCommand = project.targets.deploy.options.command
@@ -141,8 +169,6 @@ export async function syncGenerator(
     )
     updateProjectConfiguration(tree, project.name, project)
   })
-
-  // update the firebase:dep tag for functions linked to renamed apps
 
   // now sync the selected firebase apps
   workspace.firebaseAppProjects.forEach(
@@ -178,78 +204,78 @@ export async function syncGenerator(
 
       // 2. handle deleted or renamed firebase apps by updating firebase:dep:<name> tags in functions
       // also update the deploy command
-      firebaseAppProject.implicitDependencies?.map((firebaseFunctionName) => {
-        let firebaseFunctionUpdated = false
-        const firebaseFunctionProject =
-          workspace.firebaseFunctionProjects.get(firebaseFunctionName)
-        // only investigate deps that are function projects
-        // user might add other deps, or it might be the firebase config
-        if (firebaseFunctionProject) {
-          const { tagValue, tagIndex } = getFirebaseScopeFromTag(
-            firebaseFunctionProject,
-            'firebase:dep',
-          )
-          if (tagValue) {
-            if (workspace.renamedApps.has(tagValue)) {
-              const renamedFunction = workspace.renamedApps.get(tagValue)
-              firebaseFunctionProject.tags[
-                tagIndex
-              ] = `firebase:dep:${renamedFunction.name}`
-              logger.info(
-                `CHANGE updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
-              )
-              firebaseFunctionUpdated = true
-            } else if (workspace.deletedApps.has(tagValue)) {
-              logger.warn(
-                `CHANGE ORPHANED firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
-              )
-            }
-          }
+      // firebaseAppProject.implicitDependencies?.map((firebaseFunctionName) => {
+      //   let firebaseFunctionUpdated = false
+      //   const firebaseFunctionProject =
+      //     workspace.firebaseFunctionProjects.get(firebaseFunctionName)
+      //   // only investigate deps that are function projects
+      //   // user might add other deps, or it might be the firebase config
+      //   if (firebaseFunctionProject) {
+      //     const { tagValue, tagIndex } = getFirebaseScopeFromTag(
+      //       firebaseFunctionProject,
+      //       'firebase:dep',
+      //     )
+      //     if (tagValue) {
+      //       if (workspace.renamedApps.has(tagValue)) {
+      //         const renamedFunction = workspace.renamedApps.get(tagValue)
+      //         firebaseFunctionProject.tags[
+      //           tagIndex
+      //         ] = `firebase:dep:${renamedFunction.name}`
+      //         logger.info(
+      //           `CHANGE updated firebase:dep tag in firebase function '${firebaseFunctionName}' from '${tagValue}' to renamed to firebase app '${firebaseAppName}'`,
+      //         )
+      //         firebaseFunctionUpdated = true
+      //       } else if (workspace.deletedApps.has(tagValue)) {
+      //         logger.warn(
+      //           `CHANGE ORPHANED firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
+      //         )
+      //       }
+      //     }
 
-          // update the firebase function name tag if it has been renamed
-          // const functionNameTag = getFirebaseScopeFromTag(
-          //   firebaseFunctionProject,
-          //   'firebase:name',
-          // )
-          // if (workspace.renamedFunctions.has(functionNameTag.tagValue)) {
-          //   const newFunctionName = workspace.renamedFunctions.get(
-          //     functionNameTag.tagValue,
-          //   ).name
-          //   const newFunctionNameTag = `firebase:name:${newFunctionName}`
-          //   firebaseFunctionProject.tags[functionNameTag.tagIndex] =
-          //     newFunctionNameTag
-          //   logger.info(
-          //     `CHANGE updated firebase function name tag for firebase function '${firebaseFunctionName}', renamed from '${functionNameTag.tagValue}' to '${newFunctionNameTag}'`,
-          //   )
+      //     // update the firebase function name tag if it has been renamed
+      //     // const functionNameTag = getFirebaseScopeFromTag(
+      //     //   firebaseFunctionProject,
+      //     //   'firebase:name',
+      //     // )
+      //     // if (workspace.renamedFunctions.has(functionNameTag.tagValue)) {
+      //     //   const newFunctionName = workspace.renamedFunctions.get(
+      //     //     functionNameTag.tagValue,
+      //     //   ).name
+      //     //   const newFunctionNameTag = `firebase:name:${newFunctionName}`
+      //     //   firebaseFunctionProject.tags[functionNameTag.tagIndex] =
+      //     //     newFunctionNameTag
+      //     //   logger.info(
+      //     //     `CHANGE updated firebase function name tag for firebase function '${firebaseFunctionName}', renamed from '${functionNameTag.tagValue}' to '${newFunctionNameTag}'`,
+      //     //   )
 
-          // need to update the deploy command on the function too
-          // const deployCommand =
-          //   firebaseFunctionProject.targets.deploy.options.command
-          // firebaseFunctionProject.targets.deploy.options.command =
-          //   deployCommand.replace(
-          //     FUNCTIONS_DEPLOY_MATCHER,
-          //     '$1' + newFunctionName,
-          //   )
-          // logger.info(
-          //   `CHANGE updated deploy command for firebase function, renamed from '${functionNameTag.tagValue}' to '${newFunctionName}'`,
-          // )
+      //     // need to update the deploy command on the function too
+      //     // const deployCommand =
+      //     //   firebaseFunctionProject.targets.deploy.options.command
+      //     // firebaseFunctionProject.targets.deploy.options.command =
+      //     //   deployCommand.replace(
+      //     //     FUNCTIONS_DEPLOY_MATCHER,
+      //     //     '$1' + newFunctionName,
+      //     //   )
+      //     // logger.info(
+      //     //   `CHANGE updated deploy command for firebase function, renamed from '${functionNameTag.tagValue}' to '${newFunctionName}'`,
+      //     // )
 
-          // firebaseFunctionUpdated = true
-          // }
-        } else {
-          debugInfo(
-            `- WARNING: Found implicitDep '${firebaseFunctionName}' that wasnt a firebase function `,
-          )
-        }
+      //     // firebaseFunctionUpdated = true
+      //     // }
+      //   } else {
+      //     debugInfo(
+      //       `- WARNING: Found implicitDep '${firebaseFunctionName}' that wasnt a firebase function `,
+      //     )
+      //   }
 
-        if (firebaseFunctionUpdated) {
-          updateProjectConfiguration(
-            tree,
-            firebaseFunctionName,
-            firebaseFunctionProject,
-          )
-        }
-      })
+      //   if (firebaseFunctionUpdated) {
+      //     updateProjectConfiguration(
+      //       tree,
+      //       firebaseFunctionName,
+      //       firebaseFunctionProject,
+      //     )
+      //   }
+      // })
 
       // 3. Update firebase.json config for this app if any of its functions have been renamed or deleted
       debugInfo(`- checking for updates to firebase.json`)
@@ -317,27 +343,27 @@ export async function syncGenerator(
   )
 
   // last, detect and warn about orphaned functions (where its parent app has been deleted)
-  debugInfo(`- checking for orphaned functions`)
-  workspace.firebaseFunctionProjects.forEach(
-    (firebaseFunctionProject, firebaseFunctionName) => {
-      // for (const firebaseFunctionName in workspace.firebaseFunctionProjects) {
-      //   const firebaseFunctionProject =
-      //     workspace.firebaseFunctionProjects[firebaseFunctionName]
-      const { tagValue } = getFirebaseScopeFromTag(
-        firebaseFunctionProject,
-        'firebase:dep',
-      )
-      debugInfo(`- checking for ${tagValue} in firebase apps`)
-      debugInfo(
-        `- firebaseAppProjects=${mapKeys(workspace.firebaseAppProjects)}`,
-      )
-      if (!workspace.firebaseAppProjects.has(tagValue)) {
-        logger.info(
-          `CHANGE orphaned firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
-        )
-      }
-    },
-  )
+  // debugInfo(`- checking for orphaned functions`)
+  // workspace.firebaseFunctionProjects.forEach(
+  //   (firebaseFunctionProject, firebaseFunctionName) => {
+  //     // for (const firebaseFunctionName in workspace.firebaseFunctionProjects) {
+  //     //   const firebaseFunctionProject =
+  //     //     workspace.firebaseFunctionProjects[firebaseFunctionName]
+  //     const { tagValue } = getFirebaseScopeFromTag(
+  //       firebaseFunctionProject,
+  //       'firebase:dep',
+  //     )
+  //     debugInfo(`- checking for ${tagValue} in firebase apps`)
+  //     debugInfo(
+  //       `- firebaseAppProjects=${mapKeys(workspace.firebaseAppProjects)}`,
+  //     )
+  //     if (!workspace.firebaseAppProjects.has(tagValue)) {
+  //       logger.info(
+  //         `CHANGE orphaned firebase function '${firebaseFunctionName}', cannot locate firebase application '${tagValue}'`,
+  //       )
+  //     }
+  //   },
+  // )
 
   return runTasksInSerial(...tasks)
 }
