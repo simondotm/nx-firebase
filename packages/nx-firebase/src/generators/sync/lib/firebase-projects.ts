@@ -11,8 +11,6 @@ import { debugInfo } from './debug'
 import { FirebaseProjects } from './types'
 
 const FIREBASE_PROJECT_MATCHER = /(--project[ =])([^\s]+)/
-//TODO: this will be replaced with the new firebase target
-// const FIREBASE_DEPLOY_MATCHER = /(firebase deploy)/
 const FIREBASE_COMMAND_MATCHER = /(firebase)/
 
 export function isFirebaseApp(project: ProjectConfiguration) {

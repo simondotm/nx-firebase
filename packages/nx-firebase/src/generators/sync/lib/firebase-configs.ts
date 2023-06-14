@@ -4,8 +4,7 @@ import { FirebaseConfig } from '../../../utils'
 import { CONFIG_NO_APP, FirebaseConfigs, FirebaseProjects } from './types'
 import { debugInfo, mapEntries, mapKeys } from './debug'
 
-const FIREBASE_TARGET_CONFIG_MATCHER = /--config[ =]([^\s]+)/
-// const FIREBASE_CONFIG_FILE_MATCHER = /firebase.([^.]+).json/ // TODO: enhance this to match firebase.json or firebase.*.json
+const FIREBASE_TARGET_CONFIG_MATCHER = /(--config[ =])([^\s]+)/
 const FIREBASE_CONFIG_FILE_MATCHER = /(firebase)(\S*)(.json)/
 
 export function getFirebaseConfigs(
@@ -16,11 +15,6 @@ export function getFirebaseConfigs(
   const firebaseAppConfigs = new Map<string, string>()
   const firebaseConfigProjects = new Map<string, string>()
 
-  // debugInfo(`- firebaseAppProjects=${[...firebaseAppProjects.keys()]}`)
-  // debugInfo(
-  //   `- firebaseFunctionProjects=${[...firebaseFunctionProjects.keys()]}`,
-  // )
-
   debugInfo(`- firebaseAppProjects=${mapKeys(projects.firebaseAppProjects)}`)
   debugInfo(
     `- firebaseFunctionProjects=${mapKeys(projects.firebaseFunctionProjects)}`,
@@ -30,25 +24,13 @@ export function getFirebaseConfigs(
   const rootFiles = tree.children('')
   rootFiles.map((child) => {
     if (tree.isFile(child)) {
-      // debugInfo(`- checking rootfile ${child} for config`)
-      // if (child.includes('firebase.')) {
-      //   debugInfo(`- !!! it should match this one`)
-      //   debugInfo(`- match=${child.match(FIREBASE_CONFIG_FILE_MATCHER)}`)
-      // }
-
-      if (
-        // child === 'firebase.json' ||
-        child.match(FIREBASE_CONFIG_FILE_MATCHER)
-      ) {
-        // debugInfo(`- found firebase config file ${child}`)
-
+      if (child.match(FIREBASE_CONFIG_FILE_MATCHER)) {
         firebaseConfigs.set(child, readJson<FirebaseConfig>(tree, child))
         // set an firebaseConfigProjects as null for now, later we will add the project
         firebaseConfigProjects.set(child, CONFIG_NO_APP)
       }
     }
   })
-  // debugInfo(`- firebaseConfigs=${[...firebaseConfigs.keys()]}`)
   debugInfo(`- firebaseConfigs=${mapKeys(firebaseConfigs)}`)
 
   // map firebase configs to their apps
@@ -90,12 +72,6 @@ export function getFirebaseConfigs(
     }
   })
 
-  // debugInfo(`firebaseAppConfigs=${[...firebaseAppConfigs.entries()]}`)
-  // debugInfo(
-  //   `firebaseConfigProjects=${[...firebaseConfigProjects.entries()]},
-  //   )}`,
-  // )
-
   debugInfo(`- firebaseAppConfigs=${mapEntries(firebaseAppConfigs)}`)
   debugInfo(
     `- firebaseConfigProjects=${mapEntries(firebaseConfigProjects)},
@@ -114,11 +90,9 @@ export function getFirebaseConfigFromCommand(
   project: ProjectConfiguration,
   firebaseConfigs: Map<string, FirebaseConfig>,
 ) {
-  // debugInfo(`- getFirebaseConfigFromCommand checking command '${command}'`)
   const match = command.match(FIREBASE_TARGET_CONFIG_MATCHER)
-  // debugInfo(`- match=${match}`)
-  if (match && match.length === 2) {
-    const configName = match[1]
+  if (match && match.length === 3) {
+    const configName = match[2]
     // check the config we've parsed actually resolves to a firebase config file in the workspace
     if (!firebaseConfigs.has(configName)) {
       throw new Error(
@@ -130,4 +104,23 @@ export function getFirebaseConfigFromCommand(
   throw new Error(
     `Firebase app project ${project.name} does not have --config set in its 'firebase' target.`,
   )
+}
+
+export function setFirebaseConfigFromCommand(
+  project: ProjectConfiguration,
+  configFileName: string,
+) {
+  // we've already checked that firebase target exists when setting up workspace
+  const firebaseTarget = project.targets.firebase
+  firebaseTarget.options.command = firebaseTarget.options.command.replace(
+    FIREBASE_TARGET_CONFIG_MATCHER,
+    '$1' + configFileName,
+  )
+  // do this for all other configurations on this target too
+  const configurations = firebaseTarget.configurations
+  for (const configuration in configurations) {
+    configurations[configuration].command = configurations[
+      configuration
+    ].command.replace(FIREBASE_TARGET_CONFIG_MATCHER, '$1' + configFileName)
+  }
 }

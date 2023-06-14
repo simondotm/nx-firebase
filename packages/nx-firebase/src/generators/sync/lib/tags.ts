@@ -1,7 +1,6 @@
 import {
   ProjectConfiguration,
   Tree,
-  logger,
   updateProjectConfiguration,
 } from '@nx/devkit'
 import { debugInfo } from './debug'
@@ -19,14 +18,12 @@ export function getFirebaseScopeFromTag(
   scope: 'firebase:name' | 'firebase:dep',
 ) {
   const tags = project.tags
-  // let foundTag = false
   if (tags) {
     for (let i = 0; i < tags.length; ++i) {
       const tag = tags[i]
       debugInfo(`- checking tag '${tag}' for scope '${scope}'`)
       if (tag.includes(scope)) {
         debugInfo(`- matched tag '${tag}' for scope '${scope}'`)
-        // foundTag = true
         const scopes = tag.split(':')
         if (scopes.length === 3) {
           debugInfo(`- returning tagValue '${scopes[2]}' tagIndex '${i}'`)
@@ -35,9 +32,6 @@ export function getFirebaseScopeFromTag(
           throw new Error(
             `Malformed '${scope}' tag in project '${project.name}', expected '${scope}:<value>', found '${tag}'`,
           )
-          // logger.error(
-          //   `Malformed '${scope}' tag in project '${project.name}', expected '${scope}:<value>', found '${tag}'.`,
-          // )
         }
       }
     }
@@ -45,21 +39,7 @@ export function getFirebaseScopeFromTag(
   throw new Error(
     `Project '${project.name}' has a missing '${scope}' tag in project. Ensure this is set correctly.`,
   )
-  // if (!foundTag) {
-  //   logger.error(
-  //     `Project '${project.name}' has a missing '${scope}' tag in project.`,
-  //   )
-  // }
-  // return undefined
 }
-
-// export function updateFirebaseScopeTag(
-//   project: ProjectConfiguration,
-//   scope: 'firebase:name' | 'firebase:dep',
-//   value: string
-// ) {
-
-// }
 
 export function updateFirebaseProjectNameTag(
   tree: Tree,

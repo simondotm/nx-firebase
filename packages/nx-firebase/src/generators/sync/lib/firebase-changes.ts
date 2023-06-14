@@ -122,9 +122,6 @@ export function getFirebaseChanges(
   debugInfo(`- checking functions for deleted apps`)
   projects.firebaseFunctionProjects.forEach(
     (firebaseFunctionProject, firebaseFunctionName) => {
-      // for (const firebaseFunctionName in projects.firebaseFunctionProjects) {
-      //   const firebaseFunctionProject =
-      //     projects.firebaseFunctionProjects[firebaseFunctionName]
       const { tagValue } = getFirebaseScopeFromTag(
         firebaseFunctionProject,
         'firebase:dep',
@@ -136,7 +133,6 @@ export function getFirebaseChanges(
         debugInfo(
           `- function ${firebaseFunctionName} points to app ${tagValue} which doesnt exist, so app must be deleted`,
         )
-
         deletedApps.set(tagValue, true)
       }
     },
