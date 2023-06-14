@@ -626,8 +626,9 @@ describe('nx-firebase e2e', () => {
           const result = await syncGeneratorAsync()
           debugInfo(result.stdout)
           expectStrings(result.stdout, [
-            `  SYNC Firebase function '${functionData.projectName}' has been deleted`,
-            `CHANGE deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
+            // `  SYNC Firebase function '${functionData.projectName}' has been deleted`,
+            // `CHANGE deleted firebase function '${functionData.projectName}' from 'firebase.${appData.projectName}.json`,
+            `CHANGE Firebase function '${functionData.projectName}' was deleted, removing function codebase from 'firebase.${appData.projectName}.json'`,            
             `UPDATE ${appData.configName}`,
           ])          
 
@@ -648,7 +649,7 @@ describe('nx-firebase e2e', () => {
           const result = await syncGeneratorAsync()
           debugInfo(result.stdout)
           expectStrings(result.stdout, [
-            `  SYNC Firebase app '${appData.projectName}' has been deleted`,
+            // `  SYNC Firebase app '${appData.projectName}' has been deleted`,
             // `CHANGE ${appData.projectName} app was deleted, removing its firebase config file ${appData.configName}`,  
             `CHANGE Firebase app '${appData.projectName}' was deleted, firebase:dep tag for firebase function '${functionData.projectName}' is no longer linked to a Firebase app.`,
 
@@ -678,9 +679,10 @@ describe('nx-firebase e2e', () => {
           debugInfo(result.stdout)
 
           expectStrings(result.stdout, [
-            `  SYNC Firebase function '${renamedFunctionData.projectName}' has been renamed from '${functionData.projectName}'`,
+            // `  SYNC Firebase function '${renamedFunctionData.projectName}' has been renamed from '${functionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
-            `CHANGE renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+            // `CHANGE renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${appData.configName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
             // `CHANGE updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
             // `CHANGE updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
@@ -709,7 +711,7 @@ describe('nx-firebase e2e', () => {
           debugInfo(result.stdout)
 
           expectStrings(result.stdout, [
-            `  SYNC Firebase app '${renamedAppData.projectName}' has been renamed from '${appData.projectName}'`,
+            // `  SYNC Firebase app '${renamedAppData.projectName}' has been renamed from '${appData.projectName}'`,
             // `CHANGE firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
@@ -750,16 +752,17 @@ describe('nx-firebase e2e', () => {
           debugInfo(result.stdout)
 
           expectStrings(result.stdout, [
-            `  SYNC Firebase app '${renamedAppData.projectName}' has been renamed from '${appData.projectName}'`,
-            `  SYNC Firebase function '${renamedFunctionData.projectName}' has been renamed from '${functionData.projectName}'`,
+            // `  SYNC Firebase app '${renamedAppData.projectName}' has been renamed from '${appData.projectName}'`,
+            // `  SYNC Firebase function '${renamedFunctionData.projectName}' has been renamed from '${functionData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${appData.configName}'`,
 
             // `CHANGE firebase app name tag for renamed firebase app '${renamedAppData.projectName}' from '${appData.projectName}' to 'firebase:name:${renamedAppData.projectName}'`,
             // `CHANGE updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}' from '${appData.projectName}' to renamed to firebase app '${renamedAppData.projectName}'`,
-            `CHANGE renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
+            // `CHANGE renamed firebase function codebase from '${functionData.projectName}' to '${renamedFunctionData.projectName}' in '${appData.configName}'`,
             // `CHANGE updated firebase function name tag for firebase function '${renamedFunctionData.projectName}', renamed from '${functionData.projectName}' to 'firebase:name:${renamedFunctionData.projectName}'`,
             // `CHANGE updated deploy command for firebase function, renamed from '${functionData.projectName}' to '${renamedFunctionData.projectName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
