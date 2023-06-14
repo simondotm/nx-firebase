@@ -148,7 +148,7 @@ export async function syncGenerator(
         workspace.deletedApps.has(tagValue) ||
         !workspace.firebaseAppProjects.has(tagValue)
       ) {
-        logger.info(
+        logger.warn(
           `CHANGE Firebase app '${tagValue}' was deleted, firebase:dep tag for firebase function '${name}' is no longer linked to a Firebase app.`,
         )
       }

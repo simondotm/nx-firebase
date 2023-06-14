@@ -647,8 +647,10 @@ describe('nx-firebase e2e', () => {
           const result = await syncGeneratorAsync()
           debugInfo(result.stdout)
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' was deleted, firebase:dep tag for firebase function '${functionData.projectName}' is no longer linked to a Firebase app.`,
             `DELETE ${appData.configName}`,
+          ])
+          expectStrings(result.stderr, [
+            `CHANGE Firebase app '${appData.projectName}' was deleted, firebase:dep tag for firebase function '${functionData.projectName}' is no longer linked to a Firebase app.`,
           ])
       
           // cleanup - function only, already removed app
@@ -667,7 +669,12 @@ describe('nx-firebase e2e', () => {
           await appGeneratorAsync(`${appData.name}`)
           await functionGeneratorAsync(`${functionData.name} --app ${appData.projectName}`)
 
+          expect(readJson(`${functionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--only functions:${functionData.projectName}`
+          )
+
           await renameProjectAsync(functionData, renamedFunctionData)
+     
 
           const result = await syncGeneratorAsync()
           debugInfo(result.stdout)
@@ -679,6 +686,10 @@ describe('nx-firebase e2e', () => {
             `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
             `UPDATE ${appData.configName}`,
           ])
+
+          expect(readJson(`${renamedFunctionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--only functions:${renamedFunctionData.projectName}`
+          )           
       
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
@@ -713,10 +724,14 @@ describe('nx-firebase e2e', () => {
             `DELETE ${appData.configName}`,            
             `CREATE ${renamedAppData.configName}`,            
           ])
+
+          expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${renamedAppData.configName}`
+          )                    
       
           // run another sync to check there should be no orphaned functions from an app rename
           const result2 = await syncGeneratorAsync()
-          expect(result2.stdout).not.toContain('is no longer linked to a Firebase app')
+          expect(result2.stderr).not.toContain('is no longer linked to a Firebase app')
           expect(result2.stdout).not.toContain('UPDATE')
 
           // cleanup - function, then app
@@ -757,6 +772,14 @@ describe('nx-firebase e2e', () => {
             `DELETE ${appData.configName}`,            
             `CREATE ${renamedAppData.configName}`,            
           ])          
+
+          expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${renamedAppData.configName}`
+          )                    
+          expect(readJson(`${renamedFunctionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--only functions:${renamedFunctionData.projectName}`
+          )           
+                         
 
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
