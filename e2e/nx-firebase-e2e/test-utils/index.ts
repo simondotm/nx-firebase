@@ -1,6 +1,6 @@
 
 import { names } from '@nx/devkit'
-import { runNxCommandAsync } from '@nx/plugin/testing'
+import { exists, fileExists, runNxCommandAsync } from '@nx/plugin/testing'
 
 const NPM_SCOPE = '@proj'
 
@@ -16,7 +16,7 @@ export interface ProjectData {
   configName: string
 }
 
-const ENABLE_DEBUG_INFO = false
+const ENABLE_DEBUG_INFO = true
 
 export function debugInfo(info: string) {
   if (ENABLE_DEBUG_INFO) {
@@ -24,8 +24,19 @@ export function debugInfo(info: string) {
   }
 }
 
+export async function safeRunNxCommandAsync(cmd: string)
+{
+  try {
+    const result = await runNxCommandAsync(`${cmd} --verbose`, { silenceError: true })
+    return result
+  }
+  catch (e) {
+    throw e 
+  }
+}
+
 export async function removeProjectAsync(projectData: ProjectData) {
-  const result = await runNxCommandAsync(`g @nx/workspace:remove ${projectData.projectName} --forceRemove`)
+  const result = await safeRunNxCommandAsync(`g @nx/workspace:remove ${projectData.projectName} --forceRemove`)
   expectStrings(result.stdout, [
     `DELETE ${projectData.projectDir}/project.json`,
     `DELETE ${projectData.projectDir}`,
@@ -35,7 +46,7 @@ export async function removeProjectAsync(projectData: ProjectData) {
 
 export async function renameProjectAsync(projectData: ProjectData, renameProjectData: ProjectData) {
   //TODO: this wont work if destination project is in a subdir
-  const result = await runNxCommandAsync(`g @nx/workspace:move --project=${projectData.projectName} --destination=${renameProjectData.projectName}`)
+  const result = await safeRunNxCommandAsync(`g @nx/workspace:move --project=${projectData.projectName} --destination=${renameProjectData.projectName}`)
   expectStrings(result.stdout, [
     `DELETE apps/${projectData.projectName}/project.json`,
     `DELETE apps/${projectData.projectName}`,
@@ -44,26 +55,32 @@ export async function renameProjectAsync(projectData: ProjectData, renameProject
   return result 
 }
 
-export async function appGeneratorAsync(params: string = '') {
-  return await runNxCommandAsync(`g @simondotm/nx-firebase:app ${params}`)
+export async function appGeneratorAsync(projectData: ProjectData, params: string = '') {
+  // const isFirstProject = !fileExists('firebase.json')
+  // projectData.configName = isFirstProject ? 'firebase.json' : `firebase.${projectData.projectName}.json`
+  const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:app ${projectData.name} ${params}`)
+  debugInfo(`- appGeneratorAsync ${projectData.projectName}`)
+  debugInfo(result.stdout)
+
+  return result
 }
 
-export async function functionGeneratorAsync(params: string = '') {
-  return await runNxCommandAsync(`g @simondotm/nx-firebase:function ${params}`)
+export async function functionGeneratorAsync(projectData: ProjectData, params: string = '') {
+  return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:function ${projectData.name} ${params}`)
 }
 
 export async function syncGeneratorAsync(params: string = '') {
-  return await runNxCommandAsync(`g @simondotm/nx-firebase:sync ${params}`)
+  return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:sync ${params}`)
 }
 
-export async function cleanAppAsync(projectData: ProjectData) {
+export async function cleanAppAsync(projectData: ProjectData, options = { appsRemaining:0, functionsRemaining: 0}) {
   debugInfo(`- cleanAppAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
   const result = await syncGeneratorAsync(projectData.projectName)
   debugInfo(result.stdout)
   expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
   expectStrings(result.stdout, [
-    'This workspace has 0 firebase apps and 0 firebase functions',
+    `This workspace has ${options.appsRemaining} firebase apps and ${options.functionsRemaining} firebase functions`,
     `CHANGE Firebase config '${projectData.configName}' is no longer referenced by any firebase app, deleted`
   ])
 }  
@@ -81,12 +98,14 @@ export function expectStrings(input: string, contains: string[]) {
 }
 
 /**
- * 
+ * Generate test project data
+ * Note: call this function AFTER initial app firebase.json has been created in order to have a
+ *  correct configName
  * @param name - project name (cannot be camel case)
  * @param dir - project dir
  * @returns - asset locations for this project
  */
-export function getDirectories(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
+export function getProjectData(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
   const d = dir ? `${names(dir).fileName}` : ''
   const n = names(name).fileName
   
@@ -105,6 +124,7 @@ export function getDirectories(type: 'libs' | 'apps', name: string, dir?: string
     npmScope: `${NPM_SCOPE}/${projectName}`,
     // for testing, configName is always derived from project name when app is generated
     // apart from first project which is firebase.json
-    configName: `firebase.${projectName}.json`, 
+    // will also be set by appGeneratorAsync
+    configName: exists('firebase.json') ? `firebase.${projectName}.json` : 'firebase.json', 
   }
 }

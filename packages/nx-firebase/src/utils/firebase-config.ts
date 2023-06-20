@@ -1,6 +1,7 @@
 import { Tree } from '@nx/devkit'
+import { debugInfo } from '../generators/sync/lib'
 
-const USE_CONFIG_FALLBACK = false
+const USE_CONFIG_FALLBACK = true
 
 export interface FirebaseFunction {
   predeploy?: string[]
@@ -72,8 +73,12 @@ export function generateFirebaseConfigName(tree: Tree, projectName: string) {
       ? `firebase.${projectName}.json`
       : 'firebase.json'
 
+    debugInfo(
+      `generateFirebaseConfigName returning FALLBACK ${firebaseConfigName}`,
+    )
     return firebaseConfigName
   } else {
+    debugInfo(`generateFirebaseConfigName returning NON FALLBACK`)
     return `firebase.${projectName}.json`
   }
 }

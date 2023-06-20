@@ -58,11 +58,11 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
   // use `firebase.json` as the first firebase project config
   // use `firebase.<project-name>.json` for subsequent project configs
 
-  const firebaseConfigName = calculateFirebaseConfigName(
-    tree,
-    options.projectName,
-  )
-  if (firebaseConfigName === 'firebase.json') {
+  // const firebaseConfigName = calculateFirebaseConfigName(
+  //   tree,
+  //   options.projectName,
+  // )
+  if (firebaseAppConfig === 'firebase.json') {
     //  if (!tree.exists('firebase.json')) {
     generateFiles(
       tree,

@@ -8,9 +8,11 @@ import {
   uniq,
   updateFile,
   tmpProjPath,
+  fileExists,
+  exists,
 } from '@nx/plugin/testing'
 
-import { ProjectData, appGeneratorAsync, cleanAppAsync, cleanFunctionAsync, debugInfo, expectStrings, functionGeneratorAsync, getDirectories, removeProjectAsync, renameProjectAsync, syncGeneratorAsync } from '../test-utils'
+import { ProjectData, appGeneratorAsync, cleanAppAsync, cleanFunctionAsync, debugInfo, expectStrings, functionGeneratorAsync, getProjectData, removeProjectAsync, renameProjectAsync, syncGeneratorAsync } from '../test-utils'
 
 
 const JEST_TIMEOUT = 120000
@@ -193,8 +195,8 @@ describe('nx-firebase e2e', () => {
     it(
       'should create nx-firebase app',
       async () => {
-        const appData = getDirectories('apps', uniq(appName))
-        await appGeneratorAsync(`${appData.name}`)
+        const appData = getProjectData('apps', uniq(appName))
+        await appGeneratorAsync(appData)
         // test generator output
         expect(() =>
           checkFilesExist(
@@ -209,8 +211,8 @@ describe('nx-firebase e2e', () => {
     it(
       'should build nx-firebase app',
       async () => {
-        const appData = getDirectories('apps', uniq(appName))
-        await appGeneratorAsync(`${appData.name}`)
+        const appData = getProjectData('apps', uniq(appName))
+        await appGeneratorAsync(appData)
 
         // test app builder
         // at this point there are no functions so it doe nothing
@@ -225,9 +227,9 @@ describe('nx-firebase e2e', () => {
       it(
         'should create nx-firebase app in the specified directory',
         async () => {
-          const appData = getDirectories('apps', uniq(appName), subDir)
-          await appGeneratorAsync(
-            `${appData.name} --directory ${appData.dir}`,
+          const appData = getProjectData('apps', uniq(appName), subDir)
+          await appGeneratorAsync(appData,
+            `--directory ${appData.dir}`,
           )
           expect(() =>
             checkFilesExist(
@@ -247,9 +249,9 @@ describe('nx-firebase e2e', () => {
       it(
         'should add tags to the project',
         async () => {
-          const appData = getDirectories('apps', uniq(appName))
-          await appGeneratorAsync(
-            `${appData.name} --tags e2etag,e2ePackage`,
+          const appData = getProjectData('apps', uniq(appName))
+          await appGeneratorAsync(appData,
+            `--tags e2etag,e2ePackage`,
           )
           const project = readJson(`${appData.projectDir}/project.json`)
           expect(project.tags).toEqual(['firebase:app', `firebase:name:${appData.name}`, 'e2etag', 'e2ePackage'])
@@ -566,8 +568,8 @@ describe('nx-firebase e2e', () => {
         'should set firebase app project using --project',
         async () => {
           // create firebase app without specifying firebase deploy --project
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-          await appGeneratorAsync(`${appData.projectName}`)
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          await appGeneratorAsync(appData)
 
           expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).not.toContain(
             `--project`
@@ -590,8 +592,8 @@ describe('nx-firebase e2e', () => {
         async () => {
           
           // create firebase app specifying firebase deploy --project        
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-          await appGeneratorAsync(`${appData.projectName} --project=test`)
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          await appGeneratorAsync(appData, `--project=test`)
 
           expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--project=test`
@@ -616,17 +618,17 @@ describe('nx-firebase e2e', () => {
       it(
         'should detect deleted firebase functions',
         async () => {
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          await appGeneratorAsync(`${appData.name}`)
-          await functionGeneratorAsync(`${functionData.name} --app ${appData.projectName}`)
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
           await removeProjectAsync(functionData)
 
           const result = await syncGeneratorAsync()
           debugInfo(result.stdout)
           expectStrings(result.stdout, [
-            `CHANGE Firebase function '${functionData.projectName}' was deleted, removing function codebase from 'firebase.${appData.projectName}.json'`,            
+            `CHANGE Firebase function '${functionData.projectName}' was deleted, removing function codebase from '${appData.configName}'`,            
             `UPDATE ${appData.configName}`,
           ])          
 
@@ -637,10 +639,10 @@ describe('nx-firebase e2e', () => {
       it(
         'should detect deleted firebase apps',
         async () => {
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          await appGeneratorAsync(`${appData.name}`)
-          await functionGeneratorAsync(`${functionData.name} --app ${appData.projectName}`)
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
           await removeProjectAsync(appData)
 
@@ -663,11 +665,11 @@ describe('nx-firebase e2e', () => {
       it(
         'should detect renamed firebase functions',
         async () => {
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          await appGeneratorAsync(`${appData.name}`)
-          await functionGeneratorAsync(`${functionData.name} --app ${appData.projectName}`)
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedFunctionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
           expect(readJson(`${functionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
             `--only functions:${functionData.projectName}`
@@ -700,14 +702,14 @@ describe('nx-firebase e2e', () => {
       it(
         'should detect renamed firebase apps',
         async () => {
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
           // we will attach two functions to the app for this test
-          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          const functionData2 = getDirectories('apps', uniq('firebaseSyncFunction'))
-          const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
-          await appGeneratorAsync(`${appData.name}`)
-          await functionGeneratorAsync(`${functionData.name} --app ${appData.projectName}`)
-          await functionGeneratorAsync(`${functionData2.name} --app ${appData.projectName}`)
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const functionData2 = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+          await functionGeneratorAsync(functionData2, `--app ${appData.projectName}`)
 
           await renameProjectAsync(appData, renamedAppData)
 
@@ -715,16 +717,25 @@ describe('nx-firebase e2e', () => {
           debugInfo(result.stdout)
 
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData2.projectName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
-            `UPDATE apps/${functionData.projectName}/project.json`,
-            `DELETE ${appData.configName}`,            
-            `CREATE ${renamedAppData.configName}`,            
+            `UPDATE apps/${functionData.projectName}/project.json`,   
           ])
+          // we should not rename config if it is called firebase.json
+          expect(result.stdout).not.toContain(
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+          )
+          expect(result.stdout).not.toContain(
+            `DELETE ${appData.configName}`,            
+          )
+          expect(result.stdout).not.toContain(
+            `CREATE ${renamedAppData.configName}`,        
+          )
 
+          // check that app project has correct --config setting after rename
           expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--config=${renamedAppData.configName}`
           )                    
@@ -745,13 +756,13 @@ describe('nx-firebase e2e', () => {
       it(
         'should detect renamed firebase apps & functions',
         async () => {
-          const appData = getDirectories('apps', uniq('firebaseSyncApp'))
-          const functionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          const renamedFunctionData = getDirectories('apps', uniq('firebaseSyncFunction'))
-          const renamedAppData = getDirectories('apps', uniq('firebaseSyncApp'))
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedFunctionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'))
 
-          await appGeneratorAsync(`${appData.name}`)
-          await functionGeneratorAsync(`${functionData.name} --app ${appData.projectName}`)
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
           // rename app & function
           await renameProjectAsync(appData, renamedAppData)
@@ -761,7 +772,7 @@ describe('nx-firebase e2e', () => {
           debugInfo(result.stdout)
 
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
@@ -769,13 +780,23 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${renamedAppData.configName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+          ])      
+          // we should not rename config if it is called firebase.json
+          expect(result.stdout).not.toContain(
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+          )              
+          expect(result.stdout).not.toContain(
             `DELETE ${appData.configName}`,            
-            `CREATE ${renamedAppData.configName}`,            
-          ])          
+          )
+          expect(result.stdout).not.toContain(
+            `CREATE ${renamedAppData.configName}`,        
+          )
 
+          // check that app project has correct --config setting after rename
           expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--config=${renamedAppData.configName}`
           )                    
+          // check that function project has correct --config setting after rename
           expect(readJson(`${renamedFunctionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
             `--only functions:${renamedFunctionData.projectName}`
           )           
@@ -786,6 +807,89 @@ describe('nx-firebase e2e', () => {
           await cleanAppAsync(renamedAppData)
       })
 
+
+
+      it(
+        'should rename configs for renamed firebase apps when multiple apps in workspace',
+        async () => {
+          expect(!exists('firebase.json'))
+
+          console.debug("firebasejson exists 1 =", exists('firebase.json'))
+
+          // create first project that will have the primary firebase.json config
+          const appDataPrimary = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appDataPrimary)
+
+          console.debug("firebasejson exists 2 =", exists('firebase.json'))
+          console.debug("appDataPrimary=", appDataPrimary)
+
+          expect(appDataPrimary.configName).toEqual('firebase.json')
+          expect(readJson(`${appDataPrimary.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=firebase.json`
+          )                           
+          // expect(fileExists('firebase.json'))
+          expect(exists('firebase.json'))
+
+          console.debug("firebasejson exists 3 =", exists('firebase.json'))
+
+          // generate second app after first app is generated so that first config is detected
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          appData.configName = `firebase.${appData.projectName}.json`
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'))
+          renamedAppData.configName = `firebase.${renamedAppData.projectName}.json`
+
+          console.debug("firebasejson exists 4 =", exists('firebase.json'))
+
+
+          console.debug("appData=", appData)
+          console.debug("renamedAppData=", renamedAppData)
+
+          expect(appData.configName).not.toEqual('firebase.json')
+          expect(renamedAppData.configName).not.toEqual('firebase.json')
+
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).not.toContain(
+            `--config=firebase.json`
+          )         
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${appData.configName}`
+          )                                
+
+          await renameProjectAsync(appData, renamedAppData)
+
+          const result = await syncGeneratorAsync()
+          debugInfo(result.stdout)
+
+          expectStrings(result.stdout, [
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
+            `UPDATE apps/${renamedAppData.projectName}/project.json`,
+            `UPDATE apps/${functionData.projectName}/project.json`,   
+            `DELETE ${appData.configName}`,            
+            `CREATE ${renamedAppData.configName}`,        
+          ])
+
+          // check that app project has correct --config setting after rename
+          expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${renamedAppData.configName}`
+          )     
+      
+          // run another sync to check there should be no orphaned functions from an app rename
+          const result2 = await syncGeneratorAsync()
+          expect(result2.stderr).not.toContain('is no longer linked to a Firebase app')
+          expect(result2.stdout).not.toContain('UPDATE')
+
+          // cleanup - function, then app
+          await cleanFunctionAsync(functionData)
+          await cleanAppAsync(renamedAppData, { appsRemaining: 1, functionsRemaining: 0 })       
+          await cleanAppAsync(appDataPrimary)       
+        })           
+
+        // check we get a warning if there are apps but no primary `firebase.json` config
 
     })
 

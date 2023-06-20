@@ -92,34 +92,40 @@ export async function syncGenerator(
   // 2. rename firebase config files too if app is renamed
   workspace.renamedApps.forEach((project, oldProjectName) => {
     const configFileName = workspace.firebaseAppConfigs.get(project.name)
-    //TODO: check if firebase.json
-    const config = workspace.firebaseConfigs.get(configFileName)
+    // dont rename config file if it is firebase.json
+    if (configFileName === 'firebase.json') {
+      logger.info(
+        `CHANGE Firebase app '${oldProjectName}' linked to primary config file was renamed to '${project.name}', skipping rename of '${configFileName}'`,
+      )
+    } else {
+      const config = workspace.firebaseConfigs.get(configFileName)
 
-    // create a copy of the firebase config with the renamed project name
-    const newConfigFileName = `firebase.${project.name}.json`
-    writeJson(tree, newConfigFileName, config)
+      // create a copy of the firebase config with the renamed project name
+      const newConfigFileName = `firebase.${project.name}.json`
+      writeJson(tree, newConfigFileName, config)
 
-    // rewrite the --config=<configFileName> part of the firebase target command
-    setFirebaseConfigFromCommand(project, newConfigFileName)
+      // rewrite the --config=<configFileName> part of the firebase target command
+      setFirebaseConfigFromCommand(project, newConfigFileName)
 
-    // write the updated project
-    updateProjectConfiguration(tree, project.name, project)
+      // write the updated project
+      updateProjectConfiguration(tree, project.name, project)
 
-    // delete the original config from the workspace
-    tree.delete(configFileName)
+      // delete the original config from the workspace
+      tree.delete(configFileName)
 
-    // rewrite the workspace to the newly renamed config file
-    workspace.firebaseConfigs.delete(configFileName)
-    workspace.firebaseAppConfigs.delete(project.name)
-    workspace.firebaseConfigProjects.delete(configFileName)
+      // rewrite the workspace to the newly renamed config file
+      workspace.firebaseConfigs.delete(configFileName)
+      workspace.firebaseAppConfigs.delete(project.name)
+      workspace.firebaseConfigProjects.delete(configFileName)
 
-    workspace.firebaseConfigs.set(newConfigFileName, config)
-    workspace.firebaseAppConfigs.set(project.name, newConfigFileName)
-    workspace.firebaseConfigProjects.set(newConfigFileName, project.name)
+      workspace.firebaseConfigs.set(newConfigFileName, config)
+      workspace.firebaseAppConfigs.set(project.name, newConfigFileName)
+      workspace.firebaseConfigProjects.set(newConfigFileName, project.name)
 
-    logger.info(
-      `CHANGE Firebase app '${oldProjectName}' was renamed to '${project.name}', renamed config file to '${newConfigFileName}'`,
-    )
+      logger.info(
+        `CHANGE Firebase app '${oldProjectName}' was renamed to '${project.name}', renamed config file to '${newConfigFileName}'`,
+      )
+    }
   })
 
   // 3. update the firebase:name tag for renamed apps
