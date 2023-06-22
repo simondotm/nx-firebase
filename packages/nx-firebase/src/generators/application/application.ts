@@ -8,7 +8,7 @@ import {
 
 import { createFiles } from './lib'
 
-import { generateFirebaseConfigName, getProjectName } from '../../utils'
+import { getProjectName } from '../../utils'
 import type { ApplicationGeneratorOptions, NormalizedOptions } from './schema'
 import initGenerator from '../init/init'
 
@@ -31,7 +31,9 @@ export function normalizeOptions(
    * - plugin can try `firebase.<projectname>.json` and use if exists
    * - otherwise fallback is `firebase.json`
    */
-  const firebaseConfigName = generateFirebaseConfigName(tree, projectName)
+  const firebaseConfigName = tree.exists('firebase.json')
+    ? `firebase.${projectName}.json`
+    : 'firebase.json'
 
   // firebase config name has to be unique.
   if (tree.exists(firebaseConfigName)) {

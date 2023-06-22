@@ -9,7 +9,7 @@ import {
 } from '@nx/devkit'
 
 import { SyncGeneratorSchema } from './schema'
-import { FirebaseFunction } from '../../utils'
+import { FirebaseFunction, setFirebaseConfigFromCommand } from '../../utils'
 import initGenerator from '../init/init'
 
 import {
@@ -20,7 +20,6 @@ import {
   CONFIG_NO_APP,
   updateFirebaseProjectNameTag,
   getFirebaseWorkspace,
-  setFirebaseConfigFromCommand,
 } from './lib'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/

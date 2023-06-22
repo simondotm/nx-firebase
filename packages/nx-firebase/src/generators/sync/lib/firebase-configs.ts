@@ -1,10 +1,13 @@
-import { ProjectConfiguration, Tree, readJson } from '@nx/devkit'
+import { Tree, readJson } from '@nx/devkit'
 
-import { FirebaseConfig } from '../../../utils'
+import {
+  FirebaseConfig,
+  getFirebaseConfigFromCommand,
+  getFirebaseConfigFromProject,
+} from '../../../utils'
 import { CONFIG_NO_APP, FirebaseConfigs, FirebaseProjects } from './types'
 import { debugInfo, mapEntries, mapKeys } from '../../../utils/debug'
 
-const FIREBASE_TARGET_CONFIG_MATCHER = /(--config[ =])([^\s]+)/
 const FIREBASE_CONFIG_FILE_MATCHER = /(firebase)(\S*)(.json)/
 
 export function getFirebaseConfigs(
@@ -44,12 +47,7 @@ export function getFirebaseConfigs(
         `Firebase app project ${name} does not have a 'firebase' target. Sync will no longer work.`,
       )
     }
-    const firebaseCommand = firebaseTarget.options.command
-    const firebaseConfigName = getFirebaseConfigFromCommand(
-      firebaseCommand,
-      project,
-      firebaseConfigs,
-    )
+    const firebaseConfigName = getFirebaseConfigFromProject(tree, project)
     firebaseAppConfigs.set(name, firebaseConfigName)
     firebaseConfigProjects.set(firebaseConfigName, name)
 
@@ -60,9 +58,9 @@ export function getFirebaseConfigs(
     const configurations = firebaseTarget.configurations
     for (const configuration in configurations) {
       const additionalConfigName = getFirebaseConfigFromCommand(
-        configurations[configuration].command,
+        tree,
         project,
-        firebaseConfigs,
+        configurations[configuration].command,
       )
       if (additionalConfigName !== firebaseConfigName) {
         throw new Error(
@@ -82,45 +80,5 @@ export function getFirebaseConfigs(
     firebaseConfigs,
     firebaseAppConfigs,
     firebaseConfigProjects,
-  }
-}
-
-export function getFirebaseConfigFromCommand(
-  command: string,
-  project: ProjectConfiguration,
-  firebaseConfigs: Map<string, FirebaseConfig>,
-) {
-  const match = command.match(FIREBASE_TARGET_CONFIG_MATCHER)
-  if (match && match.length === 3) {
-    const configName = match[2]
-    // check the config we've parsed actually resolves to a firebase config file in the workspace
-    if (!firebaseConfigs.has(configName)) {
-      throw new Error(
-        `Firebase app project ${project.name} is using a firebase config file ${configName} that does not exist in the workspace.`,
-      )
-    }
-    return configName
-  }
-  throw new Error(
-    `Firebase app project ${project.name} does not have --config set in its 'firebase' target.`,
-  )
-}
-
-export function setFirebaseConfigFromCommand(
-  project: ProjectConfiguration,
-  configFileName: string,
-) {
-  // we've already checked that firebase target exists when setting up workspace
-  const firebaseTarget = project.targets.firebase
-  firebaseTarget.options.command = firebaseTarget.options.command.replace(
-    FIREBASE_TARGET_CONFIG_MATCHER,
-    '$1' + configFileName,
-  )
-  // do this for all other configurations on this target too
-  const configurations = firebaseTarget.configurations
-  for (const configuration in configurations) {
-    configurations[configuration].command = configurations[
-      configuration
-    ].command.replace(FIREBASE_TARGET_CONFIG_MATCHER, '$1' + configFileName)
   }
 }

@@ -1,7 +1,6 @@
-import { Tree } from '@nx/devkit'
-import { debugInfo } from '../generators/sync/lib'
+import { Tree, ProjectConfiguration } from '@nx/devkit'
 
-const USE_CONFIG_FALLBACK = true
+const FIREBASE_TARGET_CONFIG_MATCHER = /(--config[ =])([^\s]+)/
 
 export interface FirebaseFunction {
   predeploy?: string[]
@@ -60,50 +59,71 @@ export interface FirebaseConfig {
 }
 
 /**
- * Generate a firebase config file name for the given project
- * If `firebase.json` doesnt already exist in the workspace, use that
- * Otherwise use `firebase.<projectname>.json`
- * @param tree
- * @param projectName
- * @returns firebase config name for this project
+ * Return the config file from the provided firebase target command
+ * This can be used to parse commands in additional configurations
+ * @param project
+ * @param command
+ * @returns
  */
-export function generateFirebaseConfigName(tree: Tree, projectName: string) {
-  if (USE_CONFIG_FALLBACK) {
-    const firebaseConfigName = tree.exists('firebase.json')
-      ? `firebase.${projectName}.json`
-      : 'firebase.json'
-
-    debugInfo(
-      `generateFirebaseConfigName returning FALLBACK ${firebaseConfigName}`,
-    )
-    return firebaseConfigName
-  } else {
-    debugInfo(`generateFirebaseConfigName returning NON FALLBACK`)
-    return `firebase.${projectName}.json`
+export function getFirebaseConfigFromCommand(
+  tree: Tree,
+  project: ProjectConfiguration,
+  command: string,
+) {
+  const match = command.match(FIREBASE_TARGET_CONFIG_MATCHER)
+  if (match && match.length === 3) {
+    const configName = match[2]
+    // check the config we've parsed actually resolves to a firebase config file in the workspace
+    if (!tree.exists(configName)) {
+      throw new Error(
+        `Firebase app project ${project.name} is using a firebase config file ${configName} that does not exist in the workspace.`,
+      )
+    }
+    return configName
   }
+  throw new Error(
+    `Firebase app project ${project.name} does not have --config set in its 'firebase' target.`,
+  )
 }
 
 /**
- * Determine the firebase config file name for the given project
- * If `firebase.<projectname>.json` exists in the workspace, then use that
- * Otherwise use `firebase.json`
- * @param tree
- * @param projectName
- * @returns firebase config file name
+ * Return the config file used by the `firebase` target command of the provided firebase app project
+ * @param command
+ * @param project
+ * @param firebaseConfigs
+ * @returns
  */
-export function calculateFirebaseConfigName(tree: Tree, projectName: string) {
-  let firebaseConfigName = `firebase.${projectName}.json`
-  if (USE_CONFIG_FALLBACK) {
-    if (!tree.exists(firebaseConfigName)) {
-      firebaseConfigName = 'firebase.json'
-    }
+export function getFirebaseConfigFromProject(
+  tree: Tree,
+  project: ProjectConfiguration,
+) {
+  return getFirebaseConfigFromCommand(
+    tree,
+    project,
+    project.targets.firebase.options.command,
+  )
+}
+
+/**
+ * Modify the config file used by the `firebase` target command of the provided firebase app project
+ * @param project
+ * @param configFileName
+ */
+export function setFirebaseConfigFromCommand(
+  project: ProjectConfiguration,
+  configFileName: string,
+) {
+  // we've already checked that firebase target exists when setting up workspace
+  const firebaseTarget = project.targets.firebase
+  firebaseTarget.options.command = firebaseTarget.options.command.replace(
+    FIREBASE_TARGET_CONFIG_MATCHER,
+    '$1' + configFileName,
+  )
+  // do this for all other configurations on this target too
+  const configurations = firebaseTarget.configurations
+  for (const configuration in configurations) {
+    configurations[configuration].command = configurations[
+      configuration
+    ].command.replace(FIREBASE_TARGET_CONFIG_MATCHER, '$1' + configFileName)
   }
-
-  // if (!tree.exists(firebaseConfigName)) {
-  //   throw new Error(
-  //     `Could not find firebase config called '${firebaseConfigName}' in this workspace.`,
-  //   )
-  // }
-
-  return firebaseConfigName
 }

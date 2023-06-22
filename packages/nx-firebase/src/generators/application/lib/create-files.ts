@@ -1,12 +1,6 @@
-import {
-  generateFiles,
-  joinPathFragments,
-  offsetFromRoot,
-  Tree,
-} from '@nx/devkit'
+import { generateFiles, joinPathFragments, Tree } from '@nx/devkit'
 
 import type { NormalizedOptions } from '../schema'
-import { calculateFirebaseConfigName } from '../../../utils'
 
 /**
  * Generate the firebase app specific files
@@ -21,13 +15,7 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
     tmpl: '',
     projectName: options.projectName,
     projectRoot: options.projectRoot,
-
-    // firebaseAppName: options.name,
     firebaseAppConfig,
-    // firebaseAppConfigPath,
-
-    // firebaseNodeRuntime,
-    // firebaseNodeEngine,
   }
 
   // The default functions package.json & templated typescript source files are added here
@@ -44,24 +32,8 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
     substitutions,
   )
 
-  // app project, so that it can be easily located with the cli command, and also enables nx workspaces
-  // to contain multiple firebase projects
-  // firebase.*.json files have to go in the root of the workspace, because firebase function deployment only allows
-  //  the deployed package for functions to exist in a sub directory from where the firebase.json config is located
-  // In principle for users that are not using the firebase functions feature, they could put this firebase.json config
-  //  inside their app folder, but it's better to have consistent behaviour for every workspace
-
-  // generate these firebase files in the root workspace only if they dont already exist
-  // ( since we dont want to overwrite any existing configs)
-
-  // create firebase config file in the root of the workspace.
-  // use `firebase.json` as the first firebase project config
-  // use `firebase.<project-name>.json` for subsequent project configs
-
-  // const firebaseConfigName = calculateFirebaseConfigName(
-  //   tree,
-  //   options.projectName,
-  // )
+  // The first firebase app project in a workspace will always use `firebase.json` as its config file
+  // Subsequent firebase app projects will be assigned a config file based on the project name, so `firebase.<project-name>.json`
   if (firebaseAppConfig === 'firebase.json') {
     //  if (!tree.exists('firebase.json')) {
     generateFiles(
