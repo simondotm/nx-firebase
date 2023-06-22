@@ -1,6 +1,6 @@
 
 import { names } from '@nx/devkit'
-import { exists, fileExists, runNxCommandAsync } from '@nx/plugin/testing'
+import { runNxCommandAsync } from '@nx/plugin/testing'
 
 const NPM_SCOPE = '@proj'
 
@@ -56,8 +56,6 @@ export async function renameProjectAsync(projectData: ProjectData, renameProject
 }
 
 export async function appGeneratorAsync(projectData: ProjectData, params: string = '') {
-  // const isFirstProject = !fileExists('firebase.json')
-  // projectData.configName = isFirstProject ? 'firebase.json' : `firebase.${projectData.projectName}.json`
   const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:app ${projectData.name} ${params}`)
   debugInfo(`- appGeneratorAsync ${projectData.projectName}`)
   debugInfo(result.stdout)
@@ -105,26 +103,23 @@ export function expectStrings(input: string, contains: string[]) {
  * @param dir - project dir
  * @returns - asset locations for this project
  */
-export function getProjectData(type: 'libs' | 'apps', name: string, dir?: string): ProjectData {
-  const d = dir ? `${names(dir).fileName}` : ''
+export function getProjectData(type: 'libs' | 'apps', name: string, options?: { dir?: string, customConfig?: boolean }): ProjectData {
+  const d = options?.dir ? `${names(options.dir).fileName}` : ''
   const n = names(name).fileName
   
-  const prefix = dir ? `${d}-` : ''
+  const prefix = options?.dir ? `${d}-` : ''
   const projectName = `${prefix}${n}`
-  const rootDir = dir ? `${d}/` : ''
+  const rootDir = options?.dir ? `${d}/` : ''
   const distDir = `dist/${type}/${rootDir}${n}`
   return {
     name, // name passed to generator
-    dir, // directory passed to generator
+    dir: options?.dir, // directory passed to generator
     projectName, // project name
     projectDir: `${type}/${rootDir}${n}`,
     srcDir: `${type}/${rootDir}${n}/src`,
     distDir: distDir,
     mainTsPath: `${type}/${rootDir}${n}/src/main.ts`,
     npmScope: `${NPM_SCOPE}/${projectName}`,
-    // for testing, configName is always derived from project name when app is generated
-    // apart from first project which is firebase.json
-    // will also be set by appGeneratorAsync
-    configName: exists('firebase.json') ? `firebase.${projectName}.json` : 'firebase.json', 
+    configName: options?.customConfig ? `firebase.${projectName}.json` : 'firebase.json', 
   }
 }

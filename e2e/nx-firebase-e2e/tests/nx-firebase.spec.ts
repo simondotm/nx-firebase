@@ -1,14 +1,10 @@
-import { names, readJsonFile, readProjectConfiguration, writeJsonFile } from '@nx/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
-  readFile,
   readJson,
   runNxCommandAsync,
   uniq,
   updateFile,
-  tmpProjPath,
-  fileExists,
   exists,
 } from '@nx/plugin/testing'
 
@@ -227,7 +223,7 @@ describe('nx-firebase e2e', () => {
       it(
         'should create nx-firebase app in the specified directory',
         async () => {
-          const appData = getProjectData('apps', uniq(appName), subDir)
+          const appData = getProjectData('apps', uniq(appName), { dir: subDir })
           await appGeneratorAsync(appData,
             `--directory ${appData.dir}`,
           )
@@ -814,36 +810,20 @@ describe('nx-firebase e2e', () => {
         async () => {
           expect(!exists('firebase.json'))
 
-          console.debug("firebasejson exists 1 =", exists('firebase.json'))
-
           // create first project that will have the primary firebase.json config
           const appDataPrimary = getProjectData('apps', uniq('firebaseSyncApp'))
           const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
           await appGeneratorAsync(appDataPrimary)
 
-          console.debug("firebasejson exists 2 =", exists('firebase.json'))
-          console.debug("appDataPrimary=", appDataPrimary)
-
           expect(appDataPrimary.configName).toEqual('firebase.json')
           expect(readJson(`${appDataPrimary.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--config=firebase.json`
           )                           
-          // expect(fileExists('firebase.json'))
           expect(exists('firebase.json'))
 
-          console.debug("firebasejson exists 3 =", exists('firebase.json'))
-
           // generate second app after first app is generated so that first config is detected
-          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
-          appData.configName = `firebase.${appData.projectName}.json`
-          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'))
-          renamedAppData.configName = `firebase.${renamedAppData.projectName}.json`
-
-          console.debug("firebasejson exists 4 =", exists('firebase.json'))
-
-
-          console.debug("appData=", appData)
-          console.debug("renamedAppData=", renamedAppData)
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'), {customConfig: true})
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'), {customConfig: true})
 
           expect(appData.configName).not.toEqual('firebase.json')
           expect(renamedAppData.configName).not.toEqual('firebase.json')
