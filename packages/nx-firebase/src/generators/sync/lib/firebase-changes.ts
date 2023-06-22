@@ -2,7 +2,7 @@ import { ProjectConfiguration, Tree } from '@nx/devkit'
 
 import { FirebaseFunction } from '../../../utils'
 
-import { debugInfo, mapKeys } from './debug'
+import { debugInfo, mapKeys } from '../../../utils/debug'
 import { getFirebaseScopeFromTag } from './tags'
 import { FirebaseProjects, FirebaseChanges, FirebaseConfigs } from './types'
 

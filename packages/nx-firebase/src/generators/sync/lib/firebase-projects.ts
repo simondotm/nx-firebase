@@ -7,7 +7,7 @@ import {
 } from '@nx/devkit'
 
 import { SyncGeneratorSchema } from '../schema'
-import { debugInfo } from './debug'
+import { debugInfo } from '../../../utils/debug'
 import { FirebaseProjects } from './types'
 
 const FIREBASE_PROJECT_MATCHER = /(--project[ =])([^\s]+)/

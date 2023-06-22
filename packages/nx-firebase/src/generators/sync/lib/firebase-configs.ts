@@ -2,7 +2,7 @@ import { ProjectConfiguration, Tree, readJson } from '@nx/devkit'
 
 import { FirebaseConfig } from '../../../utils'
 import { CONFIG_NO_APP, FirebaseConfigs, FirebaseProjects } from './types'
-import { debugInfo, mapEntries, mapKeys } from './debug'
+import { debugInfo, mapEntries, mapKeys } from '../../../utils/debug'
 
 const FIREBASE_TARGET_CONFIG_MATCHER = /(--config[ =])([^\s]+)/
 const FIREBASE_CONFIG_FILE_MATCHER = /(firebase)(\S*)(.json)/

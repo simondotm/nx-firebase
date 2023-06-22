@@ -3,7 +3,7 @@ import {
   Tree,
   updateProjectConfiguration,
 } from '@nx/devkit'
-import { debugInfo } from './debug'
+import { debugInfo } from '../../../utils/debug'
 
 /**
  * Parse a firebase tag value for the given scope

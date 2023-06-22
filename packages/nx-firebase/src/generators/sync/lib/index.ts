@@ -1,4 +1,4 @@
-export * from './debug'
+export * from '../../../utils/debug'
 export * from './firebase-changes'
 export * from './firebase-configs'
 export * from './firebase-projects'
