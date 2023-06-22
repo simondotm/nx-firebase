@@ -23,7 +23,7 @@ import {
   setFirebaseConfigFromCommand,
 } from './lib'
 
-const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([A-Za-z-]+)/
+const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
 /**
  * Sync firebase workspace
