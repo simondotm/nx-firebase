@@ -50,18 +50,35 @@ describe('application generator', () => {
             command: `nx run-many --targets=test --projects=tag:firebase:dep:my-firebase-app --parallel=100`,
           },
         },
+        firebase: {
+          executor: 'nx:run-commands',
+          options: {
+            command: `firebase --config=firebase.json`,
+          },
+          configurations: {
+            production: {
+              command: `firebase --config=firebase.json`,
+            },
+          },
+        },
+        killports: {
+          executor: 'nx:run-commands',
+          options: {
+            command: `kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500`,
+          },
+        },
         getconfig: {
           executor: 'nx:run-commands',
           options: {
-            command: `firebase functions:config:get --config=firebase.json > apps/my-firebase-app/.runtimeconfig.json`,
+            command: `nx run my-firebase-app:firebase functions:config:get > apps/my-firebase-app/.runtimeconfig.json`,
           },
         },
         emulate: {
           executor: 'nx:run-commands',
           options: {
             commands: [
-              'kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500',
-              `firebase emulators:start --config=firebase.json --import=apps/my-firebase-app/.emulators --export-on-exit`,
+              `nx run my-firebase-app:killports`,
+              `nx run my-firebase-app:firebase emulators:start --import=apps/my-firebase-app/.emulators --export-on-exit`,
             ],
             parallel: false,
           },
@@ -79,12 +96,7 @@ describe('application generator', () => {
           executor: 'nx:run-commands',
           dependsOn: ['build'],
           options: {
-            command: `firebase deploy --config=firebase.json`,
-          },
-          configurations: {
-            production: {
-              command: `firebase deploy --config=firebase.json`,
-            },
+            command: `nx run my-firebase-app:firebase deploy`,
           },
         },
       }),
