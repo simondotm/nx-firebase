@@ -654,6 +654,29 @@ describe('nx-firebase e2e', () => {
           // cleanup - function only, already removed app
           await cleanFunctionAsync(functionData)      
       })
+
+      it(
+        'should warn when no firebase apps use firebase.json config',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const appData2 = getProjectData('apps', uniq('firebaseSyncApp'), {customConfig: true})
+          await appGeneratorAsync(appData)
+          await appGeneratorAsync(appData2)
+
+          // delete the app that used firebase.json
+          await removeProjectAsync(appData)
+
+          const result = await syncGeneratorAsync()
+          debugInfo(result.stdout)
+          expectStrings(result.stderr, [
+            `None of the Firebase apps in this workspace use 'firebase.json' as their config. Firebase CLI may not work as expected. This can be fixed by renaming the config for one of your firebase projects to 'firebase.json'.`,
+          ])
+      
+          // cleanup - second app
+          await cleanFunctionAsync(appData2)      
+      })
+
+
     })
 
     describe('renames', () => {    
