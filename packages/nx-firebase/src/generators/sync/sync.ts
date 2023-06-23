@@ -222,6 +222,16 @@ export async function syncGenerator(
     }
   })
 
+  // if user deletes a project that was linked to firebase.json config but there
+  // are other firebase apps in the workspace, we need to inform user about
+  // this, since we dont have a way
+  // other firebase apps in the workspace, we'll just advise
+  if (!tree.exists('firebase.json') && workspace.firebaseAppProjects.size) {
+    logger.warn(
+      `None of the Firebase apps in this workspace use 'firebase.json' as their config. Firebase CLI may not work as expected. This can be fixed by renaming the config for one of your firebase projects to 'firebase.json'.`,
+    )
+  }
+
   return runTasksInSerial(...tasks)
 }
 
