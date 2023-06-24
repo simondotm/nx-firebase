@@ -16,10 +16,10 @@ export interface ProjectData {
   configName: string
 }
 
-const ENABLE_DEBUG_INFO = true
+const ENABLE_TEST_DEBUG_INFO = true
 
-export function debugInfo(info: string) {
-  if (ENABLE_DEBUG_INFO) {
+export function testDebug(info: string) {
+  if (ENABLE_TEST_DEBUG_INFO) {
     console.debug(info)
   }
 }
@@ -37,9 +37,9 @@ export async function safeRunNxCommandAsync(cmd: string)
 
 export async function runTargetAsync(projectData: ProjectData, target: string = 'build') {
   const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
-  debugInfo(`- runTargetAsync ${target} ${projectData.projectName}`)
-  debugInfo(result.stdout)
-  debugInfo(result.stderr)
+  testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
+  testDebug(result.stdout)
+  testDebug(result.stderr)
   expectStrings(result.stdout, [
     `Successfully ran target ${target} for project ${projectData.projectName}`
   ])   
@@ -68,14 +68,18 @@ export async function renameProjectAsync(projectData: ProjectData, renameProject
 
 export async function appGeneratorAsync(projectData: ProjectData, params: string = '') {
   const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:app ${projectData.name} ${params}`)
-  debugInfo(`- appGeneratorAsync ${projectData.projectName}`)
-  debugInfo(result.stdout)
+  testDebug(`- appGeneratorAsync ${projectData.projectName}`)
+  testDebug(result.stdout)
 
   return result
 }
 
 export async function functionGeneratorAsync(projectData: ProjectData, params: string = '') {
-  return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:function ${projectData.name} ${params}`)
+  const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:function ${projectData.name} ${params}`)
+  testDebug(`- functionGeneratorAsync ${projectData.projectName}`)
+  testDebug(result.stdout)
+  testDebug(result.stderr)
+  return result
 }
 
 export async function syncGeneratorAsync(params: string = '') {
@@ -88,10 +92,10 @@ export async function libGeneratorAsync(projectData: ProjectData, params: string
 
 
 export async function cleanAppAsync(projectData: ProjectData, options = { appsRemaining:0, functionsRemaining: 0}) {
-  debugInfo(`- cleanAppAsync ${projectData.projectName}`)
+  testDebug(`- cleanAppAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
   const result = await syncGeneratorAsync(projectData.projectName)
-  debugInfo(result.stdout)
+  testDebug(result.stdout)
   expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
   expectStrings(result.stdout, [
     `This workspace has ${options.appsRemaining} firebase apps and ${options.functionsRemaining} firebase functions`,
@@ -100,7 +104,7 @@ export async function cleanAppAsync(projectData: ProjectData, options = { appsRe
 }  
 
 export async function cleanFunctionAsync(projectData: ProjectData) {
-  debugInfo(`- cleanFunctionAsync ${projectData.projectName}`)
+  testDebug(`- cleanFunctionAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
 }  
 
