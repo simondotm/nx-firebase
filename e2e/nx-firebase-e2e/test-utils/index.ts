@@ -36,6 +36,15 @@ export async function safeRunNxCommandAsync(cmd: string)
 }
 
 export async function runTargetAsync(projectData: ProjectData, target: string = 'build') {
+
+  if (target === 'build') {
+      // need to reset Nx here for e2e test to work
+      // otherwise it bundles node modules in the main.js output too
+      // I think this is a problem with dep-graph, since it works if main.ts
+      // is modified before first build      
+      await runNxCommandAsync('reset')    
+  }
+
   const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
   testDebug(result.stdout)

@@ -467,13 +467,14 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
-        // need to reset Nx here for e2e test to work
-        // otherwise it bundles node modules in the main.js output too
-        // I think this is a problem with dep-graph, since it works if main.ts
-        // is modified before first build
-        await runNxCommandAsync('reset')
+        // // need to reset Nx here for e2e test to work
+        // // otherwise it bundles node modules in the main.js output too
+        // // I think this is a problem with dep-graph, since it works if main.ts
+        // // is modified before first build
+        // await runNxCommandAsync('reset')
 
-        const result = await runNxCommandAsync(`build ${functionData.projectName}`)
+        // const result = await runNxCommandAsync(`build ${functionData.projectName}`)
+        const result = await runTargetAsync(functionData, 'build')
 
         const distPackageFile = `${functionData.distDir}/package.json`
         expect(exists(distPackageFile))
@@ -568,9 +569,9 @@ describe('nx-firebase e2e', () => {
         expect(updatedMainTs).toContain(importAddition3)
         expect(updatedMainTs).toContain(importAddition4)
 
-        // need to reset Nx here for e2e test to work
-        // otherwise it bundles node modules in the main.js output too
-        await runNxCommandAsync('reset')
+        // // need to reset Nx here for e2e test to work
+        // // otherwise it bundles node modules in the main.js output too
+        // await runNxCommandAsync('reset')
 
         // build
         // const result = await runNxCommandAsync(`build ${functionData.projectName}`)
