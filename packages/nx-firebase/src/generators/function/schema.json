@@ -33,12 +33,6 @@
       "type": "boolean",
       "default": false
     },
-    "format": {
-      "description": "The module format for this function (esm or cjs).",
-      "type": "string",
-      "enum": ["esm", "cjs"],
-      "default": "esm"
-    },
     "app": {
       "description": "The name of the parent Nx firebase application project this function will be added to.",
       "type": "string",

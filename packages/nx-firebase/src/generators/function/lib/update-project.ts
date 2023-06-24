@@ -20,14 +20,16 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
       main: project.targets.build.options.main,
       tsConfig: project.targets.build.options.tsConfig,
       assets: project.targets.build.options.assets,
-      generatePackageJson: true,
-      // these are the defaults for esbuild, but let's set them anyway
-      platform: 'node',
-      bundle: true,
+      generatePackageJson: true, // default=false
       thirdParty: false,
-      dependenciesFieldType: 'dependencies',
+      // these are the defaults for esbuild, but let's set them anyway
+      platform: 'node', // default='node'
+      bundle: true, // default=true
+      dependenciesFieldType: 'dependencies', // default=dependencies
       target: 'node16',
-      format: [options.format || 'esm'], // default for esbuild is esm
+      // format: [options.format || 'esm'], // default=["esm"]
+      // always output esm
+      format: ['esm'], // default=["esm"]
       esbuildOptions: {
         logLevel: 'info',
       },
