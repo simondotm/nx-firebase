@@ -30,9 +30,6 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
       format: [options.format || 'esm'], // default for esbuild is esm
       esbuildOptions: {
         logLevel: 'info',
-        // ensure that esbuild does not bundle node_modules packages
-        // thirdParty false should do this, but not working in e2e
-        packages: 'external',
       },
     },
   }

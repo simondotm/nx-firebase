@@ -79,7 +79,6 @@ describe('function generator', () => {
                 format: ['esm'],
                 esbuildOptions: {
                   logLevel: 'info',
-                  packages: 'external',
                 },
               },
             },

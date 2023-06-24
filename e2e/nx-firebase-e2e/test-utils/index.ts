@@ -143,3 +143,36 @@ export function getProjectData(type: 'libs' | 'apps', name: string, options?: { 
     configName: options?.customConfig ? `firebase.${projectName}.json` : 'firebase.json', 
   }
 }
+
+const IMPORT_MATCH = `import * as functions from 'firebase-functions';`
+
+export function getMainTs() {
+  return `
+import * as admin from "firebase-admin";
+${IMPORT_MATCH}
+admin.initializeApp();
+
+export const helloWorld = functions.https.onRequest((request, response) => {
+  functions.logger.info("Hello logs!", {structuredData: true});
+  response.send("Hello from Firebase!");
+});  
+`
+}
+
+
+/**
+ * return the import function for a generated library
+ */
+export function getLibImport(projectData: ProjectData) {
+  const libName = projectData.name
+  const libDir = projectData.dir
+  return libDir
+      ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
+      : libName
+}
+
+export function addImport(mainTs: string, addition: string) {
+  const replaced = mainTs.replace(IMPORT_MATCH, `${IMPORT_MATCH}\n${addition}`)
+  return replaced
+}
+

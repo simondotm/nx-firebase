@@ -6,9 +6,28 @@ import {
   uniq,
   updateFile,
   exists,
+  readFile,
 } from '@nx/plugin/testing'
 
-import { ProjectData, appGeneratorAsync, cleanAppAsync, cleanFunctionAsync, testDebug, expectStrings, functionGeneratorAsync, getProjectData, libGeneratorAsync, removeProjectAsync, renameProjectAsync, runTargetAsync, safeRunNxCommandAsync, syncGeneratorAsync } from '../test-utils'
+import {
+  ProjectData,
+  appGeneratorAsync,
+  cleanAppAsync,
+  cleanFunctionAsync,
+  testDebug,
+  expectStrings,
+  functionGeneratorAsync,
+  getProjectData,
+  libGeneratorAsync,
+  removeProjectAsync,
+  renameProjectAsync,
+  runTargetAsync,
+  safeRunNxCommandAsync,
+  syncGeneratorAsync,
+  getMainTs,
+  getLibImport,
+  addImport,
+} from '../test-utils'
 
 
 const JEST_TIMEOUT = 120000
@@ -48,20 +67,14 @@ const compileComplete = 'Done compiling TypeScript files for project'
 const buildSuccess = 'Successfully ran target build for project'
 
 
-
-/**
- * return the import function for a generated library
- */
-function getLibImport(projectData: ProjectData) {
-  const libName = projectData.name
-  const libDir = projectData.dir
-  return libDir
-      ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
-      : libName
-}
+const buildableLibData = getProjectData('libs', 'buildablelib')
+const nonbuildableLibData = getProjectData('libs', 'nonbuildablelib')
+const subDirBuildableLibData = getProjectData('libs', 'buildablelib', {dir: 'subdir'})
+const subDirNonbuildableLibData = getProjectData('libs', 'nonbuildablelib', {dir:'subdir'})
 
 
-const importMatch = `import * as functions from 'firebase-functions';`
+
+// const importMatch = `import * as functions from 'firebase-functions';`
 
 function expectedAppFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
@@ -189,55 +202,55 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library',
       async () => {
-        const projectData = getProjectData('libs', 'buildablelib')        
-        await libGeneratorAsync(projectData, `--buildable --importPath="${projectData.npmScope}"`)
+        // const projectData = getProjectData('libs', 'buildablelib')        
+        await libGeneratorAsync(buildableLibData, `--buildable --importPath="${buildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
+          checkFilesExist(`${buildableLibData.projectDir}/package.json`),
         ).not.toThrow()
 
         const result = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
+          `build ${buildableLibData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
         expect(result.stdout).toContain(
-          `${buildSuccess} ${projectData.projectName}`,
+          `${buildSuccess} ${buildableLibData.projectName}`,
         )
     })
 
     it(
       'should create buildable typescript library in subdir',
       async () => {
-        const projectData = getProjectData('libs', 'buildablelib', { dir: 'subdir' })           
-        await libGeneratorAsync(projectData, `--directory=${projectData.dir} --buildable --importPath="${projectData.npmScope}"`)
+        // const projectData = getProjectData('libs', 'buildablelib', { dir: 'subdir' })           
+        await libGeneratorAsync(subDirBuildableLibData, `--directory=${subDirBuildableLibData.dir} --buildable --importPath="${subDirBuildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
+          checkFilesExist(`${subDirBuildableLibData.projectDir}/package.json`),
         ).not.toThrow()
 
         const result = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
+          `build ${subDirBuildableLibData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
         expect(result.stdout).toContain(
-          `${buildSuccess} ${projectData.projectName}`,
+          `${buildSuccess} ${subDirBuildableLibData.projectName}`,
         )
     })
 
     it(
       'should create non-buildable typescript library',
       async () => {
-        const projectData = getProjectData('libs', 'nonbuildablelib')          
-        await libGeneratorAsync(projectData, `--buildable=false --importPath="${projectData.npmScope}"`)
+        // const projectData = getProjectData('libs', 'nonbuildablelib')          
+        await libGeneratorAsync(nonbuildableLibData, `--buildable=false --importPath="${nonbuildableLibData.npmScope}"`)
 
         expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
+          checkFilesExist(`${nonbuildableLibData.projectDir}/package.json`),
         ).toThrow()
 
         const project = readJson(
-          `${projectData.projectDir}/project.json`,
+          `${nonbuildableLibData.projectDir}/project.json`,
         )
         expect(project.targets.build).not.toBeDefined()
     })
@@ -245,15 +258,15 @@ describe('nx-firebase e2e', () => {
     it(
       'should create non-buildable typescript library in subdir',
       async () => {
-        const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
-        await libGeneratorAsync(projectData, `--directory=${projectData.dir} --buildable=false --importPath="${projectData.npmScope}"`)
+        // const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
+        await libGeneratorAsync(subDirNonbuildableLibData, `--directory=${subDirNonbuildableLibData.dir} --buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`)
 
         expect(() =>
-          checkFilesExist(`${projectData.projectDir}/package.json`),
+          checkFilesExist(`${subDirNonbuildableLibData.projectDir}/package.json`),
         ).toThrow()
 
         const project = readJson(
-          `${projectData.projectDir}/project.json`,
+          `${subDirNonbuildableLibData.projectDir}/project.json`,
         )
         expect(project.targets.build).not.toBeDefined()
     })
@@ -454,6 +467,12 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
+        // need to reset Nx here for e2e test to work
+        // otherwise it bundles node modules in the main.js output too
+        // I think this is a problem with dep-graph, since it works if main.ts
+        // is modified before first build
+        await runNxCommandAsync('reset')
+
         const result = await runNxCommandAsync(`build ${functionData.projectName}`)
 
         const distPackageFile = `${functionData.distDir}/package.json`
@@ -462,6 +481,8 @@ describe('nx-firebase e2e', () => {
         const distPackage = readJson(distPackageFile)
         const deps = distPackage['dependencies']
         expect(deps).toBeDefined()
+
+
         // seems like first run, build does not emit dependencies
         // expect(deps['firebase-admin']).toBeDefined()
         // expect(deps['firebase-functions']).toBeDefined()
@@ -496,100 +517,107 @@ describe('nx-firebase e2e', () => {
   })
 
 
-  // //--------------------------------------------------------------------------------------------------
-  // // Test import & dependency handling
-  // //--------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------
+  // Test import & dependency handling
+  //--------------------------------------------------------------------------------------------------
 
-  // describe('nx-firebase dependencies', () => {
-  //   it(
-  //     'should inline library dependencies into function bundle',
-  //     async () => {
-  //       // use libs we generated earler
+  describe('nx-firebase bundle dependencies', () => {
+    it(
+      'should inline library dependencies into function bundle',
+      async () => {
+        // use libs we generated earler
        
-  //       // generate a function
-  //       const functionData = getDirectories('apps', 'functionwithdeps')
-  //       await runNxCommandAsync(`${functionGeneratorCommand} ${functionData.name} --app firebase`)
+        const appData = getProjectData('apps', uniq('firebaseDepsApp'))
+        const functionData = getProjectData('apps', uniq('firebaseDepsFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
-  //       // add buildable & nonbuildable lib dependencies using import statements
-  //       const mainTs = readFile(functionData.mainTsPath)
-  //       expect(mainTs).toContain(importMatch)
+        // add buildable & nonbuildable lib dependencies using import statements
+        let mainTs = getMainTs()
+        
+        // import from a buildable lib
+        const libImport1 = getLibImport(buildableLibData)
+        const importAddition1 = `import { ${libImport1} } from '${buildableLibData.npmScope}'\nconsole.log(${libImport1}())\n`
+        mainTs = addImport(mainTs, importAddition1)
+        
+        // import from a non buildable lib
+        const libImport2 = getLibImport(nonbuildableLibData)
+        const importAddition2 = `import { ${libImport2} } from '${nonbuildableLibData.npmScope}'\nconsole.log(${libImport2}())\n`
+        mainTs = addImport(mainTs, importAddition2)
+        
+        // import from a buildable subdir lib
+        const libImport3 = getLibImport(subDirBuildableLibData)
+        const importAddition3 = `import { ${libImport3} } from '${subDirBuildableLibData.npmScope}'\nconsole.log(${libImport3}())\n`
+        mainTs = addImport(mainTs, importAddition3)
+        
+        // import from a non buildable subdir lib
+        const libImport4 = getLibImport(subDirNonbuildableLibData)
+        const importAddition4 = `import { ${libImport4} } from '${subDirNonbuildableLibData.npmScope}'\nconsole.log(${libImport4}())\n`
+        mainTs = addImport(mainTs, importAddition4)
 
-  //       // import from a buildable lib
-  //       const buildableLibData = getDirectories('libs', 'buildablelib')
-  //       const libImport1 = getLibImport(buildableLibData)
-  //       const importAddition1 = `import { ${libImport1} } from '${buildableLibData.npmScope}'\nconsole.log(${libImport1}())\n`
-  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition1)
-
-  //       // import from a non buildable lib
-  //       const nonbuildableLibData = getDirectories('libs', 'nonbuildablelib')
-  //       const libImport2 = getLibImport(nonbuildableLibData)
-  //       const importAddition2 = `import { ${libImport2} } from '${nonbuildableLibData.npmScope}'\nconsole.log(${libImport2}())\n`
-  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition2)
-
-  //       // import from a buildable subdir lib
-  //       const subDirBuildableLibData = getDirectories('libs', 'buildablelib', 'subdir')
-  //       const libImport3 = getLibImport(subDirBuildableLibData)
-  //       const importAddition3 = `import { ${libImport3} } from '${subDirBuildableLibData.npmScope}'\nconsole.log(${libImport3}())\n`
-  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition3)
-
-  //       // import from a non buildable subdir lib
-  //       const subDirNonbuildableLibData = getDirectories('libs', 'nonbuildablelib', 'subdir')
-  //       const libImport4 = getLibImport(subDirNonbuildableLibData)
-  //       const importAddition4 = `import { ${libImport4} } from '${subDirNonbuildableLibData.npmScope}'\nconsole.log(${libImport4}())\n`
-  //       addContentToMainTs(functionData.mainTsPath, importMatch, importAddition4)
+        // write the new main.ts
+        updateFile(functionData.mainTsPath, (content: string) => {
+          return mainTs
+        })
 
 
-  //       // confirm the file changes
-  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition1)
-  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition2)
-  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition3)
-  //       expect(readFile(functionData.mainTsPath)).toContain(importAddition4)
+        // confirm the file changes
+        const updatedMainTs = readFile(functionData.mainTsPath)
+        expect(updatedMainTs).toContain(importAddition1)
+        expect(updatedMainTs).toContain(importAddition2)
+        expect(updatedMainTs).toContain(importAddition3)
+        expect(updatedMainTs).toContain(importAddition4)
 
-  //       // need to reset Nx here for e2e test to work
-  //       // otherwise it bundles node modules in the main.js output too
-  //       await runNxCommandAsync('reset')
+        // need to reset Nx here for e2e test to work
+        // otherwise it bundles node modules in the main.js output too
+        await runNxCommandAsync('reset')
 
-  //       // build
-  //       const result = await runNxCommandAsync(`build ${functionData.projectName}`)
-  //       // check console output
-  //       expect(result.stdout).toContain(
-  //         `Successfully ran target build for project ${functionData.projectName}`,
-  //       )
+        // build
+        // const result = await runNxCommandAsync(`build ${functionData.projectName}`)
+        const result = await runTargetAsync(functionData, `build`)
+        // check console output
+        expect(result.stdout).toContain(
+          `Successfully ran target build for project ${functionData.projectName}`,
+        )
 
-  //       // check dist outputs
-  //       expect(() =>
-  //         checkFilesExist(
-  //           `${functionData.distDir}/package.json`,
-  //           `${functionData.distDir}/main.js`,
-  //         ),
-  //       ).not.toThrow()
+        // check dist outputs
+        expect(() =>
+          checkFilesExist(
+            `${functionData.distDir}/package.json`,
+            `${functionData.distDir}/main.js`,
+          ),
+        ).not.toThrow()
 
-  //       // check dist package contains external imports
-  //       const distPackage = readJson(`${functionData.distDir}/package.json`)
-  //       const deps = distPackage['dependencies']
-  //       expect(deps).toBeDefined()
-  //       expect(deps['firebase-admin']).toBeDefined()
-  //       expect(deps['firebase-functions']).toBeDefined()        
+        // check dist package contains external imports
+        const distPackage = readJson(`${functionData.distDir}/package.json`)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()        
 
-  //       // check bundled code contains the libcode we added
-  //       const bundle = readFile(`${functionData.distDir}/main.js`)
+        // check bundled code contains the libcode we added
+        const bundle = readFile(`${functionData.distDir}/main.js`)
 
-  //       // check that node modules were not bundled, happens in e2e if nx reset not called
-  //       // probably the earlier check for deps in the package.json already detects this scenario too
-  //       expect(bundle).not.toContain(`require_firebase_app`)  
+        // check that node modules were not bundled, happens in e2e if nx reset not called
+        // probably the earlier check for deps in the package.json already detects this scenario too
+        expect(bundle).not.toContain(`require_firebase_app`)  
 
-  //       // our imported lib modules should be inlined in the bundle
-  //       expect(bundle).toContain(`function ${libImport1}`)  
-  //       expect(bundle).toContain(`return "${buildableLibData.projectName}"`)  
-  //       expect(bundle).toContain(`function ${libImport2}`)  
-  //       expect(bundle).toContain(`return "${nonbuildableLibData.projectName}"`)  
-  //       expect(bundle).toContain(`function ${libImport3}`)  
-  //       expect(bundle).toContain(`return "${subDirBuildableLibData.projectName}"`)  
-  //       expect(bundle).toContain(`function ${libImport4}`)  
-  //       expect(bundle).toContain(`return "${subDirNonbuildableLibData.projectName}"`)  
-  //   })
+        // our imported lib modules should be inlined in the bundle
+        expect(bundle).toContain(`function ${libImport1}`)  
+        expect(bundle).toContain(`return "${buildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport2}`)  
+        expect(bundle).toContain(`return "${nonbuildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport3}`)  
+        expect(bundle).toContain(`return "${subDirBuildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport4}`)  
+        expect(bundle).toContain(`return "${subDirNonbuildableLibData.projectName}"`)  
 
-  // })
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)               
+    })
+
+  })
 
 
 
