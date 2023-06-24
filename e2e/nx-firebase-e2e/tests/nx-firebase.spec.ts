@@ -8,7 +8,7 @@ import {
   exists,
 } from '@nx/plugin/testing'
 
-import { ProjectData, appGeneratorAsync, cleanAppAsync, cleanFunctionAsync, debugInfo, expectStrings, functionGeneratorAsync, getProjectData, removeProjectAsync, renameProjectAsync, runTargetAsync, syncGeneratorAsync } from '../test-utils'
+import { ProjectData, appGeneratorAsync, cleanAppAsync, cleanFunctionAsync, debugInfo, expectStrings, functionGeneratorAsync, getProjectData, libGeneratorAsync, removeProjectAsync, renameProjectAsync, runTargetAsync, safeRunNxCommandAsync, syncGeneratorAsync } from '../test-utils'
 
 
 const JEST_TIMEOUT = 120000
@@ -41,8 +41,6 @@ const functionName = 'function'
 const subDir = 'subdir'
 
 
-
-const libGeneratorCommand = 'generate @nx/js:lib'
 
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
@@ -182,6 +180,84 @@ describe('nx-firebase e2e', () => {
         expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
     })
   })
+
+
+  //--------------------------------------------------------------------------------------------------
+  // Create Libraries for e2e function generator tests
+  //--------------------------------------------------------------------------------------------------
+  describe('setup libraries', () => {
+    it(
+      'should create buildable typescript library',
+      async () => {
+        const projectData = getProjectData('libs', 'buildablelib')        
+        await libGeneratorAsync(projectData, `--buildable --importPath="${projectData.npmScope}"`)
+
+        // no need to test the js library generator, only that it ran ok
+        expect(() =>
+          checkFilesExist(`${projectData.projectDir}/package.json`),
+        ).not.toThrow()
+
+        const result = await runNxCommandAsync(
+          `build ${projectData.projectName}`,
+        )
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(
+          `${buildSuccess} ${projectData.projectName}`,
+        )
+    })
+
+    it(
+      'should create buildable typescript library in subdir',
+      async () => {
+        const projectData = getProjectData('libs', 'buildablelib', { dir: 'subdir' })           
+        await libGeneratorAsync(projectData, `--directory=${projectData.dir} --buildable --importPath="${projectData.npmScope}"`)
+
+        // no need to test the js library generator, only that it ran ok
+        expect(() =>
+          checkFilesExist(`${projectData.projectDir}/package.json`),
+        ).not.toThrow()
+
+        const result = await runNxCommandAsync(
+          `build ${projectData.projectName}`,
+        )
+        expect(result.stdout).toContain(compileComplete)
+        expect(result.stdout).toContain(
+          `${buildSuccess} ${projectData.projectName}`,
+        )
+    })
+
+    it(
+      'should create non-buildable typescript library',
+      async () => {
+        const projectData = getProjectData('libs', 'nonbuildablelib')          
+        await libGeneratorAsync(projectData, `--buildable=false --importPath="${projectData.npmScope}"`)
+
+        expect(() =>
+          checkFilesExist(`${projectData.projectDir}/package.json`),
+        ).toThrow()
+
+        const project = readJson(
+          `${projectData.projectDir}/project.json`,
+        )
+        expect(project.targets.build).not.toBeDefined()
+    })
+
+    it(
+      'should create non-buildable typescript library in subdir',
+      async () => {
+        const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
+        await libGeneratorAsync(projectData, `--directory=${projectData.dir} --buildable=false --importPath="${projectData.npmScope}"`)
+
+        expect(() =>
+          checkFilesExist(`${projectData.projectDir}/package.json`),
+        ).toThrow()
+
+        const project = readJson(
+          `${projectData.projectDir}/project.json`,
+        )
+        expect(project.targets.build).not.toBeDefined()
+    })
+  })  
   
   //--------------------------------------------------------------------------------------------------
   // Application generator e2e tests
@@ -403,91 +479,6 @@ describe('nx-firebase e2e', () => {
     )
   })
 
-  // //--------------------------------------------------------------------------------------------------
-  // // Create Libraries for e2e function generator tests
-  // //--------------------------------------------------------------------------------------------------
-  // describe('libraries', () => {
-  //   it(
-  //     'should create buildable typescript library',
-  //     async () => {
-  //       const projectData = getDirectories('libs', 'buildablelib')        
-  //       await runNxCommandAsync(
-  //         `${libGeneratorCommand} ${projectData.name} --buildable --importPath="${projectData.npmScope}"`,
-  //       )
-
-  //       // no need to test the js library generator, only that it ran ok
-  //       expect(() =>
-  //         checkFilesExist(`${projectData.projectDir}/package.json`),
-  //       ).not.toThrow()
-
-  //       const result = await runNxCommandAsync(
-  //         `build ${projectData.projectName}`,
-  //       )
-  //       expect(result.stdout).toContain(compileComplete)
-  //       expect(result.stdout).toContain(
-  //         `${buildSuccess} ${projectData.projectName}`,
-  //       )
-  //   })
-
-  //   it(
-  //     'should create buildable typescript library in subdir',
-  //     async () => {
-  //       const projectData = getDirectories('libs', 'buildablelib', 'subdir')           
-  //       await runNxCommandAsync(
-  //         `${libGeneratorCommand} ${projectData.name} --buildable --directory=${projectData.dir} --importPath="${projectData.npmScope}"`,
-  //       )
-
-  //       // no need to test the js library generator, only that it ran ok
-  //       expect(() =>
-  //         checkFilesExist(`${projectData.projectDir}/package.json`),
-  //       ).not.toThrow()
-
-  //       const result = await runNxCommandAsync(
-  //         `build ${projectData.projectName}`,
-  //       )
-  //       expect(result.stdout).toContain(compileComplete)
-  //       expect(result.stdout).toContain(
-  //         `${buildSuccess} ${projectData.projectName}`,
-  //       )
-  //   })
-
-  //   it(
-  //     'should create non-buildable typescript library',
-  //     async () => {
-  //       const projectData = getDirectories('libs', 'nonbuildablelib')          
-  //       await runNxCommandAsync(
-  //         `${libGeneratorCommand} ${projectData.name} --buildable=false --importPath="${projectData.npmScope}"`,
-  //       )
-
-  //       expect(() =>
-  //         checkFilesExist(`${projectData.projectDir}/package.json`),
-  //       ).toThrow()
-
-  //       const project = readJson(
-  //         `${projectData.projectDir}/project.json`,
-  //       )
-  //       expect(project.targets.build).not.toBeDefined()
-  //   })
-
-  //   it(
-  //     'should create non-buildable typescript library in subdir',
-  //     async () => {
-  //       const projectData = getDirectories('libs', 'nonbuildablelib', 'subdir')          
-
-  //       await runNxCommandAsync(
-  //         `${libGeneratorCommand} ${projectData.name} --directory=${projectData.dir} --buildable=false --importPath="${projectData.npmScope}"`,
-  //       )
-
-  //       expect(() =>
-  //         checkFilesExist(`${projectData.projectDir}/package.json`),
-  //       ).toThrow()
-
-  //       const project = readJson(
-  //         `${projectData.projectDir}/project.json`,
-  //       )
-  //       expect(project.targets.build).not.toBeDefined()
-  //   })
-  // })
 
   // //--------------------------------------------------------------------------------------------------
   // // Test import & dependency handling

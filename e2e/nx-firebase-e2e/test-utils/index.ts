@@ -82,6 +82,11 @@ export async function syncGeneratorAsync(params: string = '') {
   return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:sync ${params}`)
 }
 
+export async function libGeneratorAsync(projectData: ProjectData, params: string = '') {
+  return await safeRunNxCommandAsync(`g @nx/js:lib ${projectData.name} ${params}`)
+}
+
+
 export async function cleanAppAsync(projectData: ProjectData, options = { appsRemaining:0, functionsRemaining: 0}) {
   debugInfo(`- cleanAppAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
