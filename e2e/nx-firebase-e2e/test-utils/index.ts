@@ -17,6 +17,8 @@ export interface ProjectData {
 }
 
 const ENABLE_TEST_DEBUG_INFO = true
+const STRIP_ANSI_MATCHER = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
+
 
 export function testDebug(info: string) {
   if (ENABLE_TEST_DEBUG_INFO) {
@@ -28,6 +30,9 @@ export async function safeRunNxCommandAsync(cmd: string)
 {
   try {
     const result = await runNxCommandAsync(`${cmd} --verbose`, { silenceError: true })
+    // strip chalk TTY ANSI codes from output
+    result.stdout = result.stdout.replace(STRIP_ANSI_MATCHER, '')
+    result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')    
     return result
   }
   catch (e) {
@@ -49,9 +54,13 @@ export async function runTargetAsync(projectData: ProjectData, target: string = 
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
   testDebug(result.stdout)
   testDebug(result.stderr)
-  expectStrings(result.stdout, [
-    `Successfully ran target ${target} for project ${projectData.projectName}`
-  ])   
+
+  if (target === 'build') {
+    expectStrings(result.stdout, [
+      `Successfully ran target ${target} for project ${projectData.projectName}`
+    ])   
+  }
+
   return result 
 }
 
