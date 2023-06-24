@@ -37,13 +37,13 @@ jest.setTimeout(JEST_TIMEOUT)
 
 // TODO:
 // check that functions can be within firebase app folder
-// remove all tests related to old plugin
 // check that deploy runs the application deploy?
 // check that lint works for functions & apps
 // check that test works for functions & apps
 // check that serve works for apps
 
 // DONE
+// remove all tests related to old plugin
 // dont check anything that the generator tests already test, this is just e2e
 // check all options
 // check dependent packages are installed
@@ -66,7 +66,7 @@ const pluginPath = 'dist/packages/nx-firebase'
 const compileComplete = 'Done compiling TypeScript files for project'
 const buildSuccess = 'Successfully ran target build for project'
 
-
+// libraries persist across all e2e tests
 const buildableLibData = getProjectData('libs', 'buildablelib')
 const nonbuildableLibData = getProjectData('libs', 'nonbuildablelib')
 const subDirBuildableLibData = getProjectData('libs', 'buildablelib', {dir: 'subdir'})
@@ -105,23 +105,6 @@ function expectedFunctionFiles(projectData: ProjectData) {
     `${projectPath}/tsconfig.spec.json`,
   ]
 }
-
-/**
- * Replace content in the application `main.ts` that matches `importMatch` with `importAddition`
- * @param match - string to match in the index.ts
- * @param addition - string to add after the matched line in the index.ts
- */
-function addContentToMainTs(
-  mainTsPath: string,
-  match: string,
-  addition: string,
-) {
-  updateFile(mainTsPath, (content: string) => {
-    const replaced = content.replace(match, `${match}\n${addition}`)
-    return replaced
-  })
-}
-
 
 describe('nx-firebase e2e', () => {
   // Setting up individual workspaces per
@@ -202,7 +185,6 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library',
       async () => {
-        // const projectData = getProjectData('libs', 'buildablelib')        
         await libGeneratorAsync(buildableLibData, `--buildable --importPath="${buildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
@@ -222,7 +204,6 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library in subdir',
       async () => {
-        // const projectData = getProjectData('libs', 'buildablelib', { dir: 'subdir' })           
         await libGeneratorAsync(subDirBuildableLibData, `--directory=${subDirBuildableLibData.dir} --buildable --importPath="${subDirBuildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
@@ -242,7 +223,6 @@ describe('nx-firebase e2e', () => {
     it(
       'should create non-buildable typescript library',
       async () => {
-        // const projectData = getProjectData('libs', 'nonbuildablelib')          
         await libGeneratorAsync(nonbuildableLibData, `--buildable=false --importPath="${nonbuildableLibData.npmScope}"`)
 
         expect(() =>
@@ -359,15 +339,8 @@ describe('nx-firebase e2e', () => {
       'should not create nx-firebase function without --app',
       async () => {
         const functionData = getProjectData('apps', uniq('firebaseFunction'))
-
         const result = await functionGeneratorAsync(functionData)
         expect(result.stdout).toContain("Required property 'app' is missing")
-        // await expect(
-        //   functionGeneratorAsync(functionData)
-        // ).rejects.toThrow(
-        //   "Command failed: npx nx generate @simondotm/nx-firebase:function function",
-        // )
-
         // no cleanup required  
     })
 
@@ -375,16 +348,8 @@ describe('nx-firebase e2e', () => {
       'should not create nx-firebase function with an invalid --app',
       async () => {
         const functionData = getProjectData('apps', uniq('firebaseFunction'))
-
         const result = await functionGeneratorAsync(functionData, '--app badapple')
         expect(result.stdout).toContain("A firebase application project called 'badapple' was not found in this workspace.")
-
-        // await expect(
-        //   functionGeneratorAsync(functionData)
-        // ).rejects.toThrow(
-        //   "Command failed: npx nx generate @simondotm/nx-firebase:function function",
-        // )
-
         // no cleanup required  
     })    
 
@@ -467,14 +432,18 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
-        // // need to reset Nx here for e2e test to work
-        // // otherwise it bundles node modules in the main.js output too
-        // // I think this is a problem with dep-graph, since it works if main.ts
-        // // is modified before first build
-        // await runNxCommandAsync('reset')
-
-        // const result = await runNxCommandAsync(`build ${functionData.projectName}`)
         const result = await runTargetAsync(functionData, 'build')
+        expect(result.stdout).toContain(
+          `Successfully ran target build for project ${functionData.projectName}`,
+        )        
+
+        expectStrings(result.stderr, [
+          `${functionData.distDir}/main.js`
+        ])
+        // make sure output build is not megabytes in size, which would mean we've
+        // bundled node_modules as well
+        expect(result.stdout).not.toContain('Mb')
+
 
         const distPackageFile = `${functionData.distDir}/package.json`
         expect(exists(distPackageFile))
@@ -482,11 +451,8 @@ describe('nx-firebase e2e', () => {
         const distPackage = readJson(distPackageFile)
         const deps = distPackage['dependencies']
         expect(deps).toBeDefined()
-
-
-        // seems like first run, build does not emit dependencies
-        // expect(deps['firebase-admin']).toBeDefined()
-        // expect(deps['firebase-functions']).toBeDefined()
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()
 
         // cleanup
         await cleanFunctionAsync(functionData)              
@@ -569,17 +535,26 @@ describe('nx-firebase e2e', () => {
         expect(updatedMainTs).toContain(importAddition3)
         expect(updatedMainTs).toContain(importAddition4)
 
-        // // need to reset Nx here for e2e test to work
-        // // otherwise it bundles node modules in the main.js output too
-        // await runNxCommandAsync('reset')
-
         // build
-        // const result = await runNxCommandAsync(`build ${functionData.projectName}`)
         const result = await runTargetAsync(functionData, `build`)
         // check console output
-        expect(result.stdout).toContain(
+        expectStrings(result.stdout, [
+          `Running target build for project ${functionData.projectName}`,
+          `nx run ${buildableLibData.projectName}:build`,
+          `nx run ${subDirBuildableLibData.projectName}:build`,
+          `Compiling TypeScript files for project "${subDirBuildableLibData.projectName}"`,
+          `Compiling TypeScript files for project "${buildableLibData.projectName}"`,
+          `Done compiling TypeScript files for project "${buildableLibData.projectName}"`,
+          `Done compiling TypeScript files for project "${subDirBuildableLibData.projectName}"`,
+          `nx run ${functionData.projectName}:build`,
           `Successfully ran target build for project ${functionData.projectName}`,
-        )
+        ])
+        expectStrings(result.stderr, [
+          `${functionData.distDir}/main.js`
+        ])
+        // make sure output build is not megabytes in size, which would mean we've
+        // bundled node_modules as well
+        expect(result.stdout).not.toContain('Mb')
 
         // check dist outputs
         expect(() =>
