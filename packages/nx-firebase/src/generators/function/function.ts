@@ -1,12 +1,12 @@
 import {
   GeneratorCallback,
-  ProjectConfiguration,
   readProjectConfiguration,
   Tree,
   convertNxGenerator,
   formatFiles,
   runTasksInSerial,
   names,
+  getProjects,
 } from '@nrwl/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 
@@ -30,16 +30,16 @@ export function normalizeOptions(
     options.directory,
   )
 
-  // get/validate the firebase app project this function will be attached to
+  // get & validate the firebase app project this function will be attached to
   const firebaseApp = names(options.app).fileName
-  let firebaseAppProject: ProjectConfiguration
-  try {
-    firebaseAppProject = readProjectConfiguration(tree, firebaseApp)
-  } catch (err) {
+  const projects = getProjects(tree)
+  if (!projects.has(firebaseApp)) {
     throw new Error(
       `A firebase application project called '${firebaseApp}' was not found in this workspace.`,
     )
   }
+
+  const firebaseAppProject = readProjectConfiguration(tree, firebaseApp)
 
   // read the firebase config used by the parent app project
   const firebaseConfigName = getFirebaseConfigFromProject(
