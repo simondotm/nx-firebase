@@ -35,6 +35,17 @@ export async function safeRunNxCommandAsync(cmd: string)
   }
 }
 
+export async function runTargetAsync(projectData: ProjectData, target: string = 'build') {
+  const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
+  debugInfo(`- runTargetAsync ${target} ${projectData.projectName}`)
+  debugInfo(result.stdout)
+  debugInfo(result.stderr)
+  expectStrings(result.stdout, [
+    `Successfully ran target ${target} for project ${projectData.projectName}`
+  ])   
+  return result 
+}
+
 export async function removeProjectAsync(projectData: ProjectData) {
   const result = await safeRunNxCommandAsync(`g @nx/workspace:remove ${projectData.projectName} --forceRemove`)
   expectStrings(result.stdout, [
