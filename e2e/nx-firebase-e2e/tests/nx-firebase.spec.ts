@@ -22,7 +22,6 @@ import {
   removeProjectAsync,
   renameProjectAsync,
   runTargetAsync,
-  safeRunNxCommandAsync,
   syncGeneratorAsync,
   getMainTs,
   getLibImport,
@@ -53,14 +52,6 @@ jest.setTimeout(JEST_TIMEOUT)
 // check that libraries can be buildable and non-buildable
 // check that build includes building of dependent functions
 
-
-const appName = 'firebase'
-const functionName = 'function'
-
-const subDir = 'subdir'
-
-
-
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
 const compileComplete = 'Done compiling TypeScript files for project'
@@ -71,10 +62,6 @@ const buildableLibData = getProjectData('libs', 'buildablelib')
 const nonbuildableLibData = getProjectData('libs', 'nonbuildablelib')
 const subDirBuildableLibData = getProjectData('libs', 'buildablelib', {dir: 'subdir'})
 const subDirNonbuildableLibData = getProjectData('libs', 'nonbuildablelib', {dir:'subdir'})
-
-
-
-// const importMatch = `import * as functions from 'firebase-functions';`
 
 function expectedAppFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
@@ -261,7 +248,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should create nx-firebase app',
       async () => {
-        const appData = getProjectData('apps', uniq(appName))
+        const appData = getProjectData('apps', uniq('firebaseSetupApp'))
         await appGeneratorAsync(appData)
         // test generator output
         expect(() =>
@@ -277,7 +264,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should build nx-firebase app',
       async () => {
-        const appData = getProjectData('apps', uniq(appName))
+        const appData = getProjectData('apps', uniq('firebaseSetupApp'))
         await appGeneratorAsync(appData)
 
         // test app builder
@@ -293,7 +280,7 @@ describe('nx-firebase e2e', () => {
       it(
         'should create nx-firebase app in the specified directory',
         async () => {
-          const appData = getProjectData('apps', uniq(appName), { dir: subDir })
+          const appData = getProjectData('apps', uniq('firebaseSetupApp'), { dir: 'subdir' })
           await appGeneratorAsync(appData,
             `--directory ${appData.dir}`,
           )
@@ -315,12 +302,12 @@ describe('nx-firebase e2e', () => {
       it(
         'should add tags to the project',
         async () => {
-          const appData = getProjectData('apps', uniq(appName))
+          const appData = getProjectData('apps', uniq('firebaseSetupApp'))
           await appGeneratorAsync(appData,
             `--tags e2etag,e2ePackage`,
           )
           const project = readJson(`${appData.projectDir}/project.json`)
-          expect(project.tags).toEqual(['firebase:app', `firebase:name:${appData.name}`, 'e2etag', 'e2ePackage'])
+          expect(project.tags).toEqual(['firebase:app', `firebase:name:${appData.projectName}`, 'e2etag', 'e2ePackage'])
 
           // cleanup - app
           await cleanAppAsync(appData)  
