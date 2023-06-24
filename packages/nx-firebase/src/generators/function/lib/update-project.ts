@@ -9,10 +9,6 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
   const project = readProjectConfiguration(tree, options.projectName)
 
   const firebaseAppProject = options.firebaseAppProject
-  // const firebaseConfig = options.firebaseConfigName ?? ''
-  // const firebaseProject = options.firebaseProject
-  // ? ` --project=${options.firebaseProject}`
-  // : ''
 
   // replace the default node build target with a simplified version
   // we dont need dev/production build configurations for firebase functions since its a confined secure environment
@@ -26,12 +22,17 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
       assets: project.targets.build.options.assets,
       generatePackageJson: true,
       // these are the defaults for esbuild, but let's set them anyway
+      platform: 'node',
       bundle: true,
       thirdParty: false,
+      dependenciesFieldType: 'dependencies',
       target: 'node16',
       format: [options.format || 'esm'], // default for esbuild is esm
       esbuildOptions: {
         logLevel: 'info',
+        // ensure that esbuild does not bundle node_modules packages
+        // thirdParty false should do this, but not working in e2e
+        packages: 'external',
       },
     },
   }
