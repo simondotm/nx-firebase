@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 - [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
+  - [v1.1.0](#v110)
   - [v1.1.0-beta.0](#v110-beta0)
   - [v1.0.0](#v100)
   - [v0.13.0-beta.1](#v0130-beta1)
@@ -15,6 +16,10 @@ All notable changes to this project will be documented in this file.
   - [v0.2.3](#v023)
   - [v0.2.2 - Initial Release](#v022---initial-release)
 
+
+## v1.1.0
+
+No changes from beta.
 
 ## v1.1.0-beta.0
 
