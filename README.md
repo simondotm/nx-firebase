@@ -35,16 +35,21 @@ Additionally:
 - Auto generates default `firebase.json` configurations, rules and indexes for each Firebase app
 - Only very lightly opinionated about your Firebase configurations and workspace layouts; you can just use the Firebase CLI as usual
 - Keeps all of your firebase rules and indexes within your app folder, to keep your workspace root free of clutter
+- Use the plugin `sync` generator to easily manage firebase workspaces & configurations
 
 # User Guide
 
 - **[Quick Start](docs/quick-start.md)**
-
-**Nx Firebase**
+- [Migrating from plugin v1.x to v2.x](docs/nx-firebase-v2-migration.md)
+  
+**Nx Firebase Generators**
 
 - [Firebase Applications](docs/nx-firebase-applications.md)
 - [Firebase Functions](docs/nx-firebase-functions.md)
 - [Firebase Sync](docs/nx-firebase-sync.md)
+
+**Nx Firebase**
+
 - [Firebase Hosting](docs/nx-firebase-hosting.md)
 - [Firebase Emulators](docs/nx-firebase-emulators.md)
 - [Firebase Databases](docs/nx-firebase-databases.md)

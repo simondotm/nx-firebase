@@ -5,6 +5,9 @@
   - [Functions \& Nx-Firebase Applications](#functions--nx-firebase-applications)
   - [Functions \& Firebase Config](#functions--firebase-config)
   - [Functions \& ESBuild](#functions--esbuild)
+    - [Using ES Modules output](#using-es-modules-output)
+    - [Using CommonJS output](#using-commonjs-output)
+    - [Why ESBuild?](#why-esbuild)
   - [Nx-Firebase Workspace Layout](#nx-firebase-workspace-layout)
   - [Node Environments / Runtimes for Firebase Functions](#node-environments--runtimes-for-firebase-functions)
 
@@ -14,7 +17,7 @@ Since v2.x of the plugin, Nx-Firebase functions are now generated as individual 
 
 Generate a new Firebase function using:
 
-**`nx g @simondotm/nx-firebase:function <function-project-name> --app=<app-project-name> [--directory=dir]`**
+**`nx g @simondotm/nx-firebase:function <function-project-name> --app=<app-project-name> [--directory=dir] [--format=<'cjs'|'esm'>]`**
 
 Firebase function application projects are buildable node Typescript applications, which are compiled and bundled using `esbuild`.
 
@@ -57,7 +60,9 @@ When new Firebase function applications are generated in the workspace:
 * Import paths using TS aliases to `@nx/js` libraries will be resolved as internal imports. 
 * All external imports from `node_modules` will be added to the `package.json` as dependencies, since there is no good reason to bundle `node_modules` in node applications.
 
-`esbuild` is also configured to always output bundled code as `esm` format modules:
+### Using ES Modules output
+
+`esbuild` is also configured by default to always output bundled code as `esm` format modules:
 
 * This ensures tree-shaking is activated in the bundling process
 * Firebase functions with Node 16 or higher runtime all support ES modules
@@ -65,15 +70,20 @@ When new Firebase function applications are generated in the workspace:
 * We are only specifying that the _output_ bundle is `esm` format. The input source code sent to `esbuild` is Typescript code, which effectively uses ES6 module syntax anyway
 * Therefore, it is not necessary to change your workspace to use `esm` format modules to use this plugin since `esbuild` builds from Typescript _source code_, not compiled JS.
 
+### Using CommonJS output
 
-You may need to refactor your code if you use `require` in your function code, OR you can modify the function `project.json` to set esbuild `format` to `['cjs']`. This may limit tree-shaking optimizations however.
+If you still use Node `require()` in your Typescript function code, the default `esm` output setting for `esbuild` may not work. Your options are:
+1. Refactor your code to use `import` instead of `require`
+2. Modify the function `project.json` to set esbuild `format` to `['cjs']`
+3. Generate your function applications with the `--format=cjs` option
   
+Note that using `cjs` output may prevent tree-shaking optimizations.
 
 
 
+### Why ESBuild?
 
-
-
+While Webpack and Rollup are viable options for bundling node applications, `esbuild` is designed for node, it is fast, and it works very simply out of the box with Nx without any need for additional configuration files.
 
 
 ## Nx-Firebase Workspace Layout
