@@ -308,12 +308,11 @@ describe('function generator', () => {
       // })
 
       describe('function option --format', () => {
-        // --format no longer an option
         it('should generate function configured for --format=esm', async () => {
           await functionGenerator(tree, {
             name: 'myFirebaseFunction',
             app: 'my-firebase-app',
-            // format: 'esm',
+            format: 'esm',
           })
           const project = readProjectConfiguration(tree, 'my-firebase-function')
           expect(project.targets.build.options.format).toEqual(['esm'])
@@ -333,29 +332,29 @@ describe('function generator', () => {
           expect(tsConfig.compilerOptions.module).toEqual('es2020')
         })
 
-        // it('should generate function configured for --format=commonjs output', async () => {
-        //   await functionGenerator(tree, {
-        //     name: 'myFirebaseFunction',
-        //     app: 'my-firebase-app',
-        //     format: 'cjs',
-        //   })
-        //   const project = readProjectConfiguration(tree, 'my-firebase-function')
-        //   expect(project.targets.build.options.format).toEqual(['cjs'])
+        it('should generate function configured for --format=commonjs output', async () => {
+          await functionGenerator(tree, {
+            name: 'myFirebaseFunction',
+            app: 'my-firebase-app',
+            format: 'cjs',
+          })
+          const project = readProjectConfiguration(tree, 'my-firebase-function')
+          expect(project.targets.build.options.format).toEqual(['cjs'])
 
-        //   // check the package has the correct module type
-        //   const packageJson = readJson(
-        //     tree,
-        //     joinPathFragments(project.root, 'package.json'),
-        //   )
-        //   expect(packageJson.type).toEqual('commonjs')
+          // check the package has the correct module type
+          const packageJson = readJson(
+            tree,
+            joinPathFragments(project.root, 'package.json'),
+          )
+          expect(packageJson.type).toEqual('commonjs')
 
-        //   // check the tsconfig
-        //   const tsConfig = readJson(
-        //     tree,
-        //     joinPathFragments(project.root, 'tsconfig.app.json'),
-        //   )
-        //   expect(tsConfig.compilerOptions.module).toEqual('commonjs')
-        // })
+          // check the tsconfig
+          const tsConfig = readJson(
+            tree,
+            joinPathFragments(project.root, 'tsconfig.app.json'),
+          )
+          expect(tsConfig.compilerOptions.module).toEqual('commonjs')
+        })
       })
       describe('function option --runTime', () => {
         it('should generate function with correct node runtime', async () => {
@@ -381,4 +380,5 @@ describe('function generator', () => {
       })
     })
   })
+  // check implicitDependencies
 })
