@@ -19,16 +19,23 @@ All notable changes to this project will be documented in this file.
 
 ## v2.0.0-beta.0
 
-* Plugin completely rewritten
+Initial beta of plugin version 2.0.
+
+Users of earlier plugin versions must read [here for plugin v1 -> v2 migration instructions](docs/nx-firebase-v2-migration.md)
+
+> **Please note that legacy v1 versions of the plugin are no longer supported from this point on, so only take this update if you are prepared to migrate your workspace and Firebase projects**
+
+**Changes**
+
+* Plugin is completely rewritten 
 * Added `@simondotm/nx-firebase:function` generator
 * Firebase functions are now separate application nx projects
 * Now uses `esbuild` to compile & bundle firebase functions
 * Firebase functions no longer require Nx libraries to be buildable
 * Added `@simondotm/nx-firebase:sync` generator to manage Firebase workspaces
 * Minimum Nx version is now 16.1.1
-* Watch mode of all code is now fully supported when running Firebase emulator
+* Watch mode build of function code & libraries is now fully supported when running Firebase emulator
 
-See [here for v1 -> v2 migration instructions](docs/nx-firebase-v2-migration.md)
 
 
 ## v1.1.0
