@@ -404,9 +404,6 @@ describe('nx-firebase e2e', () => {
         // make sure it hasnt bundled node_modules, indicator is that bundle size is megabytes in size
         expect(result.stderr).not.toContain(`Mb`)        
 
-
-
-
         // cleanup
         await cleanFunctionAsync(functionData)              
         await cleanAppAsync(appData)         
@@ -433,6 +430,7 @@ describe('nx-firebase e2e', () => {
         // bundled node_modules as well
         expect(result.stdout).not.toContain('Mb')
 
+
         const distPackageFile = `${functionData.distDir}/package.json`
         expect(exists(distPackageFile))
 
@@ -441,7 +439,6 @@ describe('nx-firebase e2e', () => {
         expect(deps).toBeDefined()
         expect(deps['firebase-admin']).toBeDefined()
         expect(deps['firebase-functions']).toBeDefined()
-        expect(distPackage['type']).toEqual('module')
 
         // cleanup
         await cleanFunctionAsync(functionData)              

@@ -50,8 +50,7 @@ export function normalizeOptions(
   return {
     ...options,
     runTime: options.runTime || '16',
-    // always esm format
-    format: 'esm', // options.format || 'esm',
+    format: options.format || 'esm',
     projectRoot,
     projectName,
     firebaseConfigName,
