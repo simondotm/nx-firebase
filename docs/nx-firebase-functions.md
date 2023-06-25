@@ -1,102 +1,134 @@
 # Firebase Functions
 
 - [Firebase Functions](#firebase-functions)
-  - [Nx-Firebase Applications Overview](#nx-firebase-applications-overview)
-  - [Nx-Firebase Application Files](#nx-firebase-application-files)
-  - [Nx-Firebase Application Naming](#nx-firebase-application-naming)
+  - [Nx-Firebase Functions](#nx-firebase-functions)
+  - [Functions \& Nx-Firebase Applications](#functions--nx-firebase-applications)
+  - [Functions \& Firebase Config](#functions--firebase-config)
+  - [Functions \& ESBuild](#functions--esbuild)
+    - [Using ES Modules output](#using-es-modules-output)
+    - [Using CommonJS output](#using-commonjs-output)
+    - [Why ESBuild?](#why-esbuild)
+  - [Nx-Firebase Workspace Layout](#nx-firebase-workspace-layout)
   - [Node Environments / Runtimes for Firebase Functions](#node-environments--runtimes-for-firebase-functions)
-  - [Typescript Configurations for Firebase Functions](#typescript-configurations-for-firebase-functions)
-  - [ES Modules](#es-modules)
 
-## Nx-Firebase Applications Overview
+## Nx-Firebase Functions
 
-An Nx-Firebase app is essentially a Firebase _functions_ directory (along with the few other configuration files as mentioned above).
+Since v2.x of the plugin, Nx-Firebase functions are now generated as individual applications, separately to the Nx-Firebase application.
 
-The main difference is that there isn't a directory called `functions` which you may be used to from projects setup by the Firebase CLI; with Nx-Firebase your app directory IS your functions folder.
+Generate a new Firebase function using:
 
-See the [quickstart guide for functions](quick-start.md#create-firebase-application) for how to generate a functions application.
+**`nx g @simondotm/nx-firebase:function <function-project-name> --app=<app-project-name> [--directory=dir] [--format=<'cjs'|'esm'>]`**
 
-## Nx-Firebase Application Files
+Firebase function application projects are buildable node Typescript applications, which are compiled and bundled using `esbuild`.
 
-Inside the new `apps/appname` directory you will find the following functions-specific files:
+The entry point module is `src/main.ts`.
 
-- `package.json` - The stub package file used when deploying firebase functions
-- `src` - Your Firebase functions code goes in here. You are free to structure your code however you like in this directory
-- `tsconfig.json` and `tsconfig.app.json` as usual
+`esbuild` will compile & bundle the input function Typescript source code to:
 
-## Nx-Firebase Application Naming
+* `dist/apps/<function-project-name>/main.js` - The bundled function code, in a single ESM format output file
+* `dist/apps/<function-project-name>/package.json` - The ESM format package file for firebase CLI to process and deploy
 
-You may find it convenient/familiar to create your Nx-Firebase application simply with `functions` as it's app name eg.:
 
-- `nx g @simondotm/nx-firebase:app functions`.
+## Functions & Nx-Firebase Applications
 
-If you have multiple Firebase projects in your workspace, the Nx-Firebase application generator supports the `--directory` option, so you may also find it convenient to organise your workspace as follows:
+The Nx-firebase plugin requires that Firebase function projects must always be a dependency of a single Firebase application project:
 
-- `apps/<projectname>/...<projectapps>`
+*  This approach allows for multiple firebase projects in a single Nx workspace
+*  It ensures all functions can be [managed by the nx-firebase plugin](./nx-firebase-sync.md)
+*  Function application projects are added as `implicitDependencies` to the parent Firebase application, which ensures we can test, lint, build & deploy all functions from the top level Firebase application
+*  Functions share the same Firebase `--config` CLI option as the parent Firebase Application
+*  Functions share the same Firebase `--project` CLI option as the parent Firebase Application
+*  You can create as many Firebase function projects as you like
+*  Firebase function apps can export either just one or multiple firebase functions
+*  When running the Firebase emulator using `serve`, **all** firebase function applications are built using `watch` mode, so local development is much more convenient
 
-And generate your app as follows:
 
-- `nx g @simondotm/nx-firebase:app functions --directory projectname`
+## Functions & Firebase Config
 
-So your workspace layout might look like this:
+When new Firebase function applications are generated in the workspace:
+
+* They are automatically added to the `functions[]` declaration in the project's `firebase.json` config file using the firebase CLI's `codebase` feature
+* The `codebase` name assigned to the function in the config is the function applications project name. 
+* When using firebase `deploy`, the CLI will deploy all `codebase`'s declared in the firebase config file
+
+
+
+
+## Functions & ESBuild
+
+`esbuild` is configured in the function's `project.json` to only bundle 'internal' source local to the workspace:
+* Import paths using TS aliases to `@nx/js` libraries will be resolved as internal imports. 
+* All external imports from `node_modules` will be added to the `package.json` as dependencies, since there is no good reason to bundle `node_modules` in node applications.
+
+### Using ES Modules output
+
+`esbuild` is also configured by default to always output bundled code as `esm` format modules:
+
+* This ensures tree-shaking is activated in the bundling process
+* Firebase functions with Node 16 or higher runtime all support ES modules
+* The bundled output code in `dist` is _much_ cleaner to review
+* We are only specifying that the _output_ bundle is `esm` format. The input source code sent to `esbuild` is Typescript code, which effectively uses ES6 module syntax anyway
+* Therefore, it is not necessary to change your workspace to use `esm` format modules to use this plugin since `esbuild` builds from Typescript _source code_, not compiled JS.
+
+### Using CommonJS output
+
+If you still use Node `require()` in your Typescript function code, the default `esm` output setting for `esbuild` may not work. Your options are:
+1. Refactor your code to use `import` instead of `require`
+2. Modify the function `project.json` to set esbuild `format` to `['cjs']`
+3. Generate your function applications with the `--format=cjs` option
+  
+Note that using `cjs` output may prevent tree-shaking optimizations.
+
+
+
+### Why ESBuild?
+
+While Webpack and Rollup are viable options for bundling node applications, `esbuild` is designed for node, it is fast, and it works very simply out of the box with Nx without any need for additional configuration files.
+
+
+## Nx-Firebase Workspace Layout
+
+Firebase applications and functions can be generated in whichever directories you like.
+
+While there are plenty of ways to organise your workspace layout, one suggestion is:
 
 ```
 /apps
     /project1
+        /firebase
         /functions
+          /function1
+          /function2
         /web
             /site1-app
             /site2-app
         /mobile
             /app
     /project2
+        /firebase
         /functions
         /web
         ...
+firebase.rc
+firebase.json
+firebase.project2.json
 ```
 
 ## Node Environments / Runtimes for Firebase Functions
 
 Firebase Functions are deployed by the Firebase CLI to specific Nodejs runtime environments.
 
-The required runtime must be set, and can be specified in two places:
-
-In the `functions/package.json` as a number (eg. `14`, `16`, `18` etc.):
+The required runtime is automatically set by the nx-firebase plugin function generator, but can be manually changedt in the `firebase.json` configuration as a definition (eg. `nodejs16`, `nodejs18` etc.):
 
 ```
-  "engines": {
-    "node": "16"
-  },
+  "functions": [
+    {
+      "codebase": "firebase-project1",
+      "runtime": "nodejs16",
+      ...
+
+    }    
+  ],
 ```
 
-Or per function, in the `firebase.json` configuration as a definition (eg. `nodejs14`, `nodejs16`, `nodejs18` etc.):
-
-```
-  "functions": {
-    "runtime": "nodejs16",
-    ...
-  },
-```
-
-The runtimes should ideally be the same for all functions in a project.
-
-## Typescript Configurations for Firebase Functions
-
-Depending on [your selected node runtime](https://stackoverflow.com/questions/59787574/typescript-tsconfig-settings-for-node-js-12/59787575#59787575), your Typescript `tsconfig.json` files for functions applications and libraries should set an appropriate ES version, eg.:
-
-```
-{
-  "compilerOptions": {
-    ...
-    "target": "es2021"
-  }
-}
-```
-
-> **Note:** _Firebase functions `tsconfig.app.json` is by default set to target `es2021` which is the maximum ES version for Node 16 runtime engine. This override exists in case the root `tsconfig.base.json` sets an ES target that is incompatible with Firebase Functions Node environment. If you are using a different Node engine, you can change this target manually._
-
-See [here](firebase-versions.md#firebase-node-versions) for more information about firebase node versions.
-
-## ES Modules
-
-See [here](firebase-versions.md#es-modules-support) for more information about firebase support for ES modules with functions.
+Runtimes are recommended to be set to the same value for all functions in a project.

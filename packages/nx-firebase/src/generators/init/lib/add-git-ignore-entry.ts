@@ -11,6 +11,7 @@ firebase-debug.log
 firestore-debug.log
 pubsub-debug.log
 ui-debug.log
+firebase-export*
 
 `
 

@@ -1,128 +1,95 @@
-// import { readJsonFile, writeJsonFile } from '@nx/devkit'
 import {
   checkFilesExist,
   ensureNxProject,
-  readFile,
   readJson,
   runNxCommandAsync,
-  tmpProjPath,
   uniq,
   updateFile,
+  exists,
+  readFile,
 } from '@nx/plugin/testing'
 
+import {
+  ProjectData,
+  appGeneratorAsync,
+  cleanAppAsync,
+  cleanFunctionAsync,
+  testDebug,
+  expectStrings,
+  functionGeneratorAsync,
+  getProjectData,
+  libGeneratorAsync,
+  removeProjectAsync,
+  renameProjectAsync,
+  runTargetAsync,
+  syncGeneratorAsync,
+  getMainTs,
+  getLibImport,
+  addImport,
+  safeRunNxCommandAsync,
+} from '../test-utils'
+
+
 const JEST_TIMEOUT = 120000
+jest.setTimeout(JEST_TIMEOUT)
 
-// NX14/15 ONLY
-// const USE_DAEMON = false
-// const daemonStatus = USE_DAEMON
-//   ? 'Nx Daemon is currently running'
-//   : 'Nx Daemon is not running'
+// NOTE: If one e2e test fails, cleanup fails, so all subsequent tests will fail.
 
-const appName = 'functions'
+// DONE
+// not gonna test watch, serve, emulate, killports, getconfig
+// check that deploy runs the application deploy
+// check that lint works for functions & apps
+// check that test works for functions & apps
+// check that serve works for apps
+// remove all tests related to old plugin
+// dont check anything that the generator tests already test, this is just e2e
+// check all options
+// check dependent packages are installed
+// check that functions are added
+// check that functions build
+// check all build artefacts are correct
+// check that libraries can be buildable and non-buildable
+// check that build includes building of dependent functions
 
-const subDir = 'subdir'
-
-const appGeneratorCommand = 'generate @simondotm/nx-firebase:app'
-const libGeneratorCommand = 'generate @nx/js:lib'
-const npmScope = '@proj'
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
 const compileComplete = 'Done compiling TypeScript files for project'
 const buildSuccess = 'Successfully ran target build for project'
 
-function getAppDirectories(appName: string, appDir?: string) {
-  const appPrefix = appDir ? `${appDir}-` : ''
-  const appProjectName = `${appPrefix}${appName}`
-  const appSrcDir = appDir ? `${appDir}/` : ''
-  const distDir = `dist/apps/${appSrcDir}${appName}`
-  return {
-    name: appName, // name passed to generator
-    dir: appDir, // directory passed to generator
-    projectName: appProjectName, // project name
-    projectDir: `apps/${appSrcDir}${appName}`,
-    srcDir: `apps/${appSrcDir}${appName}/src`,
-    distDir: distDir,
-    functionLibsDir: `libs`, // sub folder in distDir where the functions lib deps are copied
-    indexTsPath: `apps/${appSrcDir}${appName}/src/index.ts`,
-  }
-}
+// libraries persist across all e2e tests
+const buildableLibData = getProjectData('libs', 'buildablelib')
+const nonbuildableLibData = getProjectData('libs', 'nonbuildablelib')
+const subDirBuildableLibData = getProjectData('libs', 'buildablelib', {dir: 'subdir'})
+const subDirNonbuildableLibData = getProjectData('libs', 'nonbuildablelib', {dir:'subdir'})
 
-function getLibDirectories(libName: string, libDir?: string) {
-  const libPrefix = libDir ? `${libDir}-` : ''
-  const libProjectName = `${libPrefix}${libName}`
-  const libSrcDir = libDir ? `${libDir}/` : ''
-  return {
-    name: libName,
-    dir: libDir,
-    projectName: libProjectName,
-    projectDir: `libs/${libSrcDir}${libName}`,
-    srcDir: `libs/${libSrcDir}${libName}/src`,
-    npmScope: `${npmScope}/${libProjectName}`,
-    functionName: libDir
-      ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
-      : libName,
-  }
-}
-
-const appData = getAppDirectories(appName)
-const buildableLibData = getLibDirectories('buildablelib')
-const subDirBuildableLibData = getLibDirectories('buildablelib', 'subdir')
-const nonBuildableLibData = getLibDirectories('nonbuildablelib')
-const incompatibleLibData = getLibDirectories('incompatiblelib', 'subdir')
-
-//const indexTs = `apps/${appName}/src/index.ts`
-let indexTsFile
-const importMatch = `import * as functions from 'firebase-functions';`
-
-type AppDirectoryData = typeof appData
-type LibDirectoryData = typeof buildableLibData
-
-function expectedAppFiles(directoryData: AppDirectoryData) {
-  const projectPath = directoryData.projectDir
+function expectedAppFiles(projectData: ProjectData) {
+  const projectPath = projectData.projectDir
   return [
-    `${projectPath}/src/index.ts`,
     `${projectPath}/public/index.html`,
-    `${projectPath}/package.json`,
-    `${projectPath}/readme.md`,
     `${projectPath}/database.rules.json`,
     `${projectPath}/firestore.indexes.json`,
     `${projectPath}/firestore.rules`,
+    `${projectPath}/project.json`,
+    `${projectPath}/readme.md`,
     `${projectPath}/storage.rules`,
-    `firebase.json`,
+    `${projectData.configName}`,
     `.firebaserc`,
   ]
 }
 
-function expectedConfigFiles(
-  directoryData: AppDirectoryData,
-  firstProject: boolean = false,
-) {
-  return firstProject
-    ? ['firebase.json']
-    : [`firebase.${directoryData.projectName}.json`]
-}
-
-/**
- * Replace content in the application `index.ts` that matches `importMatch` with `importAddition`
- * @param match - string to match in the index.ts
- * @param addition - string to add after the matched line in the index.ts
- */
-function addContentToIndexTs(
-  indexTsPath: string,
-  match: string,
-  addition: string,
-) {
-  updateFile(indexTsPath, (content: string) => {
-    const replaced = content.replace(match, `${match}\n${addition}`)
-    return replaced
-  })
-}
-
-/**
- * Restore the application index.ts to initial state
- */
-function resetIndexTs(indexTsPath: string, content: string) {
-  updateFile(indexTsPath, content)
+function expectedFunctionFiles(projectData: ProjectData) {
+  const projectPath = projectData.projectDir
+  return [
+    `${projectPath}/src/main.ts`,
+    `${projectPath}/.eslintrc.json`,
+    `${projectPath}/jest.config.ts`,
+    `${projectPath}/package.json`,
+    `${projectPath}/project.json`,
+    `${projectPath}/readme.md`,
+    `${projectPath}/tsconfig.app.json`,
+    `${projectPath}/tsconfig.json`,
+    `${projectPath}/tsconfig.spec.json`,
+  ]
 }
 
 describe('nx-firebase e2e', () => {
@@ -133,205 +100,78 @@ describe('nx-firebase e2e', () => {
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
   beforeAll(async () => {
-    ensureNxProject(pluginName, pluginPath)
-
-    // NX14/15 ONLY
-    // if (USE_DAEMON) {
-    //   const result = await runNxCommandAsync('daemon --start')
-    //   expect(result.stdout).toContain(
-    //     'Daemon Server - Started in a background process',
-    //   )
-    // } else {
-    //   const nxJsonFile = tmpProjPath('nx.json')
-    //   const nxJson = readJsonFile(nxJsonFile)
-    //   // nxJson['pluginsConfig'] = {
-    //   //   '@nx/js': {
-    //   //     analyzeSourceFiles: true,
-    //   //   },
-    //   // }
-    //   // force local e2e tests to use same setup as CI environment
-    //   nxJson.tasksRunnerOptions.default.options.useDaemonProcess = false
-    //   writeJsonFile(nxJsonFile, nxJson)
-    // }
-
-    // await runNxCommandAsync('reset')
+    ensureNxProject(pluginName, pluginPath)    
   }, JEST_TIMEOUT)
 
   afterAll(() => {
     // `nx reset` kills the daemon, and performs
     // some work which can help clean up e2e leftovers
-    // runNxCommandAsync('reset')
+    runNxCommandAsync('reset')
   })
 
-  it(
-    'should create workspace without firebase dependencies',
-    async () => {
-      // test that generator adds dependencies to workspace package.json
-      // should not be initially set
-      const packageJson = readJson(`package.json`)
-      expect(packageJson.dependencies['firebase']).toBeUndefined()
-      expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
-      expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
-      expect(
-        packageJson.devDependencies['firebase-functions-test'],
-      ).toBeUndefined()
-      expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
-    },
-    JEST_TIMEOUT,
-  )
 
-  it(
-    'should run nx-firebase init',
-    async () => {
-      await runNxCommandAsync(`generate @simondotm/nx-firebase:init`)
-      // test that generator adds dependencies to workspace package.json
-      const packageJson = readJson(`package.json`)
-      expect(packageJson.dependencies['firebase']).toBeDefined()
-      expect(packageJson.dependencies['firebase-admin']).toBeDefined()
-      expect(packageJson.dependencies['firebase-functions']).toBeDefined()
-      expect(
-        packageJson.devDependencies['firebase-functions-test'],
-      ).toBeDefined()
-      expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
-    },
-    JEST_TIMEOUT,
-  )
 
-  // NX14/15 ONLY
-  // it(
-  //   'should have correct nx daemon status',
-  //   async () => {
-  //     const result = await runNxCommandAsync('daemon')
-  //     expect(result.stdout).toContain(daemonStatus)
-  //   },
-  //   JEST_TIMEOUT,
-  // )
 
-  it(
-    'should create nx-firebase app',
-    async () => {
-      const projectData = appData
-      await runNxCommandAsync(`${appGeneratorCommand} ${projectData.name}`)
-      // test generator output
-      expect(() =>
-        checkFilesExist(
-          ...expectedAppFiles(projectData).concat(
-            expectedConfigFiles(projectData, true),
-          ),
-        ),
-      ).not.toThrow()
+  describe('workspace setup', () => {
 
-      // stash a copy of the default index.ts
-      indexTsFile = readFile(projectData.indexTsPath)
-    },
-    JEST_TIMEOUT,
-  )
-
-  // NX14/15 ONLY
-  // it(
-  //   'should have correct nx daemon status',
-  //   async () => {
-  //     const result = await runNxCommandAsync('daemon')
-  //     expect(result.stdout).toContain(daemonStatus)
-  //   },
-  //   JEST_TIMEOUT,
-  // )
-
-  it(
-    'should build nx-firebase app',
-    async () => {
-      // test build executor
-      const result = await runNxCommandAsync(`build ${appData.projectName}`)
-      expect(result.stdout).toContain(compileComplete)
-      expect(result.stdout).toContain(`${buildSuccess} ${appData.projectName}`)
-      expect(result.stdout).toContain('Updated firebase functions package.json')
-
-      const distDir = appData.distDir
-      expect(() =>
-        checkFilesExist(
-          `${distDir}/package.json`,
-          // `${distDir}/readme.md`, // we no longer copy .md files as a default asset
-          `${distDir}/src/index.js`,
-        ),
-      ).not.toThrow()
-    },
-    JEST_TIMEOUT,
-  )
-
-  // NX14/15 ONLY
-  // it(
-  //   'should have correct nx daemon status',
-  //   async () => {
-  //     const result = await runNxCommandAsync('daemon')
-  //     expect(result.stdout).toContain(daemonStatus)
-  //   },
-  //   JEST_TIMEOUT,
-  // )
-
-  // SM: DOESNT WORK IN E2E FOR SOME REASON.
-  // it(
-  //   'should add firebase dependencies to output nx-firebase app',
-  //   async () => {
-  //     const distPackageFile = `${appData.distDir}/package.json`
-  //     const distPackage = readJson(distPackageFile)
-  //     const deps = distPackage['dependencies']
-  //     expect(deps).toBeDefined()
-  //     expect(deps['firebase-admin']).toBeDefined()
-  //     expect(deps['firebase-functions']).toBeDefined()
-  //   },
-  //   JEST_TIMEOUT,
-  // )
-
-  describe('--directory', () => {
     it(
-      'should create & build nx-firebase app in the specified directory',
+      'should create workspace without firebase dependencies',
       async () => {
-        const projectData = getAppDirectories(uniq(appName), subDir)
-        await runNxCommandAsync(
-          `${appGeneratorCommand} ${projectData.name} --directory ${projectData.dir}`,
-        )
-        expect(() =>
-          checkFilesExist(
-            ...expectedAppFiles(projectData).concat(
-              expectedConfigFiles(projectData),
-            ),
-          ),
-        ).not.toThrow()
+        // test that generator adds dependencies to workspace package.json
+        // should not be initially set
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.dependencies['firebase']).toBeUndefined()
+        expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
+        expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
+        expect(
+          packageJson.devDependencies['firebase-functions-test'],
+        ).toBeUndefined()
+        expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
+    })
 
-        // NX14/15 ONLY
-        // const project = readJson(`${projectData.projectDir}/project.json`)
-        // expect(project.name).toEqual(`${projectData.projectName}`)
-      },
-      JEST_TIMEOUT,
-    )
-  })
-
-  describe('--tags', () => {
     it(
-      'should add tags to the project',
+      'should create workspace without nx dependencies',
       async () => {
-        const projectData = getAppDirectories(uniq(appName))
-        //ensureNxProject(pluginName, pluginPath)
-        await runNxCommandAsync(
-          `${appGeneratorCommand} ${projectData.name} --tags e2etag,e2ePackage`,
-        )
-        const project = readJson(`${projectData.projectDir}/project.json`)
-        expect(project.tags).toEqual(['e2etag', 'e2ePackage'])
-      },
-      JEST_TIMEOUT,
-    )
+        // test that generator adds dependencies to workspace package.json
+        // should not be initially set
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.devDependencies['@nx/node']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/esbuild']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/linter']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/js']).toBeUndefined()
+        expect(packageJson.devDependencies['@nx/jest']).toBeUndefined()
+    })
+
+    it(
+      'should run nx-firebase init',
+      async () => {
+        await safeRunNxCommandAsync(`generate @simondotm/nx-firebase:init`)
+        // test that generator adds dependencies to workspace package.json
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.dependencies['firebase']).toBeDefined()
+        expect(packageJson.dependencies['firebase-admin']).toBeDefined()
+        expect(packageJson.dependencies['firebase-functions']).toBeDefined()
+        expect(
+          packageJson.devDependencies['firebase-functions-test'],
+        ).toBeDefined()
+        expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/node']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/esbuild']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/linter']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/js']).toBeDefined()
+        expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
+    })
   })
+
 
   //--------------------------------------------------------------------------------------------------
-  // Create Libraries for e2e tests
+  // Create Libraries for e2e function generator tests
   //--------------------------------------------------------------------------------------------------
-  describe('libraries', () => {
+  describe('setup libraries', () => {
     it(
       'should create buildable typescript library',
       async () => {
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${buildableLibData.name} --buildable --importPath="${buildableLibData.npmScope}"`,
-        )
+        await libGeneratorAsync(buildableLibData, `--buildable --importPath="${buildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
@@ -345,16 +185,12 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).toContain(
           `${buildSuccess} ${buildableLibData.projectName}`,
         )
-      },
-      JEST_TIMEOUT,
-    )
+    })
 
     it(
       'should create buildable typescript library in subdir',
       async () => {
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${subDirBuildableLibData.name} --buildable --directory ${subDirBuildableLibData.dir} --importPath="${subDirBuildableLibData.npmScope}"`,
-        )
+        await libGeneratorAsync(subDirBuildableLibData, `--directory=${subDirBuildableLibData.dir} --buildable --importPath="${subDirBuildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
@@ -368,299 +204,861 @@ describe('nx-firebase e2e', () => {
         expect(result.stdout).toContain(
           `${buildSuccess} ${subDirBuildableLibData.projectName}`,
         )
-      },
-      JEST_TIMEOUT,
-    )
+    })
 
     it(
       'should create non-buildable typescript library',
       async () => {
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${nonBuildableLibData.name} --buildable=false --importPath="${nonBuildableLibData.npmScope}"`,
-        )
+        await libGeneratorAsync(nonbuildableLibData, `--buildable=false --importPath="${nonbuildableLibData.npmScope}"`)
 
         expect(() =>
-          checkFilesExist(`${nonBuildableLibData.projectDir}/package.json`),
+          checkFilesExist(`${nonbuildableLibData.projectDir}/package.json`),
         ).toThrow()
 
         const project = readJson(
-          `${nonBuildableLibData.projectDir}/project.json`,
+          `${nonbuildableLibData.projectDir}/project.json`,
         )
         expect(project.targets.build).not.toBeDefined()
-      },
-      JEST_TIMEOUT,
-    )
+    })
 
     it(
-      'should create incompatible typescript library',
+      'should create non-buildable typescript library in subdir',
       async () => {
-        await runNxCommandAsync(
-          `${libGeneratorCommand} ${incompatibleLibData.name} --directory=${incompatibleLibData.dir}`,
-        )
+        // const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
+        await libGeneratorAsync(subDirNonbuildableLibData, `--directory=${subDirNonbuildableLibData.dir} --buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`)
 
         expect(() =>
-          checkFilesExist(`${incompatibleLibData.projectDir}/package.json`),
+          checkFilesExist(`${subDirNonbuildableLibData.projectDir}/package.json`),
+        ).toThrow()
+
+        const project = readJson(
+          `${subDirNonbuildableLibData.projectDir}/project.json`,
+        )
+        expect(project.targets.build).not.toBeDefined()
+    })
+  })  
+  
+  //--------------------------------------------------------------------------------------------------
+  // Application generator e2e tests
+  //--------------------------------------------------------------------------------------------------
+
+  describe('nx-firebase application', () => {
+
+    it(
+      'should create nx-firebase app',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseSetupApp'))
+        await appGeneratorAsync(appData)
+        // test generator output
+        expect(() =>
+          checkFilesExist(
+            ...expectedAppFiles(appData),
+          ),
         ).not.toThrow()
 
-        const result = await runNxCommandAsync(
-          `build ${incompatibleLibData.projectName}`,
-        )
-        expect(result.stdout).toContain(compileComplete)
+        // cleanup - app
+        await cleanAppAsync(appData)
+    })
+
+    it(
+      'should build nx-firebase app',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseSetupApp'))
+        await appGeneratorAsync(appData)
+
+        // test app builder
+        // at this point there are no functions so it doe nothing
+        const result = await runNxCommandAsync(`build ${appData.projectName}`)
+        expect(result.stdout).toContain("Build succeeded.")
+
+        // cleanup - app
+        await cleanAppAsync(appData)        
+    })
+
+    describe('--directory', () => {
+      it(
+        'should create nx-firebase app in the specified directory',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSetupApp'), { dir: 'subdir' })
+          await appGeneratorAsync(appData,
+            `--directory ${appData.dir}`,
+          )
+          expect(() =>
+            checkFilesExist(
+              ...expectedAppFiles(appData),
+            ),
+          ).not.toThrow()
+
+          const project = readJson(`${appData.projectDir}/project.json`)
+          expect(project.name).toEqual(`${appData.projectName}`)
+
+          // cleanup - app
+          await cleanAppAsync(appData)                
+      })
+    })
+
+    describe('--tags', () => {
+      it(
+        'should add tags to the project',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSetupApp'))
+          await appGeneratorAsync(appData,
+            `--tags e2etag,e2ePackage`,
+          )
+          const project = readJson(`${appData.projectDir}/project.json`)
+          expect(project.tags).toEqual(['firebase:app', `firebase:name:${appData.projectName}`, 'e2etag', 'e2ePackage'])
+
+          // cleanup - app
+          await cleanAppAsync(appData)  
+        }
+        
+      )
+    })
+  })
+  
+  //--------------------------------------------------------------------------------------------------
+  // Function generator e2e tests
+  //--------------------------------------------------------------------------------------------------
+
+  describe('nx-firebase function', () => {
+    it(
+      'should not create nx-firebase function without --app',
+      async () => {
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        const result = await functionGeneratorAsync(functionData)
+        expect(result.stdout).toContain("Required property 'app' is missing")
+        // no cleanup required  
+    })
+
+    it(
+      'should not create nx-firebase function with an invalid --app',
+      async () => {
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        const result = await functionGeneratorAsync(functionData, '--app badapple')
+        expect(result.stdout).toContain("A firebase application project called 'badapple' was not found in this workspace.")
+        // no cleanup required  
+    })    
+
+    it(
+      'should create nx-firebase function',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseApp'))
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        // test generator output
+        expect(() =>
+          checkFilesExist(
+            ...expectedFunctionFiles(functionData)
+          ),
+        ).not.toThrow()
+
+        // check dist files dont exist and we havent accidentally run this test out of sequence
+        expect(() =>
+          checkFilesExist(
+            `dist/${functionData.projectDir}/main.js`,
+            `dist/${functionData.projectDir}/package.json`,
+            ),
+        ).toThrow()  
+        
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)              
+    })
+
+    it(
+      'should build nx-firebase function from the app',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseApp'))
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        const result = await runTargetAsync(appData, 'build')
+        expect(result.stdout).toContain("Build succeeded.")        
+
+        expect(() =>
+          checkFilesExist(
+            `dist/${functionData.projectDir}/main.js`,
+            `dist/${functionData.projectDir}/package.json`,
+            ),
+        ).not.toThrow()   
+        
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)             
+    })
+
+    it(
+      'should build nx-firebase function directly',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseApp'))
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        const result = await runTargetAsync(functionData, 'build')
+        expect(result.stdout).toContain(`nx run ${functionData.projectName}:build`)        
+        // esbuild outputs to stderr for some reason
+        expect(result.stderr).toContain(`${functionData.distDir}/main.js`)        
+        // make sure it hasnt bundled node_modules, indicator is that bundle size is megabytes in size
+        expect(result.stderr).not.toContain(`Mb`)        
+
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)         
+    })
+
+
+    it(
+      'should add correct dependencies to the built function package.json',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseApp'))
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        const result = await runTargetAsync(functionData, 'build')
         expect(result.stdout).toContain(
-          `${buildSuccess} ${incompatibleLibData.projectName}`,
-        )
-      },
-      JEST_TIMEOUT,
+          `Successfully ran target build for project ${functionData.projectName}`,
+        )        
+
+        expectStrings(result.stderr, [
+          `${functionData.distDir}/main.js`
+        ])
+        // make sure output build is not megabytes in size, which would mean we've
+        // bundled node_modules as well
+        expect(result.stdout).not.toContain('Mb')
+
+
+        const distPackageFile = `${functionData.distDir}/package.json`
+        expect(exists(distPackageFile))
+
+        const distPackage = readJson(distPackageFile)
+        const deps = distPackage['dependencies']
+        expect(deps).toBeDefined()
+        expect(deps['firebase-admin']).toBeDefined()
+        expect(deps['firebase-functions']).toBeDefined()
+
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)           
+    })
+
+    it(
+      'should add tags to the function project',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseApp'))
+        const functionData = getProjectData('apps', uniq('firebaseFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}  --tags e2etag,e2ePackage`)
+
+        const project = readJson(`${functionData.projectDir}/project.json`)
+        expect(project.tags).toEqual([
+          'firebase:function',
+          `firebase:name:${functionData.projectName}`,
+          `firebase:dep:${appData.projectName}`,
+          'e2etag',
+          'e2ePackage',
+        ])
+
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)           
+      }
     )
   })
+
 
   //--------------------------------------------------------------------------------------------------
   // Test import & dependency handling
   //--------------------------------------------------------------------------------------------------
 
-  describe('nx-firebase dependencies', () => {
-    // it(
-    //   'should support buildable library as a dependency - new test',
-    //   async () => {
-    //     // ensureNxProject(pluginName, pluginPath)
-    //     const libData = getLibDirectories(uniq('buildable'))
-    //     const appData = getAppDirectories(uniq('functions'))
-    //     // generate a buildable library
-    //     await runNxCommandAsync(
-    //       `${libGeneratorCommand} ${libData.name} --buildable --importPath="${libData.npmScope}"`,
-    //     )
-    //     // generate an application
-    //     await runNxCommandAsync(`${appGeneratorCommand} ${appData.name}`)
-    //     // add dependency
-    //     const importAddition = `import { ${libData.functionName} } from '${libData.npmScope}'\nconsole.log(${libData.functionName}())\n`
-    //     const indexTs = readFile(appData.indexTsPath)
-    //     expect(indexTs).toContain(importMatch)
-    //     expect(indexTs).toMatch(indexTsFile)
-    //     addContentToIndexTs(appData.indexTsPath, importMatch, importAddition)
-    //     expect(readFile(appData.indexTsPath)).toContain(importAddition)
-    //     // build project
-    //     const result3 = await runNxCommandAsync(`build ${appData.projectName}`)
-    //     //        expect(result.stdout).toContain('Done compiling TypeScript files')
-    //     // take it out
-    //     resetIndexTs(appData.indexTsPath, indexTs)
-    //     // build again
-    //     const result2 = await runNxCommandAsync(`build ${appData.projectName}`)
-    //     // add it back
-    //     addContentToIndexTs(appData.indexTsPath, importMatch, importAddition)
-    //     // build again
-    //     const result = await runNxCommandAsync(`build ${appData.projectName}`)
-    //     // check console output
-    //     expect(result.stdout).toContain(
-    //       `Added 'npm' dependency 'firebase-admin'`,
-    //     )
-    //     expect(result.stdout).toContain(
-    //       `Added 'npm' dependency 'firebase-functions'`,
-    //     )
-    //     expect(result.stdout).toContain(
-    //       `Copied 'lib' dependency '${libData.npmScope}'`,
-    //     )
-    //     expect(result.stdout).toContain(
-    //       `Updated firebase functions package.json`,
-    //     )
-    //     // check dist outputs
-    //     const functionsDistDir = `${appData.distDir}/${appData.functionLibsDir}/${libData.projectName}`
-    //     expect(() =>
-    //       checkFilesExist(
-    //         `${functionsDistDir}/package.json`,
-    //         `${functionsDistDir}/README.md`,
-    //         `${functionsDistDir}/src/index.js`,
-    //         `${functionsDistDir}/src/index.d.ts`,
-    //         `${functionsDistDir}/src/lib/buildablelib.js`,
-    //         `${functionsDistDir}/src/lib/buildablelib.d.ts`,
-    //       ),
-    //     ).not.toThrow()
-    //     // ceheck package dependencies
-    //     const distPackageFile = `${appData.distDir}/package.json`
-    //     const distPackage = readJson(distPackageFile)
-    //     const deps = distPackage['dependencies']
-    //     expect(deps).toBeDefined()
-    //     expect(deps[buildableLibData.npmScope]).toEqual(
-    //       `file:${appData.functionLibsDir}/${buildableLibData.projectName}`,
-    //     )
-    //     expect(deps['firebase-admin']).toBeDefined()
-    //     expect(deps['firebase-functions']).toBeDefined()
-    //   },
-    //   JEST_TIMEOUT,
-    // )
-    /*
-    // add non-buildable lib as an imported dependency & check error handling
+  describe('nx-firebase bundle dependencies', () => {
     it(
-      'should report non-buildable library imports as unsupported',
+      'should inline library dependencies into function bundle',
       async () => {
-        const libName = nonBuildableLibName
-        const importAddition = `import { ${libName} } from '@proj/${libName}'\nconsole.log(${libName}())\n`
-        expect(indexTsFile).toContain(importMatch)
-        addContentToIndexTs(importMatch, importAddition)
-        expect(readFile(indexTs)).toContain(importAddition)
-        const result = await runNxCommandAsync(`build ${appName} --verbose`, {
-          silenceError: true,
+        // use libs we generated earler
+       
+        const appData = getProjectData('apps', uniq('firebaseDepsApp'))
+        const functionData = getProjectData('apps', uniq('firebaseDepsFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        
+        // add buildable & nonbuildable lib dependencies using import statements
+        let mainTs = getMainTs()
+        
+        // import from a buildable lib
+        const libImport1 = getLibImport(buildableLibData)
+        const importAddition1 = `import { ${libImport1} } from '${buildableLibData.npmScope}'\nconsole.log(${libImport1}())\n`
+        mainTs = addImport(mainTs, importAddition1)
+        
+        // import from a non buildable lib
+        const libImport2 = getLibImport(nonbuildableLibData)
+        const importAddition2 = `import { ${libImport2} } from '${nonbuildableLibData.npmScope}'\nconsole.log(${libImport2}())\n`
+        mainTs = addImport(mainTs, importAddition2)
+        
+        // import from a buildable subdir lib
+        const libImport3 = getLibImport(subDirBuildableLibData)
+        const importAddition3 = `import { ${libImport3} } from '${subDirBuildableLibData.npmScope}'\nconsole.log(${libImport3}())\n`
+        mainTs = addImport(mainTs, importAddition3)
+        
+        // import from a non buildable subdir lib
+        const libImport4 = getLibImport(subDirNonbuildableLibData)
+        const importAddition4 = `import { ${libImport4} } from '${subDirNonbuildableLibData.npmScope}'\nconsole.log(${libImport4}())\n`
+        mainTs = addImport(mainTs, importAddition4)
+
+        // write the new main.ts
+        updateFile(functionData.mainTsPath, (content: string) => {
+          return mainTs
         })
-        expect(result.stdout).not.toContain(compileComplete)
-        // We cant check output for this test scenario since
-        // importing a non buildable library will fail tsc with not in rootDir errors before the firebase plugin can report these issues
-        // expect(result.stdout).toContain(
-        //   `ERROR: Found non-buildable library dependency '@proj/${buildableLibName}'`,
-        // )
-      },
-      JEST_TIMEOUT,
-    )
 
-    it(
-      'should report incompatible library imports as unsupported',
-      async () => {
-        resetIndexTs()
-        const libName = incompatibleLibName
-        const libFuncName = 'subdirIncompatiblelib'
-        const importAddition = `import { subdirIncompatiblelib } from '@proj/${subDir}/${libName}'\nconsole.log(subdirIncompatiblelib())\n`
-        expect(indexTsFile).toContain(importMatch)
-        addContentToIndexTs(importMatch, importAddition)
-        expect(readFile(indexTs)).toContain(importAddition)
-        const result = await runNxCommandAsync(`build ${appName} --verbose`, {
-          silenceError: true,
-        })
-        expect(result.stdout).toContain(compileComplete)
-        expect(result.stderr).toContain(
-          'ERROR: Found incompatible nested library dependency',
-        )
-      },
-      JEST_TIMEOUT,
-    )
 
-    // check buildable lib from subdir
-    it(
-      'should support buildable subdir library as a dependency',
-      async () => {
-        resetIndexTs()
-        // add dependency
-        const importAddition = `import { ${subDirBuildableLibFunction} } from '${subDirBuildableLibScope}'\nconsole.log(${subDirBuildableLibFunction}())\n`
-        expect(readFile(indexTs)).toContain(importMatch)
-        expect(readFile(indexTs)).toMatch(indexTsFile)
-        addContentToIndexTs(importMatch, importAddition)
-        expect(readFile(indexTs)).toContain(importAddition)
+        // confirm the file changes
+        const updatedMainTs = readFile(functionData.mainTsPath)
+        expect(updatedMainTs).toContain(importAddition1)
+        expect(updatedMainTs).toContain(importAddition2)
+        expect(updatedMainTs).toContain(importAddition3)
+        expect(updatedMainTs).toContain(importAddition4)
 
-        // build project
-        const result = await runNxCommandAsync(`build ${appName} --verbose`)
-        expect(result.stdout).toContain('Done compiling TypeScript files')
-
+        // build
+        const result = await runTargetAsync(functionData, `build`)
         // check console output
-        expect(result.stdout).toContain(
-          `Added 'npm' dependency 'firebase-admin'`,
-        )
-        expect(result.stdout).toContain(
-          `Added 'npm' dependency 'firebase-functions'`,
-        )
-        expect(result.stdout).toContain(
-          `Copied 'lib' dependency '@proj/subdir-buildablelib'`,
-        )
-        expect(result.stdout).toContain(
-          `Updated firebase functions package.json`,
-        )
-
-        // check dist outputs - expect copies of the dependent library
-        expect(() =>
-          checkFilesExist(
-            `${subDirBuildableLibFunctionsDistDir}/package.json`,
-            `${subDirBuildableLibFunctionsDistDir}/README.md`,
-            `${subDirBuildableLibFunctionsDistDir}/src/index.js`,
-            `${subDirBuildableLibFunctionsDistDir}/src/index.d.ts`,
-            `${subDirBuildableLibFunctionsDistDir}/src/lib/${subDirBuildableLibName}.js`,
-            `${subDirBuildableLibFunctionsDistDir}/src/lib/${subDirBuildableLibName}.d.ts`,
-          ),
-        ).not.toThrow()
-
-        // check dist package
-        const distPackageFile = `${distDir}/package.json`
-        const distPackage = readJson(distPackageFile)
-        const deps = distPackage['dependencies']
-        expect(deps).toBeDefined()
-
-        expect(deps[subDirBuildableLibScope]).toEqual(
-          `file:libs/${subDirBuildableLibName}`,
-        )
-        expect(deps['firebase-admin']).toBeDefined()
-        expect(deps['firebase-functions']).toBeDefined()
-      },
-      JEST_TIMEOUT,
-    )
-*/
-    /*
-    // check buildable lib as an imported dependency
-    it(
-      'should support buildable library as a dependency',
-      async () => {
-        // add dependency
-        // resetIndexTs()
-        // build project
-        const projectData = appData
-        const result1 = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
-        )
-        expect(result1.stdout).toContain('Done compiling TypeScript files')
-
-        const importAddition = `import { ${buildableLibData.functionName} } from '${buildableLibData.npmScope}'\nconsole.log(${buildableLibData.functionName}())\n`
-        expect(readFile(projectData.indexTsPath)).toContain(importMatch)
-        expect(readFile(projectData.indexTsPath)).toMatch(indexTsFile)
-        addContentToIndexTs(
-          projectData.indexTsPath,
-          importMatch,
-          importAddition,
-        )
-
-        await new Promise((r) => setTimeout(r, 5000))
-        expect(readFile(projectData.indexTsPath)).toContain(importAddition)
-
-        // build project
-        const result = await runNxCommandAsync(
-          `build ${projectData.projectName}`,
-        )
-        expect(result.stdout).toContain('Done compiling TypeScript files')
-
-        // check console output
-        expect(result.stdout).toContain(
-          `Added 'npm' dependency 'firebase-admin'`,
-        )
-        expect(result.stdout).toContain(
-          `Added 'npm' dependency 'firebase-functions'`,
-        )
-        expect(result.stdout).toContain(
-          `Copied 'lib' dependency '${buildableLibData.npmScope}'`,
-        )
-        expect(result.stdout).toContain(
-          `Updated firebase functions package.json`,
-        )
+        expectStrings(result.stdout, [
+          `Running target build for project ${functionData.projectName}`,
+          `nx run ${buildableLibData.projectName}:build`,
+          `nx run ${subDirBuildableLibData.projectName}:build`,
+          `Compiling TypeScript files for project "${subDirBuildableLibData.projectName}"`,
+          `Compiling TypeScript files for project "${buildableLibData.projectName}"`,
+          `Done compiling TypeScript files for project "${buildableLibData.projectName}"`,
+          `Done compiling TypeScript files for project "${subDirBuildableLibData.projectName}"`,
+          `nx run ${functionData.projectName}:build`,
+          `Successfully ran target build for project ${functionData.projectName}`,
+        ])
+        expectStrings(result.stderr, [
+          `${functionData.distDir}/main.js`
+        ])
+        // make sure output build is not megabytes in size, which would mean we've
+        // bundled node_modules as well
+        expect(result.stdout).not.toContain('Mb')
 
         // check dist outputs
-        const functionsDistDir = `${projectData.distDir}/${projectData.functionLibsDir}/${buildableLibData.projectName}`
         expect(() =>
           checkFilesExist(
-            `${functionsDistDir}/package.json`,
-            `${functionsDistDir}/README.md`,
-            `${functionsDistDir}/src/index.js`,
-            `${functionsDistDir}/src/index.d.ts`,
-            `${functionsDistDir}/src/lib/buildablelib.js`,
-            `${functionsDistDir}/src/lib/buildablelib.d.ts`,
+            `${functionData.distDir}/package.json`,
+            `${functionData.distDir}/main.js`,
           ),
         ).not.toThrow()
 
-        const distPackageFile = `${projectData.distDir}/package.json`
-        const distPackage = readJson(distPackageFile)
+        // check dist package contains external imports
+        const distPackage = readJson(`${functionData.distDir}/package.json`)
         const deps = distPackage['dependencies']
         expect(deps).toBeDefined()
-
-        expect(deps[buildableLibData.npmScope]).toEqual(
-          `file:${projectData.functionLibsDir}/${buildableLibData.projectName}`,
-        )
         expect(deps['firebase-admin']).toBeDefined()
-        expect(deps['firebase-functions']).toBeDefined()
-      },
-      JEST_TIMEOUT,
-    )
+        expect(deps['firebase-functions']).toBeDefined()        
 
-    */
+        // check bundled code contains the libcode we added
+        const bundle = readFile(`${functionData.distDir}/main.js`)
+
+        // check that node modules were not bundled, happens in e2e if nx reset not called
+        // probably the earlier check for deps in the package.json already detects this scenario too
+        expect(bundle).not.toContain(`require_firebase_app`)  
+
+        // our imported lib modules should be inlined in the bundle
+        expect(bundle).toContain(`function ${libImport1}`)  
+        expect(bundle).toContain(`return "${buildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport2}`)  
+        expect(bundle).toContain(`return "${nonbuildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport3}`)  
+        expect(bundle).toContain(`return "${subDirBuildableLibData.projectName}"`)  
+        expect(bundle).toContain(`function ${libImport4}`)  
+        expect(bundle).toContain(`return "${subDirNonbuildableLibData.projectName}"`)  
+
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)               
+    })
+
+  })
+
+
+
+
+  describe('nx-firebase sync', () => {
+
+
+    it(
+      'should sync firebase workspace with no changes',
+      async () => {
+        const result = await syncGeneratorAsync()
+        testDebug(result.stdout)
+        expect(result.stdout).not.toContain('CHANGE')
+        expect(result.stdout).not.toContain('UPDATE')
+        expect(result.stdout).not.toContain('CREATE')
+        expect(result.stdout).not.toContain('DELETE')  
+    })
+
+    describe('--project', () => {
+      it(
+        'should set firebase app project using --project',
+        async () => {
+          // create firebase app without specifying firebase deploy --project
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          await appGeneratorAsync(appData)
+
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).not.toContain(
+            `--project`
+          ) 
+          const result = await syncGeneratorAsync(`--app=${appData.projectName} --project=test`)
+          testDebug(result.stdout)
+          expectStrings(result.stdout, [
+            `CHANGE setting firebase target --project for '${appData.projectName}' to '--project=test'`,
+            `UPDATE apps/${appData.projectName}/project.json`,
+          ])
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--project=test`
+          )
+          // cleanup - app
+          await cleanAppAsync(appData)
+      })    
+
+      it(
+        'should update firebase app project using --project',
+        async () => {
+          
+          // create firebase app specifying firebase deploy --project        
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          await appGeneratorAsync(appData, `--project=test`)
+
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--project=test`
+          ) 
+          const result = await syncGeneratorAsync(`--app=${appData.projectName} --project=test2`)
+          testDebug(result.stdout)
+          expectStrings(result.stdout, [
+            `CHANGE updating firebase target --project for '${appData.projectName}' to '--project=test2'`,
+            `UPDATE apps/${appData.projectName}/project.json`,
+          ])
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--project=test2`
+          )
+
+          // cleanup - app
+          await cleanAppAsync(appData)
+      })
+    })
+
+    describe('deletions', () => {
+
+      it(
+        'should detect deleted firebase functions',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+          await removeProjectAsync(functionData)
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+          expectStrings(result.stdout, [
+            `CHANGE Firebase function '${functionData.projectName}' was deleted, removing function codebase from '${appData.configName}'`,            
+            `UPDATE ${appData.configName}`,
+          ])          
+
+          // cleanup - app only, already removed function
+          await cleanAppAsync(appData)     
+      })
+
+      it(
+        'should detect deleted firebase apps',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+          await removeProjectAsync(appData)
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+          expectStrings(result.stdout, [
+            `DELETE ${appData.configName}`,
+          ])
+          expectStrings(result.stderr, [
+            `CHANGE Firebase app '${appData.projectName}' was deleted, firebase:dep tag for firebase function '${functionData.projectName}' is no longer linked to a Firebase app.`,
+          ])
+      
+          // cleanup - function only, already removed app
+          await cleanFunctionAsync(functionData)      
+      })
+
+      it(
+        'should warn when no firebase apps use firebase.json config',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const appData2 = getProjectData('apps', uniq('firebaseSyncApp'), {customConfig: true})
+          await appGeneratorAsync(appData)
+          await appGeneratorAsync(appData2)
+
+          // delete the app that used firebase.json
+          await removeProjectAsync(appData)
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+          expectStrings(result.stderr, [
+            `None of the Firebase apps in this workspace use 'firebase.json' as their config. Firebase CLI may not work as expected. This can be fixed by renaming the config for one of your firebase projects to 'firebase.json'.`,
+          ])
+      
+          // cleanup - second app
+          await cleanFunctionAsync(appData2)      
+      })
+
+
+    })
+
+    describe('renames', () => {    
+
+      it(
+        'should detect renamed firebase functions',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedFunctionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+          expect(readJson(`${functionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--only functions:${functionData.projectName}`
+          )
+
+          await renameProjectAsync(functionData, renamedFunctionData)
+     
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+
+          expectStrings(result.stdout, [
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${appData.configName}'`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
+            `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+            `UPDATE ${appData.configName}`,
+          ])
+
+          expect(readJson(`${renamedFunctionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--only functions:${renamedFunctionData.projectName}`
+          )           
+      
+          // cleanup - function, then app
+          await cleanFunctionAsync(renamedFunctionData)
+          await cleanAppAsync(appData)
+        })
+
+
+      it(
+        'should detect renamed firebase apps',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          // we will attach two functions to the app for this test
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const functionData2 = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'))
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+          await functionGeneratorAsync(functionData2, `--app ${appData.projectName}`)
+
+          await renameProjectAsync(appData, renamedAppData)
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+
+          expectStrings(result.stdout, [
+            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData2.projectName}'`,
+            `UPDATE apps/${renamedAppData.projectName}/project.json`,
+            `UPDATE apps/${functionData.projectName}/project.json`,   
+          ])
+          // we should not rename config if it is called firebase.json
+          expect(result.stdout).not.toContain(
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+          )
+          expect(result.stdout).not.toContain(
+            `DELETE ${appData.configName}`,            
+          )
+          expect(result.stdout).not.toContain(
+            `CREATE ${renamedAppData.configName}`,        
+          )
+
+          // check that app project has correct --config setting after rename
+          expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${renamedAppData.configName}`
+          )                    
+      
+          // run another sync to check there should be no orphaned functions from an app rename
+          const result2 = await syncGeneratorAsync()
+          expect(result2.stderr).not.toContain('is no longer linked to a Firebase app')
+          expect(result2.stdout).not.toContain('UPDATE')
+
+          // cleanup - function, then app
+          await cleanFunctionAsync(functionData)
+          await cleanFunctionAsync(functionData2)
+          await cleanAppAsync(renamedAppData)       
+        })     
+        
+        
+
+      it(
+        'should detect renamed firebase apps & functions',
+        async () => {
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedFunctionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'))
+
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+          // rename app & function
+          await renameProjectAsync(appData, renamedAppData)
+          await renameProjectAsync(functionData, renamedFunctionData)
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+
+          expectStrings(result.stdout, [
+            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
+            `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${renamedAppData.configName}'`,
+            `UPDATE apps/${renamedAppData.projectName}/project.json`,
+            `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+          ])      
+          // we should not rename config if it is called firebase.json
+          expect(result.stdout).not.toContain(
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+          )              
+          expect(result.stdout).not.toContain(
+            `DELETE ${appData.configName}`,            
+          )
+          expect(result.stdout).not.toContain(
+            `CREATE ${renamedAppData.configName}`,        
+          )
+
+          // check that app project has correct --config setting after rename
+          expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${renamedAppData.configName}`
+          )                    
+          // check that function project has correct --config setting after rename
+          expect(readJson(`${renamedFunctionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
+            `--only functions:${renamedFunctionData.projectName}`
+          )           
+                         
+
+          // cleanup - function, then app
+          await cleanFunctionAsync(renamedFunctionData)
+          await cleanAppAsync(renamedAppData)
+      })
+
+
+
+      it(
+        'should rename configs for renamed firebase apps when multiple apps in workspace',
+        async () => {
+          expect(!exists('firebase.json'))
+
+          // create first project that will have the primary firebase.json config
+          const appDataPrimary = getProjectData('apps', uniq('firebaseSyncApp'))
+          const functionData = getProjectData('apps', uniq('firebaseSyncFunction'))
+          await appGeneratorAsync(appDataPrimary)
+
+          expect(appDataPrimary.configName).toEqual('firebase.json')
+          expect(readJson(`${appDataPrimary.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=firebase.json`
+          )                           
+          expect(exists('firebase.json'))
+
+          // generate second app after first app is generated so that first config is detected
+          const appData = getProjectData('apps', uniq('firebaseSyncApp'), {customConfig: true})
+          const renamedAppData = getProjectData('apps', uniq('firebaseSyncApp'), {customConfig: true})
+
+          expect(appData.configName).not.toEqual('firebase.json')
+          expect(renamedAppData.configName).not.toEqual('firebase.json')
+
+          await appGeneratorAsync(appData)
+          await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).not.toContain(
+            `--config=firebase.json`
+          )         
+          expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${appData.configName}`
+          )                                
+
+          await renameProjectAsync(appData, renamedAppData)
+
+          const result = await syncGeneratorAsync()
+          testDebug(result.stdout)
+
+          expectStrings(result.stdout, [
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
+            `UPDATE apps/${renamedAppData.projectName}/project.json`,
+            `UPDATE apps/${functionData.projectName}/project.json`,   
+            `DELETE ${appData.configName}`,            
+            `CREATE ${renamedAppData.configName}`,        
+          ])
+
+          // check that app project has correct --config setting after rename
+          expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+            `--config=${renamedAppData.configName}`
+          )     
+      
+          // run another sync to check there should be no orphaned functions from an app rename
+          const result2 = await syncGeneratorAsync()
+          expect(result2.stderr).not.toContain('is no longer linked to a Firebase app')
+          expect(result2.stdout).not.toContain('UPDATE')
+
+          // cleanup - function, then app
+          await cleanFunctionAsync(functionData)
+          await cleanAppAsync(renamedAppData, { appsRemaining: 1, functionsRemaining: 0 })       
+          await cleanAppAsync(appDataPrimary)       
+        })           
+
+    })
+
+
+
+  })
+
+
+  //--------------------------------------------------------------------------------------------------
+  // Test app targets
+  //--------------------------------------------------------------------------------------------------
+
+  describe('nx-firebase app targets', () => {
+    it(
+      'should run lint target for app',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseTargetsApp'))
+        const functionData = getProjectData('apps', uniq('firebaseTargetsFunction'))
+        const functionData2 = getProjectData('apps', uniq('firebaseTargetsFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        await functionGeneratorAsync(functionData2, `--app ${appData.projectName}`)
+        
+        const result = await runTargetAsync(appData, 'lint')
+        expectStrings(result.stdout, [
+          `nx run ${appData.projectName}:lint`,
+          `Running target lint for 2 projects`,
+          `nx run ${functionData.projectName}:lint`,
+          `nx run ${functionData2.projectName}:lint`,
+          `All files pass linting`,
+          `Successfully ran target lint for 2 projects`,
+          `Successfully ran target lint for project ${appData.projectName}`,
+        ])
+
+        // cleanup
+        await cleanFunctionAsync(functionData2)              
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)               
+    })
+
+    it(
+      'should run test target for app',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseTargetsApp'))
+        const functionData = getProjectData('apps', uniq('firebaseTargetsFunction'))
+        const functionData2 = getProjectData('apps', uniq('firebaseTargetsFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        await functionGeneratorAsync(functionData2, `--app ${appData.projectName}`)
+        
+        const result = await runTargetAsync(appData, 'test')
+        expectStrings(result.stdout, [
+          `nx run ${appData.projectName}:test`,
+          `Running target test for 2 projects`,
+          `nx run ${functionData.projectName}:test`,
+          `nx run ${functionData2.projectName}:test`,
+          `Successfully ran target test for 2 projects`,
+          `Successfully ran target test for project ${appData.projectName}`,
+        ])
+
+        // cleanup
+        await cleanFunctionAsync(functionData2)              
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)               
+    })    
+
+
+    it(
+      'should run deploy target for app',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseTargetsApp'))
+        const functionData = getProjectData('apps', uniq('firebaseDepsFunction'))
+        const functionData2 = getProjectData('apps', uniq('firebaseDepsFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        await functionGeneratorAsync(functionData2, `--app ${appData.projectName}`)
+        
+        // deploy target will fail because theres no firebase project but thats ok
+        // we cannot e2e a real firebase project setup atm
+        const result = await runTargetAsync(appData, 'deploy')
+        expectStrings(result.stdout, [
+          `Running target deploy for project ${appData.projectName}`,
+          `nx run ${appData.projectName}:deploy`,
+          `nx run ${appData.projectName}:firebase deploy`,
+        ])
+        // build target will also execute, since functions are implicit dep of app
+        expectStrings(result.stdout, [
+          `nx run ${appData.projectName}:build`,
+          `nx run ${functionData.projectName}:build`,
+          `nx run ${functionData2.projectName}:build`,
+          `Build succeeded`,
+        ])
+        expectStrings(result.stderr, [
+          `${functionData.distDir}/main.js`,
+          `${functionData2.distDir}/main.js`,
+        ])
+        // cleanup
+        await cleanFunctionAsync(functionData2)              
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)               
+    })        
+
+
+    it(
+      'should run deploy target for function',
+      async () => {
+        const appData = getProjectData('apps', uniq('firebaseTargetsApp'))
+        const functionData = getProjectData('apps', uniq('firebaseTargetsFunction'))
+        await appGeneratorAsync(appData)
+        await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        
+        const result = await runTargetAsync(functionData, 'deploy')
+        expectStrings(result.stdout, [
+          `Running target deploy for project ${functionData.projectName}`,
+          `nx run ${appData.projectName}:deploy`,
+          `nx run ${appData.projectName}:firebase deploy`,
+        ])
+        // build target will also execute, since functions are implicit dep of app
+        expectStrings(result.stdout, [
+          `nx run ${functionData.projectName}:build`,
+          `Build succeeded`,
+        ])
+        expectStrings(result.stderr, [
+          `${functionData.distDir}/main.js`,
+        ])
+
+        // cleanup
+        await cleanFunctionAsync(functionData)              
+        await cleanAppAsync(appData)               
+    })            
   })
 })

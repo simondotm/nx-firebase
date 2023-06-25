@@ -1,15 +1,17 @@
 # Nx Firebase Applications
 
-An Nx Firebase application is primarily a container for _firebase functions_, but it also contains the various configurations for other Firebase features you might use such as _storage, firestore, and real time database_.
+An Nx Firebase application contains the various configurations for Firebase features you might use such as _storage, firestore, and real time database_.
 
 You don't have to use all of these features, but the Nx-Firebase plugin ensures they are all there if/when you do.
 
-When a new Nx Firebase application project is added to the workspace it will generate:
+Generate a new Firebase application using:
+
+**`nx g @simondotm/nx-firebase:app <app-project-name> [--directory=dir] [--project=proj]`**
+
+When a new Nx Firebase application project is generated in the workspace it will create:
 
 **Within the application folder:**
 
-- Default `src` Typescript source code for Firebase functions
-- Default `package.json` for the Firebase functions
 - Default `firestore.indexes` for Firestore database indexes
 - Default `firestore.rules` for Firestore database rules
 - Default `database.rules.json` for Firebase realtime database
@@ -20,7 +22,7 @@ When a new Nx Firebase application project is added to the workspace it will gen
 
 - A `firebase.json` configuration file for the Firebase application
 - This is preset with references to the various configuration files in the application folder
-- A `firebase.<appname>.json` if multiple firebase apps exist in the workspace
+- The plugin supports multiple firebase projects in one workspace, so if other firebase applications already exist in the workspace, the firebase configuration file will be named `firebase.<firebase-app-project>.json`
 
 **It will also generate:**
 
@@ -28,14 +30,14 @@ When a new Nx Firebase application project is added to the workspace it will gen
 
 You should use `npx firebase --add` to register your [projects & aliases](nx-firebase-projects.md) in the `.firebaserc`.
 
-## Nx-Firebase Application Targets (Executors)
+## Nx-Firebase Application Project Targets
 
-- `build` - Build the functions applicaion
-- `serve` - Build the functions application in `watch` mode and start the Firebase Emulators
+These targets will be generated in `project.json` for your new Firebase application:
+
+- `build` - Build all Firebase function applications linked to this Firebase application (if any)
+- `serve` - Build all functions in `watch` mode and start the Firebase Emulators
 - `deploy` - Run the Firebase CLI `deploy` command with the application's Firebase configuration. This target accepts forwarded command line options.
-- `lint` - Lint the functions application code
-- `test` - Run Jest unit tests on the functions application code
-- `emulate` - Start the firebase emulation suite
+- `lint` - Lint all Firebase function applications linked to this Firebase application
+- `test` - Run Jest unit tests for all Firebase function applications linked to this Firebase application
 - `getconfig` - Fetch the firebase remote config
 
-See [Firebase targets](nx-firebase-targets.md) for more information.

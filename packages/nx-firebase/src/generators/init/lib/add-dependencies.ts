@@ -68,14 +68,11 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   // This is cleaner than using peerDeps.
   addDevDependencyIfNotPresent('@nx/devkit', workspaceNxVersion.version)
 
-  // used by the plugin application generator
+  // used by the plugin function generator as a proxy for creating a typescript app
+  addDevDependencyIfNotPresent('@nx/node', workspaceNxVersion.version)
   addDevDependencyIfNotPresent('@nx/linter', workspaceNxVersion.version)
   addDevDependencyIfNotPresent('@nx/jest', workspaceNxVersion.version)
-
-  // used by the plugin application generator as a proxy for creating a typescript app
-  addDevDependencyIfNotPresent('@nx/node', workspaceNxVersion.version)
-
-  // used by the plugin application builder
+  addDevDependencyIfNotPresent('@nx/esbuild', workspaceNxVersion.version)
   addDevDependencyIfNotPresent('@nx/js', workspaceNxVersion.version)
 
   return addDependenciesToPackageJson(tree, dependencies, devDependencies)

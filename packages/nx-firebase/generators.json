@@ -14,6 +14,17 @@
       "schema": "./src/generators/application/schema.json",
       "description": "nx-firebase application generator",
       "aliases": ["app"]
+    },
+    "function": {
+      "factory": "./src/generators/function/function",
+      "schema": "./src/generators/function/schema.json",
+      "description": "nx-firebase function generator",
+      "aliases": ["func"]
+    },
+    "sync": {
+      "factory": "./src/generators/sync/sync",
+      "schema": "./src/generators/sync/schema.json",
+      "description": "nx-firebase project sync tool"
     }
   }
 }

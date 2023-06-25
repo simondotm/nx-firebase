@@ -1,19 +1,18 @@
-# Firebase Projects
+# Firebase CLI Projects
 
-- [Firebase Projects](#firebase-projects)
+- [Firebase CLI Projects](#firebase-cli-projects)
   - [Introduction](#introduction)
   - [Nx Workspaces With Single Firebase Projects](#nx-workspaces-with-single-firebase-projects)
   - [Nx Workspaces With Multiple Firebase Projects](#nx-workspaces-with-multiple-firebase-projects)
   - [Updating Firebase Configurations](#updating-firebase-configurations)
   - [Binding Nx projects to Firebase projects](#binding-nx-projects-to-firebase-projects)
-  - [Renaming Projects](#renaming-projects)
   - [Deployment Environments](#deployment-environments)
 
 ## Introduction
 
-Firebase projects are created in the firebase web console, and then specified in your local workspace configurations as deployment targets in your `.firebaserc` file, along with a `firebase.json` configuration for the various cloud components of that project (databases/functions/sites etc.).
+[Firebase projects](https://firebase.google.com/docs/projects/learn-more) are created in the firebase web console, and then specified in your local workspace configurations as deployment targets in your `.firebaserc` file.
 
-`nx-firebase` generally assumes a mapping of one `@simondotm/nx-firebase:app` to one firebase project and configuration file.
+`nx-firebase` assumes a mapping of one `@simondotm/nx-firebase:app` to one firebase project and configuration file.
 
 ## Nx Workspaces With Single Firebase Projects
 
@@ -29,7 +28,7 @@ If you run `nx g @simondotm/nx-firebase:app` in an Nx workspace that already has
 
 ## Updating Firebase Configurations
 
-Once your Nx Firebase application has been initially generated you are free to change the firebase configurations however you like. If you don't use Firebase functions, you can choose to either simply ignore or not deploy them, or just remove the `functions` settings from the Firebase configuration for your application.
+Once your Nx Firebase application has been initially generated you are free to change the firebase configurations however you like. 
 
 The Firebase CLI usually warns you anyway if you try to deploy a feature that isn't yet enabled on your Firebase Project console.
 
@@ -39,33 +38,31 @@ When using multiple Firebase projects in a workspace, remember that there is onl
 
 You can add projects using `firebase use --add` as normal.
 
-It's fine to add multiple Firebase projects to your workspace `.firebaserc` file, but remember to correctly switch between them using `firebase use <alias>` before any deployments!
+It's fine to add multiple Firebase projects to your workspace `.firebaserc` file, but it is important to remember to correctly switch between them using `firebase use <alias>` before any deployments!
 
 You can ensure this is always the case for commands like `nx deploy app` etc. by adding `--project <alias>` to any firebase commands in your nx-firebase application's targets.
 
-## Renaming Projects
+See also: [Changing Firebase CLI Project](./nx-firebase-sync.md#changing-firebase-cli-project)
 
-**Important:** _If you do rename your firebase configuration files, remember to update (or remove) any `--config` settings in your Nx-Firebase application's `serve` and `deploy` targets in your `workspace.json` or `angular.json` configuration file._
 
 ## Deployment Environments
 
 A common practice with Firebase is to generate different Firebase projects for each deployment environments (such as dev / staging / production etc.)
 
-This can be manually achieved with `nx-firebase` by adding `production` targets to your Nx `project.json` files eg.:
+This can be manually achieved with `nx-firebase` by adding `production` configurations to the `firebase` target in your Nx firebase application `project.json` file eg.:
 
 ```
-    "deploy": {
-      "executor": "@nx/workspace:run-commands",
-      "options": {
-        "command": "npx firebase deploy --config firebase.json --project your-dev-firebase-project"
+    firebase: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `firebase --config firebase.json --project your-dev-firebase-project`,
       },
-      "configurations": {
-        "production": {
-          "command": "npx firebase deploy --config firebase.json --project your-prod-firebase-project"
-        }
-      }
+      configurations: {
+        production: {
+          command: `firebase --config firebase.json --project your-prod-firebase-project`,
+        },
+      },
     },
-
 ```
 
 You can now run:
