@@ -1,6 +1,6 @@
 # Firebase Databases
 
-`nx-firebase` assumes you will be using either realtime or firestore database.
+`nx-firebase` assumes you may wish to use either realtime and/or firestore database.
 
 ## Rules & Indexes
 

@@ -2,11 +2,11 @@
 
 - [Quick Start](#quick-start)
   - [Install Plugin](#install-plugin)
-  - [Create Firebase Application](#create-firebase-application)
-  - [Build Project](#build-project)
-  - [Deploy Project (Firebase functions)](#deploy-project-firebase-functions)
-  - [Serve Project](#serve-project)
-  - [Get Remote Functions Config](#get-remote-functions-config)
+  - [Generate Firebase Application Project](#generate-firebase-application-project)
+  - [Generate Firebase Function Application Project](#generate-firebase-function-application-project)
+  - [Build Firebase Application](#build-firebase-application)
+  - [Deploy Firebase Application](#deploy-firebase-application)
+  - [Serve Firebase Project](#serve-firebase-project)
 
 ## Install Plugin
 
@@ -14,50 +14,52 @@
 
 - Installs this plugin into your Nx workspace.
 - This will also install some Nx and firebase dependencies (both for backend and frontend) to your root workspace `package.json` if they are not already installed.
-- The plugin is compatible with Nx versions 13.10.6 or above
+- The plugin is compatible with Nx versions 16.1.1 or above
 
-## Create Firebase Application
+## Generate Firebase Application Project
 
-**`nx g @simondotm/nx-firebase:app <appname> [--directory=dir] [--project=proj]`**
+**`nx g @simondotm/nx-firebase:app <app-project-name> [--directory=dir] [--project=proj]`**
 
-- Generates a new Nx Firebase application in the workspace - `/apps/[dir]/appname`
+- Generates a new Nx Firebase application project in the workspace
 - The app generator will also create a Firebase configuration file in the root of your workspace (along with a default `.firebaserc` and `firebase.json` if they don't already exist).
 - For the first firebase application you create, the project firebase configuration will be `firebase.json`.
-- If you create additional firebase applications, the project firebase configuration will be `firebase.<appname>.json`.
+- If you create additional firebase applications, the project firebase configuration will be `firebase.<app-project-name>.json`.
 
-## Build Project
+## Generate Firebase Function Application Project
 
-**`nx build <appname>`**
+**`nx g @simondotm/nx-firebase:function <function-project-name> --app=<app-project-name> [--directory=dir]`**
 
-- Compiles & builds the target Nx Firebase (functions) application to `dist/apps/[dir]/appname`. It will also auto-generate a `package.json` that is compatible with the Firebase CLI for functions deployment.
+- Generates a new Nx Firebase function application project in the workspace
+- Firebase Function projects must be linked to a Firebase application project with the `--app` option
+- Firebase Function projects can contain one or more firebase functions
+- You can generate as many Firebase Function projects as you need for your application
 
-## Deploy Project (Firebase functions)
 
-**`nx deploy <appname>`**
+## Build Firebase Application
 
-- Deploys all of your cloud resources (eg. sites, functions, database rules etc.)
+**`nx build <app-project-name>`**
+
+- Compiles & builds all Firebase function applications linked to the Nx Firebase 
+
+## Deploy Firebase Application 
+
+**`nx deploy <app-project-name> [--only ...]`**
+
+- By default, deploys ALL of your cloud resources associated with your Firebase application (eg. sites, functions, database rules etc.)
+- Use the `--only` option to selectively deploy (same as Firebase CLI)
 
 For inital deployment:
 
 - **`firebase login`** if not already authenticated
 - **`firebase use --add`** to add your Firebase Project(s) to the `.firebaserc` file in your workspace. This step must be completed before you can deploy anything to Firebase.
 
-You can also use the firebase CLI directly:
+Note that you can also use the firebase CLI directly if you prefer:
 
-- **`firebase deploy --only functions --config firebase.<appname>.json`**
+- **`firebase deploy --config=firebase.<appname>.json --only functions`**
 
-## Serve Project
+## Serve Firebase Project
 
-**`nx serve appname`**
+**`nx serve <app-project-name>`**
 
-- Builds the functions app in watch mode
-- Fetches the remote config
+- Builds & Watches all Firebase functions apps linked to the Firebase application
 - Starts the Firebase emulators
-
-## Get Remote Functions Config
-
-**`nx run getconfig:appname`**
-
-- Fetches the remote server functions configuration variables and saves it locally to the app directory as `.runtimeconfig.json`
-
-See the full plugin [README](https://github.com/simondotm/nx-firebase/blob/main/README.md) for more details.
