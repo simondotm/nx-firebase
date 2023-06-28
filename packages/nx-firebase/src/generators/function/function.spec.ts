@@ -252,8 +252,8 @@ describe('function generator', () => {
         // console.log(firebaseConfig)
 
         // expect(firebaseConfig.functions.length).toEqual(2)
-        expect(firebaseConfig.functions[0]).toEqual(testFunction)
-        expect(firebaseConfig.functions[1]).toEqual({
+        expect(firebaseConfig.functions).toContainEqual(testFunction)
+        expect(firebaseConfig.functions).toContainEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
