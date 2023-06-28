@@ -1,6 +1,5 @@
-import { offsetFromRoot, Tree } from '@nrwl/devkit'
-import { generateFiles, joinPathFragments } from '@nrwl/devkit'
-import { firebaseNodeEngine, firebaseNodeRuntime } from '../../../utils'
+import { offsetFromRoot, Tree } from '@nx/devkit'
+import { generateFiles, joinPathFragments } from '@nx/devkit'
 import type { NormalizedOptions } from '../schema'
 
 /**

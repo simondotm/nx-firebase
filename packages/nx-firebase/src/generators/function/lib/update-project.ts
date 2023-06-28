@@ -2,7 +2,7 @@ import {
   Tree,
   readProjectConfiguration,
   updateProjectConfiguration,
-} from '@nrwl/devkit'
+} from '@nx/devkit'
 import type { NormalizedOptions } from '../schema'
 
 export function updateProject(tree: Tree, options: NormalizedOptions): void {

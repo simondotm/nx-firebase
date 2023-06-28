@@ -1,4 +1,4 @@
-import type { Tree } from '@nrwl/devkit'
+import type { Tree } from '@nx/devkit'
 import { joinPathFragments, updateJson } from '@nx/devkit'
 import { nodeEsVersion } from './versions'
 

@@ -7,8 +7,8 @@ import {
   runTasksInSerial,
   names,
   getProjects,
-} from '@nrwl/devkit'
-import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
+} from '@nx/devkit'
+import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 
 import { initGenerator } from '../init/init'
 import {
@@ -60,7 +60,7 @@ export function normalizeOptions(
 
 /**
  * Firebase 'functions' application generator
- * Uses the `@nrwl/node` application generator as a base implementation
+ * Uses the `@nx/node` application generator as a base implementation
  *
  * @param tree
  * @param rawOptions
