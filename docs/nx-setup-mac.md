@@ -72,7 +72,6 @@ antigen apply
 ## 5. Install `nx`
 
 - Select the node version you want to install `nx` to: `nvm use <version>`
-- `npm i -g @nrwl/cli`
 - `npm i -g nx`
 - The previous command ensures that `nx` command line can be run without `npx`
 - Not sure when this became a thing, nor sure if the nx cli is still required as a global install, but it works.

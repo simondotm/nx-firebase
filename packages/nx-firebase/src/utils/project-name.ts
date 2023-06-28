@@ -4,7 +4,7 @@ import {
   names,
   Tree,
   extractLayoutDirectory,
-} from '@nrwl/devkit'
+} from '@nx/devkit'
 
 export function getProjectName(tree: Tree, name: string, directory?: string) {
   // console.log(`name ${name}`)

@@ -1,12 +1,12 @@
 import type { GeneratorCallback, Tree } from '@nx/devkit'
-import { convertNxGenerator, formatFiles, runTasksInSerial } from '@nx/devkit'
+import { convertNxGenerator, runTasksInSerial } from '@nx/devkit'
 import { initGenerator as nodeInitGenerator } from '@nx/node'
 import { addDependencies, normalizeOptions } from './lib'
 import { addGitIgnoreEntry } from './lib/add-git-ignore-entry'
 import type { InitGeneratorOptions } from './schema'
 
 /**
- * `nx g @simondotm/nx-firebase:init` is based on the `@nrwl/nest` plugin
+ * `nx g @simondotm/nx-firebase:init` is based on the `@nx/nest` plugin
  *   which in turn is based on the `@nx/node` plugin
  *
  * Ensures the necessary firebase packages are installed in the nx workspace
