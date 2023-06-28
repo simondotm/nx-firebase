@@ -10,32 +10,19 @@ This plugin was completely rewritten since V2.x. For documentation of the legacy
 
 ## Overview
 
-Nx provides a great way to manage monorepo workflows and this plugin helps to integrate Firebase projects with Nx, by:
+Nx provides a great way to manage monorepo workflows and this plugin helps make it easy to integrate Firebase projects with Nx.
 
-1. Enabling & promoting use of shared Typescript code libraries within Firebase functions
-2. Retaining a familiar usage of all Firebase features in a way that feels integrated with Nx workflow
-3. Requiring minimal friction/setup for configuration of an Nx workspace in order to be productive with development, building & deployment of Firebase projects
-4. Supporting multiple firebase projects & apps within an Nx workspace
+Features:
 
-## Nx-Firebase Features
-
-Supports:
-
-- Single or multiple Firebase projects in one Nx workspace
-- Firebase functions as Typescript Nx applications, now bundled using esbuild
-- Use of shared Nx libraries in Firebase functions
-- Nx provides automatic dependency checking for builds
-- Building & serving functions with watch mode & Firebase Emulators
-- Convenience Nx `getconfig` target to fetch remote firebase functions configuration variables to local `.runtimeconfig.json` file
-- Convenience Nx `deploy` , and `serve` targets for functions
-
-Additionally:
-
-- Auto bundles & generates Firebase functions `package.json` ready for no fuss deployment using the Firebase CLI
-- Auto generates default `firebase.json` configurations, rules and indexes for each Firebase app
-- Only very lightly opinionated about your Firebase configurations and workspace layouts; you can just use the Firebase CLI as usual
-- Keeps all of your firebase rules and indexes within your app folder, to keep your workspace root free of clutter
-- Use the plugin `sync` generator to easily manage firebase workspaces & configurations
+* Supports single or multiple firebase projects/apps within an Nx workspace
+* Generates Firebase node applications, with default `firebase.json` configurations, rules and indexes for each Firebase app
+* Generates Firebase functions using customised Typescript Nx node applications
+* Bundling of functions using `esbuild` for extremely fast compilation & tree-shaking for faster cold starts
+* Easily import Typescript code libraries in your Firebase functions for code sharing
+* Nx's automatic dependency checking for no-fuss builds, and per-project or per-function deployments
+* Use the Firebase Emulator suite whilst developing locally - all functions are watched and updated live while you work
+* Workspace management with the `sync` generator keeps your `firebase.json` configs automatically updated when renaming or deleting functions
+* Only very lightly opinionated about your Firebase configurations and workspace layouts; you can use Nx or the Firebase CLI
 
 # User Guide
 

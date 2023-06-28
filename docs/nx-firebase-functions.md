@@ -2,6 +2,7 @@
 
 - [Firebase Functions](#firebase-functions)
   - [Nx-Firebase Functions](#nx-firebase-functions)
+    - [Firebase Function Projects](#firebase-function-projects)
   - [Functions \& Nx-Firebase Applications](#functions--nx-firebase-applications)
   - [Functions \& Firebase Config](#functions--firebase-config)
   - [Functions \& ESBuild](#functions--esbuild)
@@ -17,7 +18,20 @@ Since v2.x of the plugin, Nx-Firebase functions are now generated as individual 
 
 Generate a new Firebase function using:
 
-**`nx g @simondotm/nx-firebase:function <function-project-name> --app=<app-project-name> [--directory=dir] [--format=<'cjs'|'esm'>]`**
+**`nx g @simondotm/nx-firebase:function`**
+
+OR 
+
+**`nx g @simondotm/nx-firebase:func`**
+
+| Options | Type | Description |
+|---|---|--|
+| `name` | required | the project name for your function |
+| `--app=<app-project-name>` | required | the firebase app this function will be a dependency of |
+| `--directory=dir` | optional | the directory this function will be located in |
+| `--format=<'cjs' or 'esm'>` | default 'esm' | specify if esbuild should generated commonJs or ES6 output |
+
+### Firebase Function Projects
 
 Firebase function application projects are buildable node Typescript applications, which are compiled and bundled using `esbuild`.
 
@@ -80,11 +94,15 @@ If you still use Node `require()` in your Typescript function code, the default 
 Note that using `cjs` output may prevent tree-shaking optimizations.
 
 
-
 ### Why ESBuild?
 
-While Webpack and Rollup are viable options for bundling node applications, `esbuild` is designed for node, it is fast, and it works very simply out of the box with Nx without any need for additional configuration files.
+While Webpack and Rollup are viable options for bundling node applications:
+* `esbuild` is designed for node, 
+* it is _very_ fast
+* it optimizes the output using tree-shaking, which is great for fast cold starts
+* and it works very simply out of the box with Nx without any need for additional configuration files.
 
+If you want to try Webpack or Rollup, just change your `build` target in the function's `project.json` accordingly.
 
 ## Nx-Firebase Workspace Layout
 

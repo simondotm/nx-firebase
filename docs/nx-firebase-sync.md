@@ -2,12 +2,12 @@
 
 - [Firebase Sync](#firebase-sync)
   - [Nx-Firebase Sync Generator](#nx-firebase-sync-generator)
-  - [Renamed Nx-Firebase Projects](#renamed-nx-firebase-projects)
-    - [Renaming a firebase application project](#renaming-a-firebase-application-project)
-    - [Renaming a firebase function project](#renaming-a-firebase-function-project)
-  - [Deleted Nx-Firebase Projects](#deleted-nx-firebase-projects)
-    - [Deleting a firebase application](#deleting-a-firebase-application)
-    - [Deleting a firebase function](#deleting-a-firebase-function)
+  - [Renaming Nx-Firebase Projects](#renaming-nx-firebase-projects)
+    - [Renamed firebase application projects](#renamed-firebase-application-projects)
+    - [Renamed firebase function projects](#renamed-firebase-function-projects)
+  - [Deleting Nx-Firebase Projects](#deleting-nx-firebase-projects)
+    - [Deleted firebase applications](#deleted-firebase-applications)
+    - [Deleted firebase functions](#deleted-firebase-functions)
   - [Changing Firebase CLI Project](#changing-firebase-cli-project)
   - [Nx-Firebase Project Tags Reference](#nx-firebase-project-tags-reference)
     - [Tag Descriptions](#tag-descriptions)
@@ -18,7 +18,7 @@ With V2.0+ of the plugin, we now have support within an Nx workspace for:
 * Multiple firebase application projects
 * Multiple firebase function projects attached to the firebase applications
 
-A new `sync` generator has been added to help assist with productivity & maintenance of this in scenarios where:
+To help manage these apps, a new `sync` generator has been added to help assist with productivity & maintenance of this in scenarios where:
 
 * Firebase application or function projects have been renamed
 * Firebase application or function projects have been deleted
@@ -27,11 +27,19 @@ Just run the following command as soon as possible after any of these operations
 
 **`nx g @simondotm/nx-firebase:sync`** 
 
-## Renamed Nx-Firebase Projects
+| Options | Type | Description |
+|---|---|--|
+| `--project=proj` | optional | updates the `--project` option that will be used for firebase CLI commands |
+| `--app=appname` | required only if `--project` is set | updates the `--project` option for firebase app `appname` that will be used for firebase CLI commands |
 
-Nx projects can be renamed using the `nx g move` generator.
 
-### Renaming a firebase application project
+## Renaming Nx-Firebase Projects
+
+Nx projects such as Firebase apps and Firebase function apps can be renamed using the `nx g move` generator.
+
+Run the `nx g @simondotm/nx-firebase:sync` generator after the rename.
+
+### Renamed firebase application projects
 
 * Functions that are dependencies of the renamed firebase app will have their `deploy` target automatically updated to run this target from the newly renamed firebase application project
 
@@ -39,7 +47,7 @@ Nx projects can be renamed using the `nx g move` generator.
 
 * The `firebase:name:<old-project-name>` tag on the Firebase application's `project.json` will be updated to `firebase:name:<new-project-name>`
 
-### Renaming a firebase function project
+### Renamed firebase function projects
 
 * Nx automatically updates `implicitDependencies` for renamed dependency projects (Firebase function apps are dependencies of Firebase applications)
 
@@ -47,11 +55,15 @@ Nx projects can be renamed using the `nx g move` generator.
 
 * The `firebase:name:<old-project-name>` tag on the Firebase function's `project.json` will be updated to `firebase:name:<new-project-name>`
 
-## Deleted Nx-Firebase Projects
+## Deleting Nx-Firebase Projects
 
-Nx projects can be deleted using the `nx g remove` generator.
+Nx projects such as Firebase apps and Firebase function apps can be deleted using the `nx g remove` generator. 
 
-### Deleting a firebase application
+Run the `nx g @simondotm/nx-firebase:sync` generator after the deletion.
+
+> Note that when deleting a firebase function project, you may need to use the additional `--forceRemove` option, since Firebase function apps are implicit dependencies of Firebase apps and Nx will warn about this.
+
+### Deleted firebase applications
 
 * The Firebase config file linked to the deleted Firebase application project will be deleted
 * Any Functions that were dependencies of the deleted firebase app will be reported as orphaned
@@ -59,7 +71,7 @@ Nx projects can be deleted using the `nx g remove` generator.
   * Changing the `firebase:dep:<old-project>` tag to `firebase:dep:<new-project>`
   * Adding `<new-project>` to the `implicitDependencies` array in the new firebase app `project.json` file
 
-### Deleting a firebase function
+### Deleted firebase functions
 
 * Nx automatically updates `implicitDependencies` for deleted dependency projects (Firebase function apps are dependencies of Firebase applications)
 * The deleted firebase function will also be deleted from the `firebase.json` config file
