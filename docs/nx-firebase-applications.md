@@ -6,7 +6,23 @@ You don't have to use all of these features, but the Nx-Firebase plugin ensures 
 
 Generate a new Firebase application using:
 
-**`nx g @simondotm/nx-firebase:app <app-project-name> [--directory=dir] [--project=proj]`**
+**`nx g @simondotm/nx-firebase:application`**
+
+OR 
+
+**`nx g @simondotm/nx-firebase:app`**
+
+| Options | Type | Description |
+|---|---|--|
+| `name` | required | the project name for your firebase app |
+| `--directory=dir` | optional | the directory this app will be located in |
+| `--project=proj` | optional | the `--project` option that will be used for firebase CLI commands |
+
+
+
+## About Firebase Apps
+
+Firebase app projects are a customised Nx project.
 
 When a new Nx Firebase application project is generated in the workspace it will create:
 
