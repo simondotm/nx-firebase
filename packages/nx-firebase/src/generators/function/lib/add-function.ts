@@ -19,6 +19,10 @@ export function addFunction(tree: Tree, options: NormalizedOptions) {
       }
     }
     json.functions.push(functionConfig)
+    // sort the codebases to be neat & tidy
+    json.functions.sort((a: FirebaseFunction, b: FirebaseFunction) => {
+      return a.codebase < b.codebase ? -1 : a.codebase > b.codebase ? 1 : 0
+    })
     return json
   })
 }

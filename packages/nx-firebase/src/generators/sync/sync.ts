@@ -218,6 +218,9 @@ export async function syncGenerator(
     })
     if (configUpdated) {
       config.functions = updatedFunctions
+      config.functions.sort((a: FirebaseFunction, b: FirebaseFunction) => {
+        return a.codebase < b.codebase ? -1 : a.codebase > b.codebase ? 1 : 0
+      })
       writeJson(tree, configFileName, config)
     }
   })
