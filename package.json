@@ -41,10 +41,13 @@
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "tslib": "^2.0.0",
-    "typescript": "4.8.4"
+    "typescript": "5.1.6"
   },
   "dependencies": {
+    "@inquirer/prompts": "^2.3.0",
+    "parse-help": "^1.0.0",
     "semver": "^7.3.8",
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "yargs": "^17.7.2"
   }
 }
