@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "version": 2,
+  "title": "Firebase CLI executor",
+  "description": "Runs the Firebase CLI for the target project's firebase configuration",
+  "type": "object",
+  "properties": {
+    "config": {
+      "type": "string",
+      "description": "Path to the firebase configuration json for this project",
+      "default": "firebase.json"
+    },
+    "command": {
+      "description": "Firebase CLI command",
+      "type": "string",
+      "format": "html-selector",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "project": {
+      "type": "string",
+      "description": "Name or alias from the .firebaserc of the firebase project being used"
+    },
+    "_": {
+      "type": "array",
+      "items": {
+        "anyOf": [{ "type": "string" }]
+      },
+      "description": "Non-hyphenated options for firebase command",
+      "default": []
+    }
+  },
+  "required": ["config", "command"]
+}

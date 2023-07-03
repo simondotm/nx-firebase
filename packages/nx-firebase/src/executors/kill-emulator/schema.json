@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "version": 2,
+  "title": "KillEmulatorPorts executor",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "config": {
+      "type": "string",
+      "description": "Path to project's firebase config (where the emulator ports are defined)"
+    }
+  },
+  "required": ["config"]
+}
