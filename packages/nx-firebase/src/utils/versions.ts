@@ -7,11 +7,11 @@ export const tsLibVersion = '^2.0.0'
 
 // Firebase packages are not managed by the plugin
 // but they are added if they do not exist already in the workspace
-export const firebaseAdminVersion = '^11.3.0'
-export const firebaseFunctionsVersion = '^4.1.0'
-export const firebaseToolsVersion = '^11.16.1'
+export const firebaseAdminVersion = '^11.10.1'
+export const firebaseFunctionsVersion = '^4.4.1'
+export const firebaseToolsVersion = '^12.4.5'
 export const firebaseVersion = '^9.14.0'
-export const firebaseFunctionsTestVersion = '^0.2.0'
+export const firebaseFunctionsTestVersion = '^3.1.0'
 
 // Target node 16 for all firebase projects now
 export const firebaseNodeEngine = '16'
