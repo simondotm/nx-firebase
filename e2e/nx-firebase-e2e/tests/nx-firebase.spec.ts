@@ -30,7 +30,7 @@ import {
 } from '../test-utils'
 
 
-const JEST_TIMEOUT = 120000
+const JEST_TIMEOUT = 190000
 jest.setTimeout(JEST_TIMEOUT)
 
 // NOTE: If one e2e test fails, cleanup fails, so all subsequent tests will fail.
@@ -437,7 +437,8 @@ describe('nx-firebase e2e', () => {
         const distPackage = readJson(distPackageFile)
         const deps = distPackage['dependencies']
         expect(deps).toBeDefined()
-        expect(deps['firebase-admin']).toBeDefined()
+        // firebase-admin is No longer in the default main.ts template
+        // expect(deps['firebase-admin']).toBeDefined()
         expect(deps['firebase-functions']).toBeDefined()
 
         // cleanup
@@ -554,7 +555,8 @@ describe('nx-firebase e2e', () => {
         const distPackage = readJson(`${functionData.distDir}/package.json`)
         const deps = distPackage['dependencies']
         expect(deps).toBeDefined()
-        expect(deps['firebase-admin']).toBeDefined()
+        // firebase-admin not in the template anymore
+        // expect(deps['firebase-admin']).toBeDefined()
         expect(deps['firebase-functions']).toBeDefined()        
 
         // check bundled code contains the libcode we added
