@@ -23,7 +23,7 @@
 - Use functions runtime `nodejs18`
 - `firebase-tools` - use [lastest version](https://github.com/firebase/firebase-tools/releases)
 - `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
-- `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
+- `firebase-admin` - [latest version](https://github.com/firebase/firebase-admin-node/releases)
 
 ### Node 16 support (Recommended)
 
@@ -32,7 +32,7 @@
 - Use functions runtime `nodejs16`
 - `firebase-tools` supports Node 16 as default from [version 10.0.0](https://github.com/firebase/firebase-tools/releases/tag/v10.0.0), recommend minimum [version 10.9.2](https://github.com/firebase/firebase-tools/releases/tag/v10.9.2)
 - `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
-- `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
+- `firebase-admin` - [latest version](https://github.com/firebase/firebase-admin-node/releases)
 
 ### Node 14 support
 
@@ -40,7 +40,7 @@
 - Use functions runtime `nodejs14`
 - `firebase-tools` - minimum [version 9.23.3](https://github.com/firebase/firebase-tools/releases/tag/v9.23.3)
 - `firebase-functions` - [latest version](https://github.com/firebase/firebase-functions/releases)
-- `firebase-admin` - [latest version](https://github.com/firebase/firebase-functions/releases)
+- `firebase-admin` - [latest version](https://github.com/firebase/firebase-admin-node/releases)
 - Node 14 introduces ESM support (see below)
 
 ### Node 12 support
