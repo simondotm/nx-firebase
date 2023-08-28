@@ -11,6 +11,7 @@ export const gitIgnoreEntries = [
   'pubsub-debug.log',
   'ui-debug.log',
   'firebase-export*',
+  '.secret.local',
 ]
 
 export function addGitIgnoreEntry(host: Tree) {
