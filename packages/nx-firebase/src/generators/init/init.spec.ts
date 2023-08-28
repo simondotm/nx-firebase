@@ -26,7 +26,19 @@ describe('init generator', () => {
   it('should add gitignores', async () => {
     await initGenerator(tree, {})
     const gitIgnore = tree.read('.gitignore')
-    expect(gitIgnore.toString('utf-8')).toContain(gitIgnoreEntries)
+    expect(gitIgnore.toString('utf-8')).toContain(
+      `${gitIgnoreEntries.join('\n')}\n`,
+    )
+  })
+
+  it('should add missing gitignores', async () => {
+    // replace .gitignore with a partial list to check plugin adds missing rules individually
+    tree.write('.gitignore', `${gitIgnoreEntries.slice(0, 3).join('\n')}\n`)
+    await initGenerator(tree, {})
+    const gitIgnore = tree.read('.gitignore')
+    expect(gitIgnore.toString('utf-8')).toContain(
+      `${gitIgnoreEntries.join('\n')}\n`,
+    )
   })
 
   it('should not have dependencies', async () => {
