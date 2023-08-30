@@ -10,7 +10,7 @@ import {
   killportVersion,
 } from '../../utils/versions'
 import { initGenerator } from './init'
-import { gitIgnoreEntries } from './lib'
+import { gitIgnoreRules, nxIgnoreRules } from './lib'
 import { workspaceNxVersion } from '../../utils'
 
 describe('init generator', () => {
@@ -23,21 +23,39 @@ describe('init generator', () => {
     jest.clearAllMocks()
   })
 
-  it('should add gitignores', async () => {
+  it('should add .gitignore rules', async () => {
     await initGenerator(tree, {})
     const gitIgnore = tree.read('.gitignore')
     expect(gitIgnore.toString('utf-8')).toContain(
-      `${gitIgnoreEntries.join('\n')}\n`,
+      `${gitIgnoreRules.join('\n')}\n`,
     )
   })
 
-  it('should add missing gitignores', async () => {
+  it('should add missing .gitignore rules', async () => {
     // replace .gitignore with a partial list to check plugin adds missing rules individually
-    tree.write('.gitignore', `${gitIgnoreEntries.slice(0, 3).join('\n')}\n`)
+    tree.write('.gitignore', `${gitIgnoreRules.slice(0, 3).join('\n')}\n`)
     await initGenerator(tree, {})
     const gitIgnore = tree.read('.gitignore')
     expect(gitIgnore.toString('utf-8')).toContain(
-      `${gitIgnoreEntries.join('\n')}\n`,
+      `${gitIgnoreRules.join('\n')}\n`,
+    )
+  })
+
+  it('should add .nxignore rules', async () => {
+    await initGenerator(tree, {})
+    const nxIgnore = tree.read('.nxignore')
+    expect(nxIgnore.toString('utf-8')).toContain(
+      `${nxIgnoreRules.join('\n')}\n`,
+    )
+  })
+
+  it('should add missing .nxignore rules', async () => {
+    // replace .nxignore with a partial list to check plugin adds missing rules individually
+    tree.write('.nxignore', `${nxIgnoreRules.slice(0, 1).join('\n')}\n`)
+    await initGenerator(tree, {})
+    const nxIgnore = tree.read('.nxignore')
+    expect(nxIgnore.toString('utf-8')).toContain(
+      `${nxIgnoreRules.join('\n')}\n`,
     )
   })
 
