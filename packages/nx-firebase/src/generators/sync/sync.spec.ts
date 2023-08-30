@@ -6,6 +6,8 @@ import { SyncGeneratorSchema } from './schema'
 import applicationGenerator from '../application/application'
 import functionGenerator from '../function/function'
 
+// sync is tested in e2e.
+
 describe('sync generator', () => {
   let tree: Tree
   const options: SyncGeneratorSchema = { app: 'test' }
