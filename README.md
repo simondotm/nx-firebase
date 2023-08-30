@@ -41,13 +41,19 @@ Features:
 - [Firebase Emulators](docs/nx-firebase-emulators.md)
 - [Firebase Databases](docs/nx-firebase-databases.md)
 - [Firebase Projects](docs/nx-firebase-projects.md)
-- [Firebase Versions](docs/firebase-versions.md)
+- [Project Schemas](docs/nx-firebase-project-structure.md)
 
 **Nx Workspace**
 
 - [Using Nx Libraries with Firebase Functions](docs/nx-libraries.md)
 - [Migrating an existing Firebase project to Nx](docs/nx-migration.md)
+
+**Version information**
+
+- [Firebase Versions](docs/firebase-versions.md)
 - [Nx Versions](docs/nx-versions.md)
+
+_Note: Some of these may not always be upto date - it's hard work keeping track of external releases and compatibilities!_
 
 **Notes**
 
