@@ -8,6 +8,7 @@ export function addFunction(tree: Tree, options: NormalizedOptions) {
       codebase: options.projectName,
       source: joinPathFragments('dist', options.projectRoot),
       runtime: `nodejs${options.runTime}`,
+      ignore: ['*.local'],
     }
 
     // console.log(`json.functions=${JSON.stringify(json.functions)}`)

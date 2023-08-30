@@ -205,6 +205,7 @@ describe('function generator', () => {
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         })
       })
 
@@ -225,6 +226,7 @@ describe('function generator', () => {
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         })
       })
 
@@ -236,6 +238,7 @@ describe('function generator', () => {
           codebase: 'test',
           source: 'dist/apps/test',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         }
         firebaseConfigInitial.functions = [testFunction]
         writeJson(tree, 'firebase.json', firebaseConfigInitial)
@@ -257,6 +260,7 @@ describe('function generator', () => {
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         })
       })
     })
