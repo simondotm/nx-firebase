@@ -70,12 +70,12 @@ describe('function generator', () => {
                 main: 'apps/my-firebase-function/src/main.ts',
                 tsConfig: 'apps/my-firebase-function/tsconfig.app.json',
                 assets: [
+                  'apps/my-firebase-function/src/assets',
                   {
                     glob: '**/*',
                     input: 'apps/my-firebase-app/environment',
                     output: '.',
                   },
-                  'apps/my-firebase-function/src/assets',
                 ],
                 generatePackageJson: true,
                 platform: 'node',

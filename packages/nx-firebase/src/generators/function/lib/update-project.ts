@@ -35,9 +35,8 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
   }
 
   // add reference to firebase app environment assets
-  // make sure this is first in array, so that function can override with its own assets if required
   const firebaseAppRoot = firebaseAppProject.root
-  project.targets.build.options.assets.unshift({
+  project.targets.build.options.assets.push({
     glob: '**/*',
     input: `${firebaseAppRoot}/environment`,
     output: '.',
