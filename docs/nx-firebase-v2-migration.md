@@ -40,7 +40,7 @@ If you are using Firebase functions in your project, the migration process is as
 * OR, if you migrated by creating a new firebase application, you can now simply delete the old v1 Firebase application project
 
 
-See the [Nx-Firebase project schemas](./nx-firebase-project-structure.md) document for more information about the v2 plugin generators project layouts.
+Check the [Nx-Firebase project schemas](./nx-firebase-project-structure.md) document for more information about the v2 plugin generators project layouts.
 
 ## 5. Library updates
 

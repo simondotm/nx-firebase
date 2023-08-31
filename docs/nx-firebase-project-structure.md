@@ -139,7 +139,7 @@ Functions use `esbuild` to compile & bundle the code.
         "tsConfig": "apps/your-firebase-function-project-name/tsconfig.app.json",
         "assets": [
           "apps/your-firebase-function-project-name/src/assets",
-          { "glob": "**/*", "input": "apps/your-firebase-app-project-name/environment", "output": "."}          
+          { "glob": "**/*", "input": "apps/your-firebase-app-project-name/environment", "output": "."},
         ],
         "generatePackageJson": true,
         "platform": "node",
