@@ -33,6 +33,16 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
       },
     },
   }
+
+  // add reference to firebase app environment assets
+  const firebaseAppRoot = firebaseAppProject.root
+  project.targets.build.options.assets.push({
+    glob: '**/*',
+    input: `${firebaseAppRoot}/environment`,
+    output: '.',
+  })
+
+  // add deploy target
   project.targets.deploy = {
     executor: 'nx:run-commands',
     options: {

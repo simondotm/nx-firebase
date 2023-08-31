@@ -9,6 +9,7 @@
     - [Using ES Modules output](#using-es-modules-output)
     - [Using CommonJS output](#using-commonjs-output)
     - [Why ESBuild?](#why-esbuild)
+    - [Why not minify?](#why-not-minify)
   - [Nx-Firebase Workspace Layout](#nx-firebase-workspace-layout)
   - [Node Environments / Runtimes for Firebase Functions](#node-environments--runtimes-for-firebase-functions)
 
@@ -104,33 +105,15 @@ While Webpack and Rollup are viable options for bundling node applications:
 
 If you want to try Webpack or Rollup, just change your `build` target in the function's `project.json` accordingly.
 
-## Nx-Firebase Workspace Layout
+### Why not minify?
 
-Firebase applications and functions can be generated in whichever directories you like.
+This plugin does not set or recommend the minify option for esbuild.
 
-While there are plenty of ways to organise your workspace layout, one suggestion is:
+* It is not really necessary for cloud function node runtime environments
+* Obfuscation of the code is not necessary since it executes in a private server-side environment
+* There is minimal (if any) performance benefit to be had
+* If exceptions occur in the cloud run, stack traces will be readable if code is not minified
 
-```
-/apps
-    /project1
-        /firebase
-        /functions
-          /function1
-          /function2
-        /web
-            /site1-app
-            /site2-app
-        /mobile
-            /app
-    /project2
-        /firebase
-        /functions
-        /web
-        ...
-firebase.rc
-firebase.json
-firebase.project2.json
-```
 
 ## Node Environments / Runtimes for Firebase Functions
 

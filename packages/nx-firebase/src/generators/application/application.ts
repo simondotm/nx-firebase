@@ -124,7 +124,7 @@ export async function applicationGenerator(
       getconfig: {
         executor: 'nx:run-commands',
         options: {
-          command: `nx run ${options.projectName}:firebase functions:config:get > ${options.projectRoot}/.runtimeconfig.json`,
+          command: `nx run ${options.projectName}:firebase functions:config:get > ${options.projectRoot}/environment/.runtimeconfig.json`,
         },
       },
       emulate: {

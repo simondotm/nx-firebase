@@ -142,11 +142,25 @@ export async function syncGenerator(
       'firebase:dep',
     )
     if (workspace.renamedApps.has(tagValue)) {
+      // update the firebase:dep tag
       const renamedApp = workspace.renamedApps.get(tagValue)
       project.tags[tagIndex] = `firebase:dep:${renamedApp.name}`
       logger.info(
         `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated firebase:dep tag in firebase function '${name}'`,
       )
+      // update the environment assets glob also
+      const functionAssets = project.targets.build.options.assets
+      for (const asset of functionAssets) {
+        if (typeof asset === 'object') {
+          if (asset.input) {
+            asset.input = renamedApp.root
+            logger.info(
+              `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated environment assets path in firebase function '${name}'`,
+            )
+          }
+        }
+      }
+      // update the function project config
       updateProjectConfiguration(tree, project.name, project)
     } else {
       if (
