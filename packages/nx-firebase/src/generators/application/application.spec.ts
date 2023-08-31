@@ -70,7 +70,7 @@ describe('application generator', () => {
         getconfig: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run my-firebase-app:firebase functions:config:get > apps/my-firebase-app/.runtimeconfig.json`,
+            command: `nx run my-firebase-app:firebase functions:config:get > apps/my-firebase-app/environment/.runtimeconfig.json`,
           },
         },
         emulate: {
