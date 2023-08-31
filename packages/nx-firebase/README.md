@@ -19,6 +19,7 @@ Features:
 * Easily import Typescript code libraries in your Firebase functions for code sharing
 * Nx's automatic dependency checking for no-fuss builds, and per-project or per-function deployments
 * Use the Firebase Emulator suite whilst developing locally - all functions are watched and updated live while you work
+* Support for function environment variables and secrets
 * Workspace management with the `sync` generator keeps your `firebase.json` configs automatically updated when renaming or deleting functions
 * Only very lightly opinionated about your Firebase configurations and workspace layouts; you can use Nx or the Firebase CLI
 
