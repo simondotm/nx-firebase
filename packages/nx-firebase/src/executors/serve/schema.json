@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "title": "Firebase serve",
+  "description": "Runs the Firebase CLI emulator for the target project",
+  "type": "object",
+  "properties": {
+    "commands": {
+      "description": "The serve commands - watch & emulate.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }, 
+    "__unparsed__": {
+      "hidden": true,
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "$default": {
+        "$source": "unparsed"
+      },
+      "x-priority": "internal"
+    }           
+  },
+  "required": []
+}
