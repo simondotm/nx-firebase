@@ -69,7 +69,14 @@ describe('function generator', () => {
                 outputPath: 'dist/apps/my-firebase-function',
                 main: 'apps/my-firebase-function/src/main.ts',
                 tsConfig: 'apps/my-firebase-function/tsconfig.app.json',
-                assets: ['apps/my-firebase-function/src/assets'],
+                assets: [
+                  'apps/my-firebase-function/src/assets',
+                  {
+                    glob: '**/*',
+                    input: 'apps/my-firebase-app/environment',
+                    output: '.',
+                  },
+                ],
                 generatePackageJson: true,
                 platform: 'node',
                 bundle: true,
@@ -205,6 +212,7 @@ describe('function generator', () => {
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         })
       })
 
@@ -225,6 +233,7 @@ describe('function generator', () => {
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         })
       })
 
@@ -236,6 +245,7 @@ describe('function generator', () => {
           codebase: 'test',
           source: 'dist/apps/test',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         }
         firebaseConfigInitial.functions = [testFunction]
         writeJson(tree, 'firebase.json', firebaseConfigInitial)
@@ -257,6 +267,7 @@ describe('function generator', () => {
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
           runtime: `nodejs16`,
+          ignore: ['*.local'],
         })
       })
     })

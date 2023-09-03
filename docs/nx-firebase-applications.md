@@ -1,6 +1,6 @@
 # Nx Firebase Applications
 
-An Nx Firebase application contains the various configurations for Firebase features you might use such as _storage, firestore, and real time database_.
+An Nx Firebase application project is a top-level container for the various configurations for Firebase features you might wish to use such as _functions_, _storage, firestore, and real time database_.
 
 You don't have to use all of these features, but the Nx-Firebase plugin ensures they are all there if/when you do.
 
@@ -33,6 +33,7 @@ When a new Nx Firebase application project is generated in the workspace it will
 - Default `database.rules.json` for Firebase realtime database
 - Default `storage.rules` for Firebase storage rules
 - Default `public/index.html` for Firebase hosting - _you can delete this if your firebase configuration for hosting points elsewhere_.
+- Default [environment variables](./nx-firebase-functions-environment.md) for your firebase functions
 
 **And in the workspace root:**
 
@@ -56,4 +57,5 @@ These targets will be generated in `project.json` for your new Firebase applicat
 - `lint` - Lint all Firebase function applications linked to this Firebase application
 - `test` - Run Jest unit tests for all Firebase function applications linked to this Firebase application
 - `getconfig` - Fetch the firebase remote config
+- `firebase` - Run the firebase CLI with the appropriate firebase `--config` and firebase `--project` parameters automatically provided
 

@@ -358,6 +358,9 @@ describe('nx-firebase e2e', () => {
           checkFilesExist(
             `dist/${functionData.projectDir}/main.js`,
             `dist/${functionData.projectDir}/package.json`,
+            `dist/${functionData.projectDir}/.env`,
+            `dist/${functionData.projectDir}/.env.local`,
+            `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).toThrow()  
         
@@ -381,6 +384,9 @@ describe('nx-firebase e2e', () => {
           checkFilesExist(
             `dist/${functionData.projectDir}/main.js`,
             `dist/${functionData.projectDir}/package.json`,
+            `dist/${functionData.projectDir}/.env`,
+            `dist/${functionData.projectDir}/.env.local`,
+            `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).not.toThrow()   
         
@@ -548,6 +554,9 @@ describe('nx-firebase e2e', () => {
           checkFilesExist(
             `${functionData.distDir}/package.json`,
             `${functionData.distDir}/main.js`,
+            `${functionData.distDir}/.env`,
+            `${functionData.distDir}/.env.local`,
+            `${functionData.distDir}/.secret.local`,
           ),
         ).not.toThrow()
 
@@ -585,7 +594,7 @@ describe('nx-firebase e2e', () => {
 
 
 
-
+  // test the nx-firebase sync generator
   describe('nx-firebase sync', () => {
 
 
@@ -692,6 +701,10 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase app '${appData.projectName}' was deleted, firebase:dep tag for firebase function '${functionData.projectName}' is no longer linked to a Firebase app.`,
           ])
       
+          // NOTE:
+          // a deleted firebase app means the assets glob input dir in a function is no longer valid
+          // this is ok though because Nx quietly fails when processing assets for an invalid input dir
+
           // cleanup - function only, already removed app
           await cleanFunctionAsync(functionData)      
       })
@@ -780,7 +793,9 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated environment assets path in firebase function '${functionData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData2.projectName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated environment assets path in firebase function '${functionData2.projectName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${functionData.projectName}/project.json`,   
           ])
@@ -835,6 +850,7 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated environment assets path in firebase function '${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${renamedAppData.configName}'`,

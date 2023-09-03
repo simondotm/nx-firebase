@@ -70,7 +70,7 @@ describe('application generator', () => {
         getconfig: {
           executor: 'nx:run-commands',
           options: {
-            command: `nx run my-firebase-app:firebase functions:config:get > apps/my-firebase-app/.runtimeconfig.json`,
+            command: `nx run my-firebase-app:firebase functions:config:get > apps/my-firebase-app/environment/.runtimeconfig.json`,
           },
         },
         emulate: {
@@ -133,6 +133,10 @@ describe('application generator', () => {
     expect(tree.isFile(`package.json`)).toBeTruthy()
     expect(tree.isFile(`firebase.json`)).toBeTruthy()
     expect(tree.isFile(`.firebaserc`)).toBeTruthy()
+    // environment files
+    expect(tree.isFile(`${root}/environment/.secret.local`)).toBeTruthy()
+    expect(tree.isFile(`${root}/environment/.env`)).toBeTruthy()
+    expect(tree.isFile(`${root}/environment/.env.local`)).toBeTruthy()
   })
 
   it('should generate multiple firebase configurations', async () => {

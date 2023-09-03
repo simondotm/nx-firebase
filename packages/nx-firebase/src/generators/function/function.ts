@@ -17,7 +17,7 @@ import {
   updateTsConfig,
 } from '../../utils'
 
-import { addFunction, createFiles, updateProject } from './lib'
+import { addFunctionConfig, createFiles, updateProject } from './lib'
 import type { FunctionGeneratorOptions, NormalizedOptions } from './schema'
 
 export function normalizeOptions(
@@ -108,7 +108,7 @@ export async function functionGenerator(
   updateProject(tree, options)
 
   // update firebase functions config
-  addFunction(tree, options)
+  addFunctionConfig(tree, options)
 
   // ensures newly added files are formatted to match workspace style
   if (!options.skipFormat) {
