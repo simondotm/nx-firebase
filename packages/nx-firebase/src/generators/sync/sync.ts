@@ -21,6 +21,7 @@ import {
   updateFirebaseProjectNameTag,
   getFirebaseWorkspace,
 } from './lib'
+import { renameCommandForTarget } from './lib/update-targets'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
@@ -132,6 +133,90 @@ export async function syncGenerator(
     updateFirebaseProjectNameTag(tree, project)
     logger.info(
       `CHANGE Firebase app '${oldName}' was renamed to '${project.name}', updated firebase:name tag`,
+    )
+
+    // we also need to update nx:run-commands in the renamed projects for various targets
+
+    // test target
+    renameCommandForTarget(
+      tree,
+      project,
+      'test',
+      `tag:firebase:dep:${oldName}`,
+      `tag:firebase:dep:${project.name}`,
+    )
+    // lint target
+    renameCommandForTarget(
+      tree,
+      project,
+      'lint',
+      `tag:firebase:dep:${oldName}`,
+      `tag:firebase:dep:${project.name}`,
+    )
+    // watch target
+    renameCommandForTarget(
+      tree,
+      project,
+      'watch',
+      `tag:firebase:dep:${oldName}`,
+      `tag:firebase:dep:${project.name}`,
+    )
+    // serve target
+    renameCommandForTarget(
+      tree,
+      project,
+      'serve',
+      `${oldName}:`,
+      `${project.name}:`,
+    )
+    // deploy target
+    renameCommandForTarget(
+      tree,
+      project,
+      'deploy',
+      `${oldName}:`,
+      `${project.name}:`,
+    )
+    // getconfig target
+    renameCommandForTarget(
+      tree,
+      project,
+      'getconfig',
+      `${oldName}:`,
+      `${project.name}:`,
+    )
+    renameCommandForTarget(
+      tree,
+      project,
+      'getconfig',
+      `/${oldName}/`,
+      `/${project.name}/`,
+    )
+    // killports target
+    renameCommandForTarget(
+      tree,
+      project,
+      'killports',
+      `${oldName}:`,
+      `${project.name}:`,
+    )
+    // emulate target
+    renameCommandForTarget(
+      tree,
+      project,
+      'emulate',
+      `/${oldName}/`,
+      `/${project.name}/`,
+    )
+    renameCommandForTarget(
+      tree,
+      project,
+      'emulate',
+      `${oldName}:`,
+      `${project.name}:`,
+    )
+    logger.info(
+      `CHANGE Firebase app '${oldName}' was renamed to '${project.name}', updated targets`,
     )
   })
 

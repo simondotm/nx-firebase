@@ -27,6 +27,7 @@ import {
   getLibImport,
   addImport,
   safeRunNxCommandAsync,
+  validateProjectConfig,
 } from '../test-utils'
 
 
@@ -255,6 +256,8 @@ describe('nx-firebase e2e', () => {
             ...expectedAppFiles(appData),
           ),
         ).not.toThrow()
+    
+        validateProjectConfig(appData.projectDir, appData.projectName)  
 
         // cleanup - app
         await cleanAppAsync(appData)
@@ -291,6 +294,8 @@ describe('nx-firebase e2e', () => {
 
           const project = readJson(`${appData.projectDir}/project.json`)
           expect(project.name).toEqual(`${appData.projectName}`)
+
+          validateProjectConfig(appData.projectDir, appData.projectName)  
 
           // cleanup - app
           await cleanAppAsync(appData)                
@@ -792,6 +797,7 @@ describe('nx-firebase e2e', () => {
           expectStrings(result.stdout, [
             `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated targets`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated environment assets path in firebase function '${functionData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData2.projectName}'`,
@@ -813,7 +819,10 @@ describe('nx-firebase e2e', () => {
           // check that app project has correct --config setting after rename
           expect(readJson(`${renamedAppData.projectDir}/project.json`).targets.firebase.options.command).toContain(
             `--config=${renamedAppData.configName}`
-          )                    
+          )      
+          
+          // check rename was successful
+          validateProjectConfig(renamedAppData.projectDir, renamedAppData.projectName)          
       
           // run another sync to check there should be no orphaned functions from an app rename
           const result2 = await syncGeneratorAsync()
@@ -849,6 +858,7 @@ describe('nx-firebase e2e', () => {
           expectStrings(result.stdout, [
             `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated targets`,           
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated environment assets path in firebase function '${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
@@ -876,7 +886,10 @@ describe('nx-firebase e2e', () => {
           expect(readJson(`${renamedFunctionData.projectDir}/project.json`).targets.deploy.options.command).toContain(
             `--only functions:${renamedFunctionData.projectName}`
           )           
-                         
+                      
+          // check rename was successful
+          validateProjectConfig(renamedAppData.projectDir, renamedAppData.projectName)          
+          
 
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
