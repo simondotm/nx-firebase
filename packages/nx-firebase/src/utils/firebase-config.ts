@@ -7,6 +7,7 @@ export interface FirebaseFunction {
   source: string
   codebase: string
   runtime: string // 'nodejs16' | 'nodejs18' | 'nodejs20'
+  ignore?: string[]
 }
 
 export interface FirebaseConfig {

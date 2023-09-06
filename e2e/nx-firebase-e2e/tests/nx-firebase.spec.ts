@@ -1092,4 +1092,38 @@ describe('nx-firebase e2e', () => {
         await cleanAppAsync(appData)               
     })            
   })
+
+
+  //--------------------------------------------------------------------------------------------------
+  // Test migrations
+  //--------------------------------------------------------------------------------------------------
+
+  // describe('nx-firebase sync migrate', () => {
+  //   it(
+  //     'should successfuly sync migrate for legacy app',
+  //     async () => {
+  //       const appData = getProjectData('apps', uniq('firebaseMigrateApp'))
+  //       const functionData = getProjectData('apps', uniq('firebaseMigrateFunction'))
+  //       await appGeneratorAsync(appData)
+  //       await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+        
+
+
+
+  //       const result = await syncGeneratorAsync(`--migrate`)
+  //       testDebug(result.stdout)
+  //       expectStrings(result.stdout, [
+  //         `CHANGE updating firebase target --project for '${appData.projectName}' to '--project=test2'`,
+  //         `UPDATE apps/${appData.projectName}/project.json`,
+  //       ])
+  //       expect(readJson(`${appData.projectDir}/project.json`).targets.firebase.options.command).toContain(
+  //         `--project=test2`
+  //       )
+
+
+  //       // cleanup
+  //       await cleanFunctionAsync(functionData)              
+  //       await cleanAppAsync(appData)               
+  //   })
+  // })  
 })

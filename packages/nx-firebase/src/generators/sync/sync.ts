@@ -20,8 +20,9 @@ import {
   CONFIG_NO_APP,
   updateFirebaseProjectNameTag,
   getFirebaseWorkspace,
+  renameCommandForTarget,
 } from './lib'
-import { renameCommandForTarget } from './lib/update-targets'
+import { runMigrations } from './lib/migrate'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
@@ -38,6 +39,22 @@ export async function syncGenerator(
   // initialise plugin
   const initTask = await initGenerator(tree, {})
   tasks.push(initTask)
+
+  // otherwise, sync the workspace.
+  // build lists of firebase apps & functions that have been deleted or renamed
+  debugInfo('- Syncing workspace')
+
+  const workspace = getFirebaseWorkspace(tree)
+
+  logger.info(
+    `This workspace has ${workspace.firebaseAppProjects.size} firebase apps and ${workspace.firebaseFunctionProjects.size} firebase functions\n\n`,
+  )
+
+  // run migrations if required
+  if (options.migrate) {
+    runMigrations(tree, workspace)
+    return
+  }
 
   // change the firebase project for an nx firebase app project
   if (options.project) {
@@ -56,16 +73,6 @@ export async function syncGenerator(
     }
     return
   }
-
-  // otherwise, sync the workspace.
-  // build lists of firebase apps & functions that have been deleted or renamed
-  debugInfo('- Syncing workspace')
-
-  const workspace = getFirebaseWorkspace(tree)
-
-  logger.info(
-    `This workspace has ${workspace.firebaseAppProjects.size} firebase apps and ${workspace.firebaseFunctionProjects.size} firebase functions\n\n`,
-  )
 
   /**
    * Nx automatically:

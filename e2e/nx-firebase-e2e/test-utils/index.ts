@@ -205,87 +205,93 @@ export function addImport(mainTs: string, addition: string) {
   return replaced
 }
 
+
+export function expectedAppProjectTargets(projectDir: string, projectName: string) {
+  return {
+    build: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `echo Build succeeded.`,
+      },
+    },
+    watch: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `nx run-many --targets=build --projects=tag:firebase:dep:${projectName} --parallel=100 --watch`,
+      },
+    },
+    lint: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `nx run-many --targets=lint --projects=tag:firebase:dep:${projectName} --parallel=100`,
+      },
+    },
+    test: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `nx run-many --targets=test --projects=tag:firebase:dep:${projectName} --parallel=100`,
+      },
+    },
+    firebase: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `firebase --config=firebase.json`,
+      },
+      configurations: {
+        production: {
+          command: `firebase --config=firebase.json`,
+        },
+      },
+    },
+    killports: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500`,
+      },
+    },
+    getconfig: {
+      executor: 'nx:run-commands',
+      options: {
+        command: `nx run ${projectName}:firebase functions:config:get > ${projectDir}/environment/.runtimeconfig.json`,
+      },
+    },
+    emulate: {
+      executor: 'nx:run-commands',
+      options: {
+        commands: [
+          `nx run ${projectName}:killports`,
+          `nx run ${projectName}:firebase emulators:start --import=${projectDir}/.emulators --export-on-exit`,
+        ],
+        parallel: false,
+      },
+    },
+    serve: {
+      executor: 'nx:run-commands',
+      options: {
+        commands: [
+          `nx run ${projectName}:watch`,
+          `nx run ${projectName}:emulate`,
+        ],
+      },
+    },
+    deploy: {
+      executor: 'nx:run-commands',
+      dependsOn: ['build'],
+      options: {
+        command: `nx run ${projectName}:firebase deploy`,
+      },
+    },
+  }
+}
+
 export function validateProjectConfig(projectDir: string, projectName: string) {
     const project = readJson(
       `${projectDir}/project.json`,
     )
     // expect(project.root).toEqual(`apps/${projectName}`)
     expect(project.targets).toEqual(
-      expect.objectContaining({
-        build: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `echo Build succeeded.`,
-          },
-        },
-        watch: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `nx run-many --targets=build --projects=tag:firebase:dep:${projectName} --parallel=100 --watch`,
-          },
-        },
-        lint: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `nx run-many --targets=lint --projects=tag:firebase:dep:${projectName} --parallel=100`,
-          },
-        },
-        test: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `nx run-many --targets=test --projects=tag:firebase:dep:${projectName} --parallel=100`,
-          },
-        },
-        firebase: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `firebase --config=firebase.json`,
-          },
-          configurations: {
-            production: {
-              command: `firebase --config=firebase.json`,
-            },
-          },
-        },
-        killports: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `kill-port --port 9099,5001,8080,9000,5000,8085,9199,9299,4000,4400,4500`,
-          },
-        },
-        getconfig: {
-          executor: 'nx:run-commands',
-          options: {
-            command: `nx run ${projectName}:firebase functions:config:get > ${projectDir}/environment/.runtimeconfig.json`,
-          },
-        },
-        emulate: {
-          executor: 'nx:run-commands',
-          options: {
-            commands: [
-              `nx run ${projectName}:killports`,
-              `nx run ${projectName}:firebase emulators:start --import=${projectDir}/.emulators --export-on-exit`,
-            ],
-            parallel: false,
-          },
-        },
-        serve: {
-          executor: 'nx:run-commands',
-          options: {
-            commands: [
-              `nx run ${projectName}:watch`,
-              `nx run ${projectName}:emulate`,
-            ],
-          },
-        },
-        deploy: {
-          executor: 'nx:run-commands',
-          dependsOn: ['build'],
-          options: {
-            command: `nx run ${projectName}:firebase deploy`,
-          },
-        },
-      }),
+      expect.objectContaining(expectedAppProjectTargets(projectDir, projectName)),
     )
 }
+
 
