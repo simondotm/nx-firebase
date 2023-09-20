@@ -266,7 +266,7 @@ export function expectedAppProjectTargets(projectDir: string, projectName: strin
       },
     },
     serve: {
-      executor: 'nx:run-commands',
+      executor: '@simondotm/nx-firebase:serve',
       options: {
         commands: [
           `nx run ${projectName}:watch`,
