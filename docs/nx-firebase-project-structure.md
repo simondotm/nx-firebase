@@ -92,7 +92,7 @@ We tag all dependent projects so that we can use Nx `run-many` with tag specifie
       }
     },
     "serve": {
-      "executor": "nx:run-commands",
+      "executor": "@simondotm/nx-firebase:serve",
       "options": {
         "commands": [
           "nx run your-firebase-app-project-name:watch",
