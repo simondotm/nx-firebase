@@ -16,7 +16,7 @@ export function runMigrations(tree: Tree, workspace: FirebaseWorkspace) {
   // ensure ignores in .nxignore
   // init generator takes care of this
 
-  // [2.0.0 -> 2.1.0] ensure environment files are present in apps
+  // [2.0.0 -> 2.1.0] ensure environment files are present in apps dir
   workspace.firebaseAppProjects.forEach((project, name) => {
     const envPath = `${project.root}/environment`
     const envFiles = [`.env`, `.env.local`, `.secret.local`]
@@ -35,6 +35,9 @@ export function runMigrations(tree: Tree, workspace: FirebaseWorkspace) {
           ),
         )
         tree.write(joinPathFragments(project.root, 'environment', envFile), src)
+        logger.info(
+          `MIGRATE Added default environment file 'environment/${envFile}' for firebase app '${name}'`,
+        )
       }
     }
   })
@@ -43,11 +46,16 @@ export function runMigrations(tree: Tree, workspace: FirebaseWorkspace) {
   workspace.firebaseAppProjects.forEach((project, name) => {
     const getconfig = project.targets['getconfig']
     const command = getconfig?.options.command as string
-    if (command) {
+    const legacyPath = joinPathFragments(project.root, '.runtimeconfig.json')
+    if (command.includes(legacyPath)) {
       getconfig.options.command = command.replace(
-        joinPathFragments(project.root, '.runtimeconfig.json'),
+        legacyPath,
         joinPathFragments(project.root, 'environment', '.runtimeconfig.json'),
       )
+      logger.info(
+        `MIGRATE Updated getconfig target to use ignore environment directory for firebase app '${name}'`,
+      )
+
       updateProjectConfiguration(tree, project.name, project)
     }
   })
@@ -58,6 +66,9 @@ export function runMigrations(tree: Tree, workspace: FirebaseWorkspace) {
     const globs = `{ "glob": "**/*", "input": "${project.root}/environment", "output": "."}`
     if (!assets.includes(globs)) {
       assets.push(globs)
+      logger.info(
+        `MIGRATE Added assets glob for firebase function app '${name}'`,
+      )
       updateProjectConfiguration(tree, project.name, project)
     }
   })
@@ -70,10 +81,14 @@ export function runMigrations(tree: Tree, workspace: FirebaseWorkspace) {
     }
     config.functions.map((func: FirebaseFunction) => {
       const ignoreRule = '*.local'
-      const ignore = func.ignore || [ignoreRule]
-      if (!ignore.includes[ignoreRule]) {
+      const ignore = func.ignore || []
+      if (!ignore.includes(ignoreRule)) {
+        logger.info(
+          `MIGRATE Added ignore rule to firebase config '${configFilename}' for firebase function codebase '${func.codebase}'`,
+        )
         ignore.push(ignoreRule)
       }
+      func.ignore = ignore
     })
     writeJson(tree, configFilename, config)
   })
@@ -84,6 +99,8 @@ export function runMigrations(tree: Tree, workspace: FirebaseWorkspace) {
     const serveExecutor = '@simondotm/nx-firebase:serve'
     if (serve.executor !== serveExecutor) {
       serve.executor = serveExecutor
+      logger.info(`MIGRATE Updated serve target for firebase app '${name}'`)
+
       updateProjectConfiguration(tree, project.name, project)
     }
   })
