@@ -1131,9 +1131,11 @@ describe('nx-firebase e2e', () => {
         renameFile(joinPathFragments(appData.projectDir, 'environment'), joinPathFragments(appData.projectDir, 'environment_old'))
 
         // modify firebase.json to be v2 schema
-        // const configFile = `firebase.json`
-        // const configJson = readJson(configFile)
-        // configJson.functions
+        const configFile = `firebase.json`
+        const configJson = readJson(configFile)
+        delete configJson.functions[0].ignore
+        updateFile(configFile, JSON.stringify(configJson, null, 3))
+
 
         // remove globs from function project
 
