@@ -10,7 +10,7 @@
 
 ## Install Plugin
 
-**`npm install @simondotm/nx-firebase`**
+**`npm install @simondotm/nx-firebase --save-dev`**
 
 - Installs this plugin into your Nx workspace.
 - This will also install some Nx and firebase dependencies (both for backend and frontend) to your root workspace `package.json` if they are not already installed.

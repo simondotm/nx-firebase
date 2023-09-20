@@ -270,7 +270,7 @@ export function validateProjectConfig(projectDir: string, projectName: string) {
           },
         },
         serve: {
-          executor: 'nx:run-commands',
+          executor: '@simondotm/nx-firebase:serve',
           options: {
             commands: [
               `nx run ${projectName}:watch`,

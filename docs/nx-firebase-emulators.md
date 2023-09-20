@@ -27,15 +27,19 @@ Hopefully Nx will address this issue in future releases.
 
 ## Emulator workaround
 
-Until Nx fix this problem, this can be worked around using an experimental executor in the plugin as follows:
+Until Nx fix this problem, we are using an experimental executor in the plugin as a interim workaround:
 
 
-Change the `serve` target in your Firebase app `project.json` from:
+The `serve` target in Firebase app `project.json` configurations is using:
 
-* `nx:run-commands` to
 * `@simondotm/nx-firebase:serve`
 
-This executor handles CTRL+C in a way that ensures the Firebase Emulator shuts down cleanly.
+instead of
+
+* `nx:run-commands`
+
+
+This custom executor handles CTRL+C in a way that ensures the Firebase Emulator shuts down cleanly.
 
 With this executor you can pass extra CLI parameters for example:
 

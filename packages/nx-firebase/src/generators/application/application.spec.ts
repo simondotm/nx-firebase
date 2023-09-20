@@ -84,7 +84,7 @@ describe('application generator', () => {
           },
         },
         serve: {
-          executor: 'nx:run-commands',
+          executor: '@simondotm/nx-firebase:serve',
           options: {
             commands: [
               `nx run my-firebase-app:watch`,
