@@ -133,6 +133,12 @@ export function expectStrings(input: string, contains: string[]) {
   })
 }
 
+export function expectNoStrings(input: string, contains: string[]) {
+  contains.forEach((item) => {
+    expect(input).not.toContain(item)
+  })
+}
+
 /**
  * Generate test project data
  * Note: call this function AFTER initial app firebase.json has been created in order to have a
