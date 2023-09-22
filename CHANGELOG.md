@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+This plugin was completely rewritten since V2.x to use esbuild for bundling cloud functions. For documentation of the legacy v1.x plugin version see [here](https://github.com/simondotm/nx-firebase/tree/release/v1.1.0).
+
 - [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
+  - [v2.1.0](#v210)
   - [v2.0.0](#v200)
   - [v2.0.0-beta.1](#v200-beta1)
   - [v2.0.0-beta.0](#v200-beta0)
@@ -18,6 +21,14 @@ All notable changes to this project will be documented in this file.
   - [v0.3.0](#v030)
   - [v0.2.3](#v023)
   - [v0.2.2 - Initial Release](#v022---initial-release)
+
+## v2.1.0
+
+* Added support for [environment variables](docs/nx-firebase-functions-environment.md)
+* Added support for [secrets](docs/nx-firebase-functions-environment.md#environment-file-types)
+* Added a custom `serve` executor that exits the Firebase Emulator suite properly
+* Fixes to `sync` generator to update firebase app and firebase function project targets when they are renamed
+* Added a custom `migrate` generator to ensure workspace configurations match the latest plugin version schemas
 
 ## v2.0.0
 
@@ -35,7 +46,7 @@ Official v2 release
 
 Initial beta of plugin version 2.0.
 
-Users of earlier plugin versions must read [here for plugin v1 -> v2 migration instructions](docs/nx-firebase-v2-migration.md)
+Users of earlier plugin versions must read [here for plugin v1 -> v2 migration instructions](docs/nx-firebase-migrations.md)
 
 > **Please note that legacy v1 versions of the plugin are no longer supported from this point on, so only take this update if you are prepared to migrate your workspace and Firebase projects**
 
@@ -49,8 +60,6 @@ Users of earlier plugin versions must read [here for plugin v1 -> v2 migration i
 * Added `@simondotm/nx-firebase:sync` generator to manage Firebase workspaces
 * Minimum Nx version is now 16.1.1
 * Watch mode build of function code & libraries is now fully supported when running Firebase emulator
-
-
 
 ## v1.1.0
 

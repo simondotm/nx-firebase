@@ -6,8 +6,6 @@ A plugin for [Nx](https://nx.dev) v16.1.1+ that provides support for Firebase pr
 
 See [CHANGELOG](https://github.com/simondotm/nx-firebase/blob/main/CHANGELOG.md) for release notes.
 
-This plugin was completely rewritten since V2.x to use esbuild for bundling cloud functions. For documentation of the legacy v1.x plugin version see [here](https://github.com/simondotm/nx-firebase/tree/release/v1.1.0).
-
 ## Overview
 
 Nx provides a great way to manage monorepo workflows and this plugin helps make it easy to integrate Firebase projects with Nx.
@@ -28,14 +26,13 @@ Features:
 # User Guide
 
 - **[Quick Start](docs/quick-start.md)**
-- [Migrating from plugin v1.x to v2.x](docs/nx-firebase-v2-migration.md)
+- [Migrating to new plugin versions](docs/nx-firebase-migrations.md)
   
 **Nx Firebase Generators**
 
 - [Firebase Applications](docs/nx-firebase-applications.md)
 - [Firebase Functions](docs/nx-firebase-functions.md)
 - [Firebase Functions - Environment Variables](docs/nx-firebase-functions-environment.md)
-- [Firebase Sync](docs/nx-firebase-sync.md)
 
 **Nx Firebase**
 
@@ -44,6 +41,11 @@ Features:
 - [Firebase Databases](docs/nx-firebase-databases.md)
 - [Firebase Projects](docs/nx-firebase-projects.md)
 - [Project Schemas](docs/nx-firebase-project-structure.md)
+
+**Nx Firebase Workspace Management**
+
+- [Nx-Firebase Sync](docs/nx-firebase-sync.md)
+
 
 **Nx Workspace**
 
