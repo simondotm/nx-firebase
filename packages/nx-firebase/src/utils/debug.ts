@@ -9,14 +9,14 @@ export function debugInfo(info: string) {
   }
 }
 
-export function mapKeys(map: Map<any, any>) {
+export function mapKeys<T, R>(map: Map<T, R>) {
   return JSON.stringify([...map.keys()], null, 3)
 }
 
-export function mapValues(map: Map<any, any>) {
+export function mapValues<T, R>(map: Map<T, R>) {
   return JSON.stringify([...map.values()], null, 3)
 }
 
-export function mapEntries(map: Map<any, any>) {
+export function mapEntries<T, R>(map: Map<T, R>) {
   return JSON.stringify([...map.entries()], null, 3)
 }

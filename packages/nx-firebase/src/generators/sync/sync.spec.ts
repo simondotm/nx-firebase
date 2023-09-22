@@ -1,16 +1,15 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
-import { Tree, readProjectConfiguration } from '@nx/devkit'
+import { Tree } from '@nx/devkit'
 
 import generator from './sync'
-import { SyncGeneratorSchema } from './schema'
-import applicationGenerator from '../application/application'
-import functionGenerator from '../function/function'
+// import { SyncGeneratorSchema } from './schema'
 
 // sync is tested in e2e.
 
 describe('sync generator', () => {
   let tree: Tree
-  const options: SyncGeneratorSchema = { app: 'test' }
+
+  // const options: SyncGeneratorSchema = { app: 'test' }
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace()
@@ -30,14 +29,4 @@ describe('sync generator', () => {
     // const config = readProjectConfiguration(tree, 'test')
     // expect(config).toBeDefined()
   })
-
-  // it('should handle renamed function', async () => {
-  //   await applicationGenerator(tree, {
-  //     name: 'myFirebaseApp',
-  //   })
-  //   await functionGenerator(tree, {
-  //     name: 'myFirebaseFunction',
-  //     app: 'myFirebaseApp',
-  //   })
-  // })
 })

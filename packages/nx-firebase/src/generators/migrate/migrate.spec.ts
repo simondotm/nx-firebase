@@ -1,16 +1,14 @@
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
-import { Tree, readProjectConfiguration } from '@nx/devkit'
+import { Tree } from '@nx/devkit'
 
 import generator from './migrate'
-import { MigrateGeneratorSchema } from './schema'
-import applicationGenerator from '../application/application'
-import functionGenerator from '../function/function'
+// import { MigrateGeneratorSchema } from './schema'
 
 // migrate is tested in e2e.
 
 describe('migrate generator', () => {
   let tree: Tree
-  const options: MigrateGeneratorSchema = {}
+  // const options: MigrateGeneratorSchema = {}
 
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace()

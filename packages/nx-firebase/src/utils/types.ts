@@ -1,1 +1,1 @@
-export type UnitTestRunner = 'jest' | 'none';
+export type UnitTestRunner = 'jest' | 'none'
