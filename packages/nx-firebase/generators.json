@@ -25,6 +25,11 @@
       "factory": "./src/generators/sync/sync",
       "schema": "./src/generators/sync/schema.json",
       "description": "nx-firebase project sync tool"
-    }
+    },
+    "migrate": {
+      "factory": "./src/generators/migrate/migrate",
+      "schema": "./src/generators/migrate/schema.json",
+      "description": "nx-firebase project migration tool"
+    }    
   }
 }
