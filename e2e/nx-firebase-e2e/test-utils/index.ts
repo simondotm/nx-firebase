@@ -104,6 +104,10 @@ export async function syncGeneratorAsync(params: string = '') {
   return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:sync ${params}`)
 }
 
+export async function migrateGeneratorAsync(params: string = '') {
+  return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:migrate ${params}`)
+}
+
 export async function libGeneratorAsync(projectData: ProjectData, params: string = '') {
   return await safeRunNxCommandAsync(`g @nx/js:lib ${projectData.name} ${params}`)
 }

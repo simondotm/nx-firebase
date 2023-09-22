@@ -30,6 +30,7 @@ import {
   addImport,
   removeProjectAsync,
   renameProjectAsync,
+  migrateGeneratorAsync,
 } from '../test-utils'
 import { ProjectConfiguration, joinPathFragments } from '@nx/devkit'
 
@@ -1101,16 +1102,16 @@ describe('nx-firebase e2e', () => {
   // Test migrations
   //--------------------------------------------------------------------------------------------------
 
-  describe('nx-firebase sync migrate', () => {
+  describe('nx-firebase migrate', () => {
     it(
-      'should successfuly sync migrate for legacy app',
+      'should successfuly migrate for legacy app',
       async () => {
         const appData = getProjectData('apps', uniq('firebaseMigrateApp'))
         const functionData = getProjectData('apps', uniq('firebaseMigrateFunction'))
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
-        const result = await syncGeneratorAsync(`--migrate`)
+        const result = await migrateGeneratorAsync(``)
         testDebug(result.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,

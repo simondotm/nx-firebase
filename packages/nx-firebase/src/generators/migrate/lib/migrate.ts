@@ -5,7 +5,7 @@ import {
   updateProjectConfiguration,
   writeJson,
 } from '@nx/devkit'
-import { FirebaseWorkspace } from './types'
+import { FirebaseWorkspace } from '../../sync/lib/types'
 import { readFileSync } from 'fs'
 import { FirebaseFunction } from '../../../utils'
 

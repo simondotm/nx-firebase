@@ -22,7 +22,7 @@ import {
   getFirebaseWorkspace,
   renameCommandForTarget,
 } from './lib'
-import { runMigrations } from './lib/migrate'
+import { runMigrations } from '../migrate/lib/migrate'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
