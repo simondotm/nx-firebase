@@ -29,6 +29,7 @@ This plugin was completely rewritten since V2.x to use esbuild for bundling clou
 * Added a custom `serve` executor that exits the Firebase Emulator suite properly
 * Fixes to `sync` generator to update firebase app and firebase function project targets when they are renamed
 * Added a custom `migrate` generator to ensure workspace configurations match the latest plugin version schemas
+* Updated plugin to be built against Nx 16.6.0
 
 ## v2.0.0
 
