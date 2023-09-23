@@ -10,6 +10,41 @@ export interface FirebaseFunction {
   ignore?: string[]
 }
 
+export interface FirebaseHosting {
+  target?: string
+  public: string
+  ignore?: string[]
+  redirects?: {
+    source: string
+    destination: string
+    type: number
+  }[]
+  rewrites?: {
+    source: string
+    destination: string
+    dynamicLinks?: boolean
+    function?: {
+      functionId: string
+      region?: string
+      pinTag?: boolean
+    }
+    run?: {
+      serviceId: string
+      region: string
+    }
+  }
+  cleanUrls?: boolean
+  trailingSlash?: boolean
+  appAssociation?: 'AUTO'
+  headers?: {
+    source: string
+    headers: {
+      key: string
+      value: string
+    }[]
+  }[]
+}
+
 export interface FirebaseConfig {
   database: {
     rules: string
@@ -18,24 +53,7 @@ export interface FirebaseConfig {
     rules: string
     indexes: string
   }
-  hosting: {
-    target: string
-    public: string
-    ignore: string[]
-    rewrites: {
-      source: string
-      destination: string
-    }[]
-    headers: [
-      {
-        source: string
-        headers: {
-          key: string
-          value: string
-        }[]
-      },
-    ]
-  }[]
+  hosting: FirebaseHosting | FirebaseHosting[]
   storage: {
     rules: string
   }
