@@ -1,5 +1,7 @@
 import {
   GeneratorCallback,
+  getProjects,
+  joinPathFragments,
   logger,
   readProjectConfiguration,
   runTasksInSerial,
@@ -329,6 +331,71 @@ export async function syncGenerator(
       })
       writeJson(tree, configFileName, config)
     }
+  })
+
+  // 8. sync firebase configs for rules & hosting for renamed apps
+  workspace.renamedApps.forEach((project, oldProjectName) => {
+    const configFileName = workspace.firebaseAppConfigs.get(project.name)
+    const config = workspace.firebaseConfigs.get(configFileName)
+
+    // update config rules that are in the firebase app
+    const databaseRules = joinPathFragments(project.root, 'database.rules.json')
+    if (config.database && config.database.rules !== databaseRules) {
+      config.database.rules = databaseRules
+      logger.info(
+        `CHANGE Firebase app '${oldProjectName}' was renamed to '${project.name}', updated database rules in '${configFileName}'`,
+      )
+    }
+
+    const firestoreRules = joinPathFragments(project.root, 'firestore.rules')
+    if (config.firestore && config.firestore.rules !== firestoreRules) {
+      config.firestore.rules = firestoreRules
+      logger.info(
+        `CHANGE Firebase app '${oldProjectName}' was renamed to '${project.name}', updated firestore rules in '${configFileName}'`,
+      )
+    }
+
+    const firestoreIndexes = joinPathFragments(
+      project.root,
+      'firestore.indexes.json',
+    )
+    if (config.firestore && config.firestore.indexes !== firestoreIndexes) {
+      config.firestore.indexes = firestoreIndexes
+      logger.info(
+        `CHANGE Firebase app '${oldProjectName}' was renamed to '${project.name}', updated firestore indexes in '${configFileName}'`,
+      )
+    }
+
+    const storageRules = joinPathFragments(project.root, 'storage.rules')
+    if (config.storage && config.storage.rules !== storageRules) {
+      config.storage.rules = storageRules
+      logger.info(
+        `CHANGE Firebase app '${oldProjectName}' was renamed to '${project.name}', updated storage rules in '${configFileName}'`,
+      )
+    }
+
+    writeJson(tree, configFileName, config)
+  })
+
+  // 9. validate hosting rules match a project
+  workspace.firebaseConfigs.forEach((config, configFileName) => {
+    const projects = getProjects(tree)
+    if (!Array.isArray(config.hosting)) {
+      config.hosting = [config.hosting]
+    }
+    config.hosting.forEach((host) => {
+      let isValid = false
+      projects.forEach((nxProject) => {
+        if (host.public.includes(nxProject.root)) {
+          isValid = true
+        }
+      })
+      if (!isValid) {
+        logger.warn(
+          `Can't match hosting target '${host.target}' public dir '${host.public}' in  '${configFileName}' to a project in this workspace. Is it configured correctly?`,
+        )
+      }
+    })
   })
 
   // if user deletes a project that was linked to firebase.json config but there

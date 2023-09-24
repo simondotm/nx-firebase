@@ -12,6 +12,7 @@ import { runMigrations } from './lib/migrate'
  */
 export default async function migrateGenerator(
   tree: Tree,
+  // eslint-disable-next-line
   options: MigrateGeneratorSchema,
 ): Promise<GeneratorCallback> {
   const tasks: GeneratorCallback[] = []

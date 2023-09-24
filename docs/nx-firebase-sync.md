@@ -14,25 +14,24 @@
 
 ## Nx-Firebase Sync Generator
 
-With V2.0+ of the plugin, we now have support within an Nx workspace for:
+Within an Nx workspace, Nx-firebase supports:
 * Multiple firebase application projects
 * Multiple firebase function projects attached to the firebase applications
 
-To help manage these apps, a new `sync` generator has been added to help assist with productivity & maintenance of this in scenarios where:
+Deleting or renaming any of these projects requires various project & firebase configurations to be updated to ensure that targets & deployments still work.
 
-* Firebase application or function projects have been renamed
-* Firebase application or function projects have been deleted
-
-Just run the following command as soon as possible after any of these operations to ensure everything is kept in sync:
+To help manage these scenarios, Nx-firebase has a `sync` generator to automate this work:
 
 **`nx g @simondotm/nx-firebase:sync`** 
 
-| Options | Type | Description |
-|---|---|--|
-| `--project=proj` | optional | updates the `--project` option that will be used for firebase CLI commands |
-| `--app=appname` | required only if `--project` is set | updates the `--project` option for firebase app `appname` that will be used for firebase CLI commands |
+Run this command as soon as possible after any of these operations to ensure your Nx Firebase workspace is kept in sync:
 
+* When Firebase application or function projects have been renamed
+* When Firebase application or function projects have been deleted
 
+The sync generator also runs some checks on your hosting configurations to validate & warn if there are any `public` paths that can't be matched to a Nx project in your workspace.
+
+You can also use the `sync` generator to [change the Firebase project](#changing-firebase-cli-project) for an Nx Firebase App.
 ## Renaming Nx-Firebase Projects
 
 Nx projects such as Firebase apps and Firebase function apps can be renamed using the `nx g move` generator.
@@ -46,6 +45,8 @@ Run the `nx g @simondotm/nx-firebase:sync` generator after the rename.
 * Firebase applications with config files named as `firebase.my-project.json` that are used by the renamed app will also be renamed to match the new project name. 
 
 * The `firebase:name:<old-project-name>` tag on the Firebase application's `project.json` will be updated to `firebase:name:<new-project-name>`
+
+* Paths to rules and indexes for Firebase database, storage and firestore are updated in the `firebase.json` config
 
 ### Renamed firebase function projects
 
@@ -78,11 +79,14 @@ Run the `nx g @simondotm/nx-firebase:sync` generator after the deletion.
 
 ## Changing Firebase CLI Project
 
-You can also use the sync generator update the firebase project that is sent to the firebase CLI `--project` option for your Firebase application Nx project as follows:
+Nx Firebase applications have a `firebase` target that runs the Firebase CLI & specifies which `firebase.json` configuration is linked to this app (`--config`), and also which Firebase project it should use when being deployed (`--project`).
+
+You can use the sync generator update the firebase project that is sent to the firebase CLI `--project` option for your Firebase application Nx project as follows:
 
 **`nx g @simondotm/nx-firebase:sync --app=<firebase-app-project-name> --project=<firebase-cli-project-name>`**
 
 All firebase commands used by the Nx project targets such as `deploy` will now send `--project=<firebase-project-name>` to the firebase CLI.
+
 
 ## Nx-Firebase Project Tags Reference
 

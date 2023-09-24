@@ -75,6 +75,7 @@ export default async function runFirebaseServeExecutor(
     ).replace(`nx run ${projectName}:firebase`, '')
 
     // Run the watch process
+    // eslint-disable-next-line
     const watchProcess = spawn(watchCommand, [], {
       shell: true,
       stdio: 'inherit',
