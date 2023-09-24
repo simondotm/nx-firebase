@@ -24,7 +24,6 @@ import {
   getFirebaseWorkspace,
   renameCommandForTarget,
 } from './lib'
-import { runMigrations } from '../migrate/lib/migrate'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
@@ -51,12 +50,6 @@ export async function syncGenerator(
   logger.info(
     `This workspace has ${workspace.firebaseAppProjects.size} firebase apps and ${workspace.firebaseFunctionProjects.size} firebase functions\n\n`,
   )
-
-  // run migrations if required
-  if (options.migrate) {
-    runMigrations(tree, workspace)
-    return
-  }
 
   // change the firebase project for an nx firebase app project
   if (options.project) {
