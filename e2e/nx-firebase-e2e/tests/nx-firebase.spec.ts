@@ -1125,7 +1125,7 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
-        const result = await migrateGeneratorAsync(``)
+        const result = await migrateGeneratorAsync()
         testDebug(result.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,
@@ -1158,7 +1158,7 @@ describe('nx-firebase e2e', () => {
         updateFile(functionFile, JSON.stringify(functionJson, null, 3))
 
         // run migrate script
-        const result2 = await syncGeneratorAsync(`--migrate`)
+        const result2 = await migrateGeneratorAsync()
         testDebug(result2.stdout)
         expectStrings(result2.stdout, [
           `MIGRATE Added default environment file 'environment/.env' for firebase app '${appData.projectName}'`,
@@ -1178,11 +1178,11 @@ describe('nx-firebase e2e', () => {
         
         //todo: validateFunctionConfig - IMPORTANT since we missed some errors in last release due to this missing test
         // where assets glob was malformed
-        validateFunctionConfig(functionData.projectDir, functionData.projectName, appData.projectDir)
+        validateFunctionConfig(functionData.projectDir, functionData.projectName, appData.projectDir, appData.projectName)
 
 
         // run it again
-        const result3 = await syncGeneratorAsync(`--migrate`)
+        const result3 = await migrateGeneratorAsync()
         testDebug(result3.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,

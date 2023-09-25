@@ -295,7 +295,7 @@ export function expectedAppProjectTargets(projectDir: string, projectName: strin
 }
 
 
-export function expectedFunctionProjectTargets(projectDir: string, projectName: string, appProjectDir: string) {
+export function expectedFunctionProjectTargets(projectDir: string, projectName: string, appProjectDir: string, appProjectName: string) {
   return {
     build: {
       executor: "@nx/esbuild:esbuild",
@@ -312,6 +312,9 @@ export function expectedFunctionProjectTargets(projectDir: string, projectName: 
           { glob: "**/*", input: `${appProjectDir}/environment`, output: "."}
         ],
         generatePackageJson: true,
+        bundle: true,
+        dependenciesFieldType: "dependencies",
+        format: [ 'esm' ],
         thirdParty: false,
         target: "node16",
         esbuildOptions: {
@@ -322,7 +325,7 @@ export function expectedFunctionProjectTargets(projectDir: string, projectName: 
     deploy: {
       executor: "nx:run-commands",
       options: {
-        command: `nx run ayok-firebase:deploy --only functions:${projectName}`
+        command: `nx run ${appProjectName}:deploy --only functions:${projectName}`
       },
       dependsOn: [
         "build"
@@ -342,12 +345,18 @@ export function expectedFunctionProjectTargets(projectDir: string, projectName: 
     test: {
       executor: "@nx/jest:jest",
       outputs: [
-        `{workspaceRoot}/coverage/${projectDir}`
+        `{workspaceRoot}/coverage/{projectRoot}`
       ],
       options: {
         jestConfig: `${projectDir}/jest.config.ts`,
         passWithNoTests: true
-      }
+      },
+      configurations: {
+        ci: {
+          ci: true,
+          codeCoverage: true,
+        },
+      },      
     }
   }
 }
@@ -364,13 +373,13 @@ export function validateProjectConfig(projectDir: string, projectName: string) {
 }
 
 
-export function validateFunctionConfig(projectDir: string, projectName: string, appProjectDir: string) {
+export function validateFunctionConfig(projectDir: string, projectName: string, appProjectDir: string, appProjectName: string) {
     const project = readJson(
       `${projectDir}/project.json`,
     )
     // expect(project.root).toEqual(`apps/${projectName}`)
     expect(project.targets).toEqual(
-      expect.objectContaining(expectedFunctionProjectTargets(projectDir, projectName, appProjectDir)),
+      expect.objectContaining(expectedFunctionProjectTargets(projectDir, projectName, appProjectDir, appProjectName)),
     )
 }
 
