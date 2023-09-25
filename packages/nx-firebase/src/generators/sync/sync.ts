@@ -247,6 +247,16 @@ export async function syncGenerator(
           }
         }
       }
+      // update the deploy command in functions where app has been renamed
+      const deployCommand = project.targets.deploy.options.command
+      project.targets.deploy.options.command = deployCommand.replace(
+        tagValue,
+        renamedApp.name,
+      )
+      logger.info(
+        `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated firebase deploy command in firebase function '${name}'`,
+      )
+
       // update the function project config
       updateProjectConfiguration(tree, project.name, project)
     } else {
