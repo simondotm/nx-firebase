@@ -240,7 +240,7 @@ export async function syncGenerator(
       for (const asset of functionAssets) {
         if (typeof asset === 'object') {
           if (asset.input) {
-            asset.input = renamedApp.root
+            asset.input = joinPathFragments(renamedApp.root, 'environment')
             logger.info(
               `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated environment assets path in firebase function '${name}'`,
             )
