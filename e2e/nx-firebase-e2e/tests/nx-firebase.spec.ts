@@ -262,7 +262,7 @@ describe('nx-firebase e2e', () => {
           ),
         ).not.toThrow()
     
-        validateProjectConfig(appData.projectDir, appData.projectName)  
+        validateProjectConfig(appData) 
 
         // cleanup - app
         await cleanAppAsync(appData)
@@ -300,7 +300,7 @@ describe('nx-firebase e2e', () => {
           const project = readJson(`${appData.projectDir}/project.json`)
           expect(project.name).toEqual(`${appData.projectName}`)
 
-          validateProjectConfig(appData.projectDir, appData.projectName)  
+          validateProjectConfig(appData)  
 
           // cleanup - app
           await cleanAppAsync(appData)                
@@ -373,7 +373,9 @@ describe('nx-firebase e2e', () => {
             `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).toThrow()  
-        
+
+        validateFunctionConfig(functionData, appData)
+
         // cleanup
         await cleanFunctionAsync(functionData)              
         await cleanAppAsync(appData)              
@@ -387,6 +389,8 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
+        validateFunctionConfig(functionData, appData)
+
         const result = await runTargetAsync(appData, 'build')
         expect(result.stdout).toContain("Build succeeded.")        
 
@@ -399,7 +403,7 @@ describe('nx-firebase e2e', () => {
             `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).not.toThrow()   
-        
+
         // cleanup
         await cleanFunctionAsync(functionData)              
         await cleanAppAsync(appData)             
@@ -412,6 +416,8 @@ describe('nx-firebase e2e', () => {
         const functionData = getProjectData('apps', uniq('firebaseFunction'))
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        validateFunctionConfig(functionData, appData)
 
         const result = await runTargetAsync(functionData, 'build')
         expect(result.stdout).toContain(`nx run ${functionData.projectName}:build`)        
@@ -433,6 +439,8 @@ describe('nx-firebase e2e', () => {
         const functionData = getProjectData('apps', uniq('firebaseFunction'))
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        validateFunctionConfig(functionData, appData)
 
         const result = await runTargetAsync(functionData, 'build')
         expect(result.stdout).toContain(
@@ -470,6 +478,8 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}  --tags e2etag,e2ePackage`)
 
+        validateFunctionConfig(functionData, appData)
+
         const project = readJson(`${functionData.projectDir}/project.json`)
         expect(project.tags).toEqual([
           'firebase:function',
@@ -502,6 +512,8 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
+        validateFunctionConfig(functionData, appData)
+
         // add buildable & nonbuildable lib dependencies using import statements
         let mainTs = getMainTs()
         
@@ -776,6 +788,9 @@ describe('nx-firebase e2e', () => {
             `--only functions:${renamedFunctionData.projectName}`
           )           
       
+          validateFunctionConfig(renamedFunctionData, appData)
+
+
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
           await cleanAppAsync(appData)
@@ -832,7 +847,9 @@ describe('nx-firebase e2e', () => {
           )      
           
           // check rename was successful
-          validateProjectConfig(renamedAppData.projectDir, renamedAppData.projectName)          
+          validateProjectConfig(renamedAppData)          
+          validateFunctionConfig(functionData, renamedAppData)
+          validateFunctionConfig(functionData2, renamedAppData)
       
           // run another sync to check there should be no orphaned functions from an app rename
           const result2 = await syncGeneratorAsync()
@@ -902,8 +919,8 @@ describe('nx-firebase e2e', () => {
           )           
                       
           // check rename was successful
-          validateProjectConfig(renamedAppData.projectDir, renamedAppData.projectName)          
-          
+          validateProjectConfig(renamedAppData)          
+          validateFunctionConfig(renamedFunctionData, renamedAppData)
 
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
@@ -1174,11 +1191,11 @@ describe('nx-firebase e2e', () => {
           `UPDATE ${appData.projectDir}/project.json`,
         ])        
 
-        validateProjectConfig(appData.projectDir, appData.projectName)  
+        validateProjectConfig(appData)  
         
         //todo: validateFunctionConfig - IMPORTANT since we missed some errors in last release due to this missing test
         // where assets glob was malformed
-        validateFunctionConfig(functionData.projectDir, functionData.projectName, appData.projectDir, appData.projectName)
+        validateFunctionConfig(functionData, appData)
 
 
         // run it again
