@@ -1,6 +1,6 @@
 import { ProjectConfiguration } from '@nx/devkit'
 
-import { FirebaseConfig } from '../../../utils'
+import { FirebaseConfig } from './firebase-config'
 
 export const CONFIG_NO_APP = 'CONFIG_NO_APP'
 

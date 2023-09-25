@@ -22,6 +22,7 @@ import {
   syncGeneratorAsync,
   safeRunNxCommandAsync,
   validateProjectConfig,
+  validateFunctionConfig,
   expectNoStrings,
   libGeneratorAsync,
   runTargetAsync,
@@ -1139,7 +1140,7 @@ describe('nx-firebase e2e', () => {
 
         // remove environment folder from app
         // cant delete in e2e, so lets just rename environment dir for now
-        renameFile(joinPathFragments(appData.projectDir, 'environment'), joinPathFragments(appData.projectDir, 'environment_old'))
+        renameFile(joinPathFragments(appData.projectDir, 'environment'), joinPathFragments(appData.projectDir, uniq('environment')))
 
         // modify firebase.json to be v2 schema
         const configFile = `firebase.json`
@@ -1174,7 +1175,10 @@ describe('nx-firebase e2e', () => {
         ])        
 
         validateProjectConfig(appData.projectDir, appData.projectName)  
-        //todo: validateFunctionConfig
+        
+        //todo: validateFunctionConfig - IMPORTANT since we missed some errors in last release due to this missing test
+        // where assets glob was malformed
+        validateFunctionConfig(functionData.projectDir, functionData.projectName, appData.projectDir)
 
 
         // run it again

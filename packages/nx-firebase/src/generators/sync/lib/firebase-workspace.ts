@@ -1,8 +1,9 @@
 import { Tree } from '@nx/devkit'
 import { getFirebaseChanges } from './firebase-changes'
 import { getFirebaseProjects } from './firebase-projects'
-import { FirebaseWorkspace } from './types'
+
 import { getFirebaseConfigs } from './firebase-configs'
+import { FirebaseWorkspace } from '../../../types'
 
 export function getFirebaseWorkspace(tree: Tree): FirebaseWorkspace {
   // build list of firebase apps and functions in the workspace

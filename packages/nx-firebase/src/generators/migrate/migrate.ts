@@ -9,9 +9,13 @@ import {
 } from '@nx/devkit'
 import { MigrateGeneratorSchema } from './schema'
 import initGenerator from '../init/init'
-import { debugInfo, getFirebaseWorkspace } from '../sync/lib'
+import {
+  debugInfo,
+  getFirebaseScopeFromTag,
+  getFirebaseWorkspace,
+} from '../sync/lib'
 import { readFileSync } from 'fs'
-import { FirebaseFunction } from '../../utils'
+import { FunctionAssetsEntry, FirebaseFunction } from '../../types'
 
 /**
  * Migrate firebase workspace
@@ -55,7 +59,6 @@ export default async function migrateGenerator(
           joinPathFragments(
             __dirname,
             '..',
-            '..',
             'application',
             'files',
             'environment',
@@ -90,9 +93,29 @@ export default async function migrateGenerator(
 
   // [2.0.0 -> 2.1.0] ensure globs in function projects
   workspace.firebaseFunctionProjects.forEach((project, name) => {
-    const assets = project.targets['build']?.options.assets as string[]
-    const globs = `{ "glob": "**/*", "input": "${project.root}/environment", "output": "."}`
-    if (!assets.includes(globs)) {
+    const appName = getFirebaseScopeFromTag(project, 'firebase:dep')
+    const appProject = workspace.firebaseAppProjects.get(appName.tagValue)
+    const assets = project.targets['build']?.options
+      .assets as FunctionAssetsEntry[]
+    const globs = {
+      glob: '**/*',
+      input: `${appProject.root}/environment`, // TODO: must be path of parent firebase app
+      output: '.',
+    }
+
+    let hasAssetsGlob = false
+    assets.forEach((asset) => {
+      if (typeof asset === 'object') {
+        if (
+          asset.glob === globs.glob &&
+          asset.input === globs.input &&
+          asset.output === globs.output
+        ) {
+          hasAssetsGlob = true
+        }
+      }
+    })
+    if (!hasAssetsGlob) {
       assets.push(globs)
       logger.info(
         `MIGRATE Added assets glob for firebase function app '${name}'`,

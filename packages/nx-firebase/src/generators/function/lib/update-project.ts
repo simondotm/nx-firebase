@@ -4,6 +4,7 @@ import {
   updateProjectConfiguration,
 } from '@nx/devkit'
 import type { NormalizedOptions } from '../schema'
+import type { FunctionAssetsEntry, FunctionAssetsGlob } from '../../../types'
 
 export function updateProject(tree: Tree, options: NormalizedOptions): void {
   const project = readProjectConfiguration(tree, options.projectName)
@@ -36,11 +37,13 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
 
   // add reference to firebase app environment assets
   const firebaseAppRoot = firebaseAppProject.root
-  project.targets.build.options.assets.push({
+  const assets: FunctionAssetsEntry[] = project.targets.build.options.assets
+  const glob: FunctionAssetsGlob = {
     glob: '**/*',
     input: `${firebaseAppRoot}/environment`,
     output: '.',
-  })
+  }
+  assets.push(glob)
 
   // add deploy target
   project.targets.deploy = {

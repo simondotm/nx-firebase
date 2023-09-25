@@ -1,10 +1,14 @@
 import { ProjectConfiguration, Tree } from '@nx/devkit'
 
-import { FirebaseFunction } from '../../../utils'
+import {
+  FirebaseProjects,
+  FirebaseChanges,
+  FirebaseConfigs,
+  FirebaseFunction,
+} from '../../../types'
 
-import { debugInfo, mapKeys } from '../../../utils/debug'
+import { debugInfo, mapKeys } from '../../../utils'
 import { getFirebaseScopeFromTag } from './tags'
-import { FirebaseProjects, FirebaseChanges, FirebaseConfigs } from './types'
 
 /**
  * Check if the given firebase project has been renamed by checking its `firebase:name` tag

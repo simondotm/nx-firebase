@@ -1,5 +1,9 @@
-import { GeneratorCallback, readJson, Tree } from '@nx/devkit'
-import { addDependenciesToPackageJson } from '@nx/devkit'
+import {
+  GeneratorCallback,
+  readJson,
+  Tree,
+  addDependenciesToPackageJson,
+} from '@nx/devkit'
 import { workspaceNxVersion } from '../../../utils'
 import {
   //  tsLibVersion,

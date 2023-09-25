@@ -11,7 +11,7 @@ import {
 } from '@nx/devkit'
 
 import { SyncGeneratorSchema } from './schema'
-import { FirebaseFunction, setFirebaseConfigFromCommand } from '../../utils'
+import { setFirebaseConfigFromCommand } from '../../utils'
 import initGenerator from '../init/init'
 
 import {
@@ -19,11 +19,11 @@ import {
   getFirebaseScopeFromTag,
   isFirebaseApp,
   updateFirebaseAppDeployProject,
-  CONFIG_NO_APP,
   updateFirebaseProjectNameTag,
   getFirebaseWorkspace,
   renameCommandForTarget,
 } from './lib'
+import { CONFIG_NO_APP, FirebaseFunction } from '../../types'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
