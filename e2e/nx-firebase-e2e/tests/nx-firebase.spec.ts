@@ -815,7 +815,6 @@ describe('nx-firebase e2e', () => {
           testDebug(result.stdout)
 
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated targets`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
@@ -886,7 +885,6 @@ describe('nx-firebase e2e', () => {
           testDebug(result.stdout)
 
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated targets`,           
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
@@ -1222,7 +1220,6 @@ describe('nx-firebase e2e', () => {
           `CREATE ${appData.projectDir}/environment/.secret.local`,
           `UPDATE ${appData.projectDir}/project.json`,
         ])    
-
 
         // cleanup
         await cleanFunctionAsync(functionData)              

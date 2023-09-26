@@ -94,12 +94,8 @@ export async function syncGenerator(
   // 2. rename firebase config files too if app is renamed
   workspace.renamedApps.forEach((project, oldProjectName) => {
     const configFileName = workspace.firebaseAppConfigs.get(project.name)
-    // dont rename config file if it is firebase.json
-    if (configFileName === 'firebase.json') {
-      logger.info(
-        `CHANGE Firebase app '${oldProjectName}' linked to primary config file was renamed to '${project.name}', skipping rename of '${configFileName}'`,
-      )
-    } else {
+    // only rename config file if it is not firebase.json
+    if (configFileName !== 'firebase.json') {
       const config = workspace.firebaseConfigs.get(configFileName)
 
       // create a copy of the firebase config with the renamed project name
