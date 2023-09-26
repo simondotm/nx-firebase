@@ -1,6 +1,6 @@
 {
   "name": "@simondotm/nx-firebase",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A Firebase plugin for Nx monorepo workspaces.",
   "author": "Simon Morris",
   "license": "MIT",

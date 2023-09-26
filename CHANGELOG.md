@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 This plugin was completely rewritten since V2.x to use esbuild for bundling cloud functions. For documentation of the legacy v1.x plugin version see [here](https://github.com/simondotm/nx-firebase/tree/release/v1.1.0).
 
 - [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
+  - [v2.1.1](#v211)
   - [v2.1.0](#v210)
   - [v2.0.0](#v200)
   - [v2.0.0-beta.1](#v200-beta1)
@@ -21,6 +22,10 @@ This plugin was completely rewritten since V2.x to use esbuild for bundling clou
   - [v0.3.0](#v030)
   - [v0.2.3](#v023)
   - [v0.2.2 - Initial Release](#v022---initial-release)
+
+## v2.1.1
+
+* Fix issues in the v2.1.0 release
 
 ## v2.1.0
 
