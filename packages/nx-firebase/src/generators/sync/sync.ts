@@ -11,7 +11,7 @@ import {
 } from '@nx/devkit'
 
 import { SyncGeneratorSchema } from './schema'
-import { FirebaseFunction, setFirebaseConfigFromCommand } from '../../utils'
+import { setFirebaseConfigFromCommand } from '../../utils'
 import initGenerator from '../init/init'
 
 import {
@@ -19,12 +19,11 @@ import {
   getFirebaseScopeFromTag,
   isFirebaseApp,
   updateFirebaseAppDeployProject,
-  CONFIG_NO_APP,
   updateFirebaseProjectNameTag,
   getFirebaseWorkspace,
   renameCommandForTarget,
 } from './lib'
-import { runMigrations } from '../migrate/lib/migrate'
+import { CONFIG_NO_APP, FirebaseFunction } from '../../types'
 
 const FUNCTIONS_DEPLOY_MATCHER = /(--only[ =]functions:)([^\s]+)/
 
@@ -51,12 +50,6 @@ export async function syncGenerator(
   logger.info(
     `This workspace has ${workspace.firebaseAppProjects.size} firebase apps and ${workspace.firebaseFunctionProjects.size} firebase functions\n\n`,
   )
-
-  // run migrations if required
-  if (options.migrate) {
-    runMigrations(tree, workspace)
-    return
-  }
 
   // change the firebase project for an nx firebase app project
   if (options.project) {
@@ -101,12 +94,8 @@ export async function syncGenerator(
   // 2. rename firebase config files too if app is renamed
   workspace.renamedApps.forEach((project, oldProjectName) => {
     const configFileName = workspace.firebaseAppConfigs.get(project.name)
-    // dont rename config file if it is firebase.json
-    if (configFileName === 'firebase.json') {
-      logger.info(
-        `CHANGE Firebase app '${oldProjectName}' linked to primary config file was renamed to '${project.name}', skipping rename of '${configFileName}'`,
-      )
-    } else {
+    // only rename config file if it is not firebase.json
+    if (configFileName !== 'firebase.json') {
       const config = workspace.firebaseConfigs.get(configFileName)
 
       // create a copy of the firebase config with the renamed project name
@@ -247,13 +236,23 @@ export async function syncGenerator(
       for (const asset of functionAssets) {
         if (typeof asset === 'object') {
           if (asset.input) {
-            asset.input = renamedApp.root
+            asset.input = joinPathFragments(renamedApp.root, 'environment')
             logger.info(
               `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated environment assets path in firebase function '${name}'`,
             )
           }
         }
       }
+      // update the deploy command in functions where app has been renamed
+      const deployCommand = project.targets.deploy.options.command
+      project.targets.deploy.options.command = deployCommand.replace(
+        tagValue,
+        renamedApp.name,
+      )
+      logger.info(
+        `CHANGE Firebase app '${tagValue}' was renamed to '${renamedApp.name}', updated firebase deploy command in firebase function '${name}'`,
+      )
+
       // update the function project config
       updateProjectConfiguration(tree, project.name, project)
     } else {
@@ -392,7 +391,7 @@ export async function syncGenerator(
       })
       if (!isValid) {
         logger.warn(
-          `Can't match hosting target '${host.target}' public dir '${host.public}' in  '${configFileName}' to a project in this workspace. Is it configured correctly?`,
+          `WARNING: Can't match hosting target with public dir '${host.public}' in '${configFileName}' to a project in this workspace. Is it configured correctly?`,
         )
       }
     })

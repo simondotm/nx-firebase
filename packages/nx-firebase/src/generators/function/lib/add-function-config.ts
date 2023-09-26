@@ -1,6 +1,6 @@
 import { Tree, joinPathFragments, updateJson } from '@nx/devkit'
-import { FirebaseConfig, FirebaseFunction } from '../../../utils'
-import { NormalizedOptions } from '../schema'
+import type { FirebaseConfig, FirebaseFunction } from '../../../types'
+import type { NormalizedOptions } from '../schema'
 
 export function addFunctionConfig(tree: Tree, options: NormalizedOptions) {
   updateJson(tree, options.firebaseConfigName, (json: FirebaseConfig) => {

@@ -22,6 +22,7 @@ import {
   syncGeneratorAsync,
   safeRunNxCommandAsync,
   validateProjectConfig,
+  validateFunctionConfig,
   expectNoStrings,
   libGeneratorAsync,
   runTargetAsync,
@@ -261,7 +262,7 @@ describe('nx-firebase e2e', () => {
           ),
         ).not.toThrow()
     
-        validateProjectConfig(appData.projectDir, appData.projectName)  
+        validateProjectConfig(appData) 
 
         // cleanup - app
         await cleanAppAsync(appData)
@@ -299,7 +300,7 @@ describe('nx-firebase e2e', () => {
           const project = readJson(`${appData.projectDir}/project.json`)
           expect(project.name).toEqual(`${appData.projectName}`)
 
-          validateProjectConfig(appData.projectDir, appData.projectName)  
+          validateProjectConfig(appData)  
 
           // cleanup - app
           await cleanAppAsync(appData)                
@@ -372,7 +373,9 @@ describe('nx-firebase e2e', () => {
             `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).toThrow()  
-        
+
+        validateFunctionConfig(functionData, appData)
+
         // cleanup
         await cleanFunctionAsync(functionData)              
         await cleanAppAsync(appData)              
@@ -386,6 +389,8 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
 
+        validateFunctionConfig(functionData, appData)
+
         const result = await runTargetAsync(appData, 'build')
         expect(result.stdout).toContain("Build succeeded.")        
 
@@ -398,7 +403,7 @@ describe('nx-firebase e2e', () => {
             `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).not.toThrow()   
-        
+
         // cleanup
         await cleanFunctionAsync(functionData)              
         await cleanAppAsync(appData)             
@@ -411,6 +416,8 @@ describe('nx-firebase e2e', () => {
         const functionData = getProjectData('apps', uniq('firebaseFunction'))
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        validateFunctionConfig(functionData, appData)
 
         const result = await runTargetAsync(functionData, 'build')
         expect(result.stdout).toContain(`nx run ${functionData.projectName}:build`)        
@@ -432,6 +439,8 @@ describe('nx-firebase e2e', () => {
         const functionData = getProjectData('apps', uniq('firebaseFunction'))
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
+
+        validateFunctionConfig(functionData, appData)
 
         const result = await runTargetAsync(functionData, 'build')
         expect(result.stdout).toContain(
@@ -469,6 +478,8 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}  --tags e2etag,e2ePackage`)
 
+        validateFunctionConfig(functionData, appData)
+
         const project = readJson(`${functionData.projectDir}/project.json`)
         expect(project.tags).toEqual([
           'firebase:function',
@@ -501,6 +512,8 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
+        validateFunctionConfig(functionData, appData)
+
         // add buildable & nonbuildable lib dependencies using import statements
         let mainTs = getMainTs()
         
@@ -775,6 +788,9 @@ describe('nx-firebase e2e', () => {
             `--only functions:${renamedFunctionData.projectName}`
           )           
       
+          validateFunctionConfig(renamedFunctionData, appData)
+
+
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
           await cleanAppAsync(appData)
@@ -799,7 +815,6 @@ describe('nx-firebase e2e', () => {
           testDebug(result.stdout)
 
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated targets`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${functionData.projectName}'`,
@@ -810,10 +825,18 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore rules in '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore indexes in '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated storage rules in '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${functionData.projectName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${functionData2.projectName}'`,
             `UPDATE ${renamedAppData.configName}`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${functionData.projectName}/project.json`,   
+            `UPDATE apps/${functionData2.projectName}/project.json`,   
           ])
+
+          expectStrings(result.stderr, [
+            `WARNING: Can't match hosting target with public dir '${appData.projectDir}/public' in '${renamedAppData.configName}' to a project in this workspace. Is it configured correctly?`,
+          ])
+
           // we should not rename config if it is called firebase.json
           expect(result.stdout).not.toContain(
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
@@ -831,7 +854,9 @@ describe('nx-firebase e2e', () => {
           )      
           
           // check rename was successful
-          validateProjectConfig(renamedAppData.projectDir, renamedAppData.projectName)          
+          validateProjectConfig(renamedAppData)          
+          validateFunctionConfig(functionData, renamedAppData)
+          validateFunctionConfig(functionData2, renamedAppData)
       
           // run another sync to check there should be no orphaned functions from an app rename
           const result2 = await syncGeneratorAsync()
@@ -865,7 +890,6 @@ describe('nx-firebase e2e', () => {
           testDebug(result.stdout)
 
           expectStrings(result.stdout, [
-            `CHANGE Firebase app '${appData.projectName}' linked to primary config file was renamed to '${renamedAppData.projectName}', skipping rename of '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated targets`,           
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:dep tag in firebase function '${renamedFunctionData.projectName}'`,
@@ -874,12 +898,18 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore rules in '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore indexes in '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated storage rules in '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${renamedAppData.configName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
-          ])      
+          ])
+          
+          expectStrings(result.stderr, [
+            `WARNING: Can't match hosting target with public dir '${appData.projectDir}/public' in '${renamedAppData.configName}' to a project in this workspace. Is it configured correctly?`,
+          ])
+
           // we should not rename config if it is called firebase.json
           expect(result.stdout).not.toContain(
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
@@ -901,8 +931,8 @@ describe('nx-firebase e2e', () => {
           )           
                       
           // check rename was successful
-          validateProjectConfig(renamedAppData.projectDir, renamedAppData.projectName)          
-          
+          validateProjectConfig(renamedAppData)          
+          validateFunctionConfig(renamedFunctionData, renamedAppData)
 
           // cleanup - function, then app
           await cleanFunctionAsync(renamedFunctionData)
@@ -957,10 +987,15 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore rules in '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore indexes in '${renamedAppData.configName}'`,
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated storage rules in '${renamedAppData.configName}'`,
+            `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${functionData.projectName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${functionData.projectName}/project.json`,   
             `DELETE ${appData.configName}`,            
-            `CREATE ${renamedAppData.configName}`,        
+            `CREATE ${renamedAppData.configName}`,   
+          ])
+
+          expectStrings(result.stderr, [
+            `WARNING: Can't match hosting target with public dir '${appData.projectDir}/public' in '${renamedAppData.configName}' to a project in this workspace. Is it configured correctly?`,
           ])
 
           // check that app project has correct --config setting after rename
@@ -1124,7 +1159,7 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
-        const result = await migrateGeneratorAsync(``)
+        const result = await migrateGeneratorAsync()
         testDebug(result.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,
@@ -1139,7 +1174,7 @@ describe('nx-firebase e2e', () => {
 
         // remove environment folder from app
         // cant delete in e2e, so lets just rename environment dir for now
-        renameFile(joinPathFragments(appData.projectDir, 'environment'), joinPathFragments(appData.projectDir, 'environment_old'))
+        renameFile(joinPathFragments(appData.projectDir, 'environment'), joinPathFragments(appData.projectDir, uniq('environment')))
 
         // modify firebase.json to be v2 schema
         const configFile = `firebase.json`
@@ -1157,7 +1192,7 @@ describe('nx-firebase e2e', () => {
         updateFile(functionFile, JSON.stringify(functionJson, null, 3))
 
         // run migrate script
-        const result2 = await syncGeneratorAsync(`--migrate`)
+        const result2 = await migrateGeneratorAsync()
         testDebug(result2.stdout)
         expectStrings(result2.stdout, [
           `MIGRATE Added default environment file 'environment/.env' for firebase app '${appData.projectName}'`,
@@ -1173,12 +1208,15 @@ describe('nx-firebase e2e', () => {
           `UPDATE ${appData.projectDir}/project.json`,
         ])        
 
-        validateProjectConfig(appData.projectDir, appData.projectName)  
-        //todo: validateFunctionConfig
+        validateProjectConfig(appData)  
+        
+        //todo: validateFunctionConfig - IMPORTANT since we missed some errors in last release due to this missing test
+        // where assets glob was malformed
+        validateFunctionConfig(functionData, appData)
 
 
         // run it again
-        const result3 = await syncGeneratorAsync(`--migrate`)
+        const result3 = await migrateGeneratorAsync()
         testDebug(result3.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,
@@ -1197,6 +1235,7 @@ describe('nx-firebase e2e', () => {
           `UPDATE ${appData.projectDir}/project.json`,
         ])    
 
+        // expect(true).toBeFalsy()
 
         // cleanup
         await cleanFunctionAsync(functionData)              

@@ -13,12 +13,7 @@
       "type": "string",
       "description": "The firebase project that should be associated with this application",
       "default": ""
-    },
-    "migrate": {
-      "type": "boolean",
-      "description": "Run the plugin migration check for your workspace",
-      "default": false
-    }    
+    }
   },
   "required": []
 }

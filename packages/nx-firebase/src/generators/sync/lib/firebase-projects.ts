@@ -8,7 +8,7 @@ import {
 
 import { SyncGeneratorSchema } from '../schema'
 import { debugInfo } from '../../../utils/debug'
-import { FirebaseProjects } from './types'
+import { FirebaseProjects } from '../../../types'
 
 const FIREBASE_PROJECT_MATCHER = /(--project[ =])([^\s]+)/
 const FIREBASE_COMMAND_MATCHER = /(firebase)/

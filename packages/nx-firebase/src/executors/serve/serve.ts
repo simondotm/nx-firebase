@@ -3,7 +3,7 @@ import {
   logger,
   TargetConfiguration,
   ProjectConfiguration,
-} from '@nrwl/devkit'
+} from '@nx/devkit'
 import { FirebaseServeExecutorSchema } from './schema'
 import { spawn } from 'child_process'
 
