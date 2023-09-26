@@ -391,7 +391,7 @@ export async function syncGenerator(
       })
       if (!isValid) {
         logger.warn(
-          `Can't match hosting target '${host.target}' public dir '${host.public}' in  '${configFileName}' to a project in this workspace. Is it configured correctly?`,
+          `WARNING: Can't match hosting target with public dir '${host.public}' in '${configFileName}' to a project in this workspace. Is it configured correctly?`,
         )
       }
     })

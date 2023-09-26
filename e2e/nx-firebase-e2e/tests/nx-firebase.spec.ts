@@ -832,6 +832,11 @@ describe('nx-firebase e2e', () => {
             `UPDATE apps/${functionData.projectName}/project.json`,   
             `UPDATE apps/${functionData2.projectName}/project.json`,   
           ])
+
+          expectStrings(result.stderr, [
+            `WARNING: Can't match hosting target with public dir '${appData.projectDir}/public' in '${renamedAppData.configName}' to a project in this workspace. Is it configured correctly?`,
+          ])
+
           // we should not rename config if it is called firebase.json
           expect(result.stdout).not.toContain(
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
@@ -899,7 +904,12 @@ describe('nx-firebase e2e', () => {
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${renamedAppData.configName}'`,
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
-          ])      
+          ])
+          
+          expectStrings(result.stderr, [
+            `WARNING: Can't match hosting target with public dir '${appData.projectDir}/public' in '${renamedAppData.configName}' to a project in this workspace. Is it configured correctly?`,
+          ])
+
           // we should not rename config if it is called firebase.json
           expect(result.stdout).not.toContain(
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
@@ -981,7 +991,11 @@ describe('nx-firebase e2e', () => {
             `UPDATE apps/${renamedAppData.projectName}/project.json`,
             `UPDATE apps/${functionData.projectName}/project.json`,   
             `DELETE ${appData.configName}`,            
-            `CREATE ${renamedAppData.configName}`,        
+            `CREATE ${renamedAppData.configName}`,   
+          ])
+
+          expectStrings(result.stderr, [
+            `WARNING: Can't match hosting target with public dir '${appData.projectDir}/public' in '${renamedAppData.configName}' to a project in this workspace. Is it configured correctly?`,
           ])
 
           // check that app project has correct --config setting after rename
@@ -1220,6 +1234,8 @@ describe('nx-firebase e2e', () => {
           `CREATE ${appData.projectDir}/environment/.secret.local`,
           `UPDATE ${appData.projectDir}/project.json`,
         ])    
+
+        // expect(true).toBeFalsy()
 
         // cleanup
         await cleanFunctionAsync(functionData)              
