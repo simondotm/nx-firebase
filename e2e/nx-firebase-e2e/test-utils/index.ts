@@ -318,6 +318,7 @@ export function expectedFunctionProjectTargets(functionProject: ProjectData, app
         thirdParty: false,
         target: "node16",
         esbuildOptions: {
+          sourcemap: true,
           logLevel: "info"
         }
       }

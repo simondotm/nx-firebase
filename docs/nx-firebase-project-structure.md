@@ -149,6 +149,7 @@ Functions use `esbuild` to compile & bundle the code.
         "target": "node16",
         "format": ["esm"],
         "esbuildOptions": {
+          "sourcemap": true,
           "logLevel": "info"
         }
       }
