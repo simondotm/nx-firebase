@@ -74,7 +74,7 @@ export function addDependencies(tree: Tree): GeneratorCallback {
 
   // used by the plugin function generator as a proxy for creating a typescript app
   addDevDependencyIfNotPresent('@nx/node', workspaceNxVersion.version)
-  addDevDependencyIfNotPresent('@nx/linter', workspaceNxVersion.version)
+  addDevDependencyIfNotPresent('@nx/eslint', workspaceNxVersion.version)
   addDevDependencyIfNotPresent('@nx/jest', workspaceNxVersion.version)
   addDevDependencyIfNotPresent('@nx/esbuild', workspaceNxVersion.version)
   addDevDependencyIfNotPresent('@nx/js', workspaceNxVersion.version)
