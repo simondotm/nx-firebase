@@ -347,6 +347,7 @@ describe('nx-firebase e2e', () => {
         checkFilesExist(
           `dist/${functionData.projectDir}/main.js`,
           `dist/${functionData.projectDir}/package.json`,
+          `dist/${functionData.projectDir}/package-lock.json`,
           `dist/${functionData.projectDir}/.env`,
           `dist/${functionData.projectDir}/.env.local`,
           `dist/${functionData.projectDir}/.secret.local`,
@@ -375,6 +376,7 @@ describe('nx-firebase e2e', () => {
         checkFilesExist(
           `dist/${functionData.projectDir}/main.js`,
           `dist/${functionData.projectDir}/package.json`,
+          `dist/${functionData.projectDir}/package-lock.json`,
           `dist/${functionData.projectDir}/.env`,
           `dist/${functionData.projectDir}/.env.local`,
           `dist/${functionData.projectDir}/.secret.local`,
@@ -540,6 +542,7 @@ describe('nx-firebase e2e', () => {
       expect(() =>
         checkFilesExist(
           `${functionData.distDir}/package.json`,
+          `${functionData.distDir}/package-lock.json`,
           `${functionData.distDir}/main.js`,
           `${functionData.distDir}/.env`,
           `${functionData.distDir}/.env.local`,
