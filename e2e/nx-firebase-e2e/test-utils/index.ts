@@ -1,11 +1,11 @@
-import { names } from '@nx/devkit'
+import { joinPathFragments, names } from '@nx/devkit'
 import { readJson, runNxCommandAsync } from '@nx/plugin/testing'
 
 const NPM_SCOPE = '@proj'
 
 export interface ProjectData {
   name: string
-  dir?: string
+  directory: string // from Nx 16.8.0 this is the apps/libs prefix
   projectName: string
   projectDir: string
   srcDir: string
@@ -26,6 +26,7 @@ export function testDebug(info: string) {
 }
 
 export async function safeRunNxCommandAsync(cmd: string) {
+  testDebug(`- safeRunNxCommandAsync ${cmd}`)
   try {
     const result = await runNxCommandAsync(`${cmd} --verbose`, {
       silenceError: true,
@@ -99,7 +100,7 @@ export async function appGeneratorAsync(
   params: string = '',
 ) {
   const result = await safeRunNxCommandAsync(
-    `g @simondotm/nx-firebase:app ${projectData.name} ${params}`,
+    `g @simondotm/nx-firebase:app ${projectData.name} --directory=${projectData.directory} ${params}`,
   )
   testDebug(`- appGeneratorAsync ${projectData.projectName}`)
   testDebug(result.stdout)
@@ -112,7 +113,7 @@ export async function functionGeneratorAsync(
   params: string = '',
 ) {
   const result = await safeRunNxCommandAsync(
-    `g @simondotm/nx-firebase:function ${projectData.name} ${params}`,
+    `g @simondotm/nx-firebase:function ${projectData.name} --directory=${projectData.directory} ${params}`,
   )
   testDebug(`- functionGeneratorAsync ${projectData.projectName}`)
   testDebug(result.stdout)
@@ -135,7 +136,7 @@ export async function libGeneratorAsync(
   params: string = '',
 ) {
   return await safeRunNxCommandAsync(
-    `g @nx/js:lib ${projectData.name} ${params}`,
+    `g @nx/js:lib ${projectData.name} --directory=${projectData.directory} ${params}`,
   )
 }
 
@@ -184,21 +185,36 @@ export function getProjectData(
   name: string,
   options?: { dir?: string; customConfig?: boolean },
 ): ProjectData {
-  const d = options?.dir ? `${names(options.dir).fileName}` : ''
-  const n = names(name).fileName
+  // Nx16.8.0+ no longer adds the 'apps' or 'libs' prefix in the project name
+  // --directory=${projectData.projectDir} is used instead
+  // see https://nx.dev/deprecated/as-provided-vs-derived
 
+  // we want to maintain the kebab-case name for the project/dir
+  // but we need to ensure the 'apps' or 'libs' prefix is added to the --directory
+
+  // const dir = options?.dir ? `${names(options.dir).fileName}` : ''
+  const d = options?.dir ? `${names(options.dir).fileName}` : ''
+  const dir = joinPathFragments(type, d)
+
+  // project name is kebab case dir + name
+  const n = names(name).fileName
   const prefix = options?.dir ? `${d}-` : ''
   const projectName = `${prefix}${n}`
-  const rootDir = options?.dir ? `${d}/` : ''
-  const distDir = `dist/${type}/${rootDir}${n}`
+
+  const projectDir = joinPathFragments(dir, n)
+
+  const srcDir = joinPathFragments(projectDir, 'src')
+  const mainTsPath = joinPathFragments(srcDir, 'main.ts')
+  const distDir = joinPathFragments('dist', projectDir)
+
   return {
     name, // name passed to generator
-    dir: options?.dir, // directory passed to generator
+    directory: dir, // --directory option required for generators
     projectName, // project name
-    projectDir: `${type}/${rootDir}${n}`,
-    srcDir: `${type}/${rootDir}${n}/src`,
-    distDir: distDir,
-    mainTsPath: `${type}/${rootDir}${n}/src/main.ts`,
+    projectDir,
+    srcDir,
+    distDir,
+    mainTsPath,
     npmScope: `${NPM_SCOPE}/${projectName}`,
     configName: options?.customConfig
       ? `firebase.${projectName}.json`
@@ -236,11 +252,9 @@ export const helloWorld = onRequest((request, response) => {
  * return the import function for a generated library
  */
 export function getLibImport(projectData: ProjectData) {
-  const libName = projectData.name
-  const libDir = projectData.dir
-  return libDir
-    ? `${libDir}${libName[0].toUpperCase() + libName.substring(1)}`
-    : libName
+  // convert kebab-case project name to camelCase library import
+  const libName = projectData.projectName.split('-').map((part, index) => index > 0 ? part[0].toUpperCase() + part.substring(1) : part).join('')
+  return libName
 }
 
 export function addImport(mainTs: string, addition: string) {
@@ -366,7 +380,7 @@ export function expectedFunctionProjectTargets(
       dependsOn: ['build'],
     },
     lint: {
-      executor: '@nx/eslint:eslint',
+      executor: '@nx/eslint:lint',
       outputs: ['{options.outputFile}'],
       options: {
         lintFilePatterns: [`${functionProject.projectDir}/**/*.ts`],
@@ -377,13 +391,6 @@ export function expectedFunctionProjectTargets(
       outputs: [`{workspaceRoot}/coverage/{projectRoot}`],
       options: {
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
-        passWithNoTests: true,
-      },
-      configurations: {
-        ci: {
-          ci: true,
-          codeCoverage: true,
-        },
       },
     },
   }

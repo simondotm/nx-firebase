@@ -38,6 +38,7 @@ import { ProjectConfiguration, joinPathFragments } from '@nx/devkit'
 const JEST_TIMEOUT = 190000
 jest.setTimeout(JEST_TIMEOUT)
 
+
 // NOTE: If one e2e test fails, cleanup fails, so all subsequent tests will fail.
 
 // DONE
@@ -139,8 +140,9 @@ describe('nx-firebase e2e', () => {
       expect(packageJson.devDependencies['@nx/node']).toBeUndefined()
       expect(packageJson.devDependencies['@nx/esbuild']).toBeUndefined()
       expect(packageJson.devDependencies['@nx/eslint']).toBeUndefined()
-      expect(packageJson.devDependencies['@nx/js']).toBeUndefined()
       expect(packageJson.devDependencies['@nx/jest']).toBeUndefined()
+      //SM: Dec'23 Seems that Nx 17+ adds this dependency by default
+      // expect(packageJson.devDependencies['@nx/js']).toBeUndefined()
     })
 
     it('should run nx-firebase init', async () => {
@@ -189,7 +191,7 @@ describe('nx-firebase e2e', () => {
     it('should create buildable typescript library in subdir', async () => {
       await libGeneratorAsync(
         subDirBuildableLibData,
-        `--directory=${subDirBuildableLibData.dir} --buildable --importPath="${subDirBuildableLibData.npmScope}"`,
+        `--buildable --importPath="${subDirBuildableLibData.npmScope}"`,
       )
 
       // no need to test the js library generator, only that it ran ok
@@ -224,7 +226,7 @@ describe('nx-firebase e2e', () => {
       // const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })
       await libGeneratorAsync(
         subDirNonbuildableLibData,
-        `--directory=${subDirNonbuildableLibData.dir} --buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`,
+        `--buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`,
       )
 
       expect(() =>
@@ -273,7 +275,7 @@ describe('nx-firebase e2e', () => {
         const appData = getProjectData('apps', uniq('firebaseSetupApp'), {
           dir: 'subdir',
         })
-        await appGeneratorAsync(appData, `--directory ${appData.dir}`)
+        await appGeneratorAsync(appData)
         expect(() =>
           checkFilesExist(...expectedAppFiles(appData)),
         ).not.toThrow()
