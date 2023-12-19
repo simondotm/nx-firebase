@@ -5,7 +5,7 @@
     "test": "nx test <%= projectName %>",
     "lint": "nx lint <%= projectName %>",
     "build": "nx build <%= projectName %>",
-    "deploy": "nx deploy <%= projectName %>",
+    "deploy": "nx deploy <%= projectName %>"
   },
   "type": "<%= moduleType %>",
   "engines": {
