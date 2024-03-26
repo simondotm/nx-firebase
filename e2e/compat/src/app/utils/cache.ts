@@ -1,6 +1,12 @@
 import { defaultCwd } from './cwd'
+import { info } from './log'
+import { satisfies } from 'semver'
 
 export const localPluginVersion = 'local'
+
+// const CACHE_DIR = `${defaultCwd}/node_modules/.cache/nx-firebase`
+// const CACHE_DIR = `${defaultCwd}/.nx-firebase`
+const CACHE_DIR = `${defaultCwd}/../.nx-firebase`
 
 export type Cache = {
   nxVersion: string
@@ -12,7 +18,7 @@ export type Cache = {
   pluginWorkspace: string
   disableDaemon: boolean
   isLocalPlugin: boolean
-  deferPluginInstall: boolean // defer plugin installs to the test suite rather than the workspace setup
+  deferPluginInstall: boolean // defer plugin installs during each test suite rather than in the workspace setup
   nodeVersion: number // major node version
 }
 
@@ -23,7 +29,10 @@ export type Cache = {
  * @returns
  */
 export function getCache(nxVersion: string, pluginVersion: string): Cache {
-  const rootDir = `${defaultCwd}/node_modules/.cache/nx-firebase/${pluginVersion}`
+  info(
+    `getting Cache for nxVersion=${nxVersion} pluginVersion=${pluginVersion}, using cache dir '${CACHE_DIR}'`,
+  )
+  const rootDir = `${CACHE_DIR}/${pluginVersion}`
   const testDir = `${rootDir}/${nxVersion}`
   const archiveFile = `${rootDir}/${nxVersion}.tar.gz`
   const workspaceDir = `${testDir}/myorg`
@@ -44,4 +53,13 @@ export function getCache(nxVersion: string, pluginVersion: string): Cache {
     // deferPluginInstall: isLocalPlugin, // for local plugin tests, install them for tests so that code changes are present in tests
     nodeVersion: parseInt(process.versions.node.split('.')[0]),
   }
+}
+
+export function isNxVersionSince(cache: Cache, nxVersion: string) {
+  console.log(
+    `checking isNxVersionSince satisfies ${cache.nxVersion} >= ${nxVersion}`,
+  )
+  const isOk = satisfies(cache.nxVersion, `>=${nxVersion}`)
+  console.log('isNxVersionSince check returned ', isOk)
+  return isOk
 }

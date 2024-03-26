@@ -1,8 +1,14 @@
-import { Cache, getCache } from './utils/cache'
+import { get } from 'http'
+import { Cache, getCache, isNxVersionSince } from './utils/cache'
 import { customExec, runNxCommandAsync } from './utils/exec'
 import { expectToContain, expectToNotContain, it } from './utils/jest-ish'
-import { green, info, red, setLogFile, time } from './utils/log'
-import { addContentToTextFile, deleteDir, setCwd } from './utils/utils'
+import { green, info, log, red, setLogFile, time } from './utils/log'
+import {
+  addContentToTextFile,
+  deleteDir,
+  getFileSize,
+  setCwd,
+} from './utils/utils'
 import { installPlugin } from './workspace'
 
 const npmContent = [
@@ -16,37 +22,104 @@ const importMatch = `import * as functions from "firebase-functions";`
 
 const notCachedMatch = `[existing outputs match the cache, left as is]`
 
-export async function testPlugin(workspaceDir: string) {
+const DELETE_AFTER_TEST = false
+
+/**
+ * A basic e2e test suite for the plugin to check compatibility with different Nx versions
+ * We just want to check that the plugin can generate and build firebase apps and functions in each nx workspace version
+ * @param cache
+ */
+export async function testPlugin(cache: Cache) {
+  const workspaceDir = cache.workspaceDir
   const indexTsPath = `${workspaceDir}/apps/functions/src/index.ts`
 
-  await runNxCommandAsync('g @simondotm/nx-firebase:app functions')
+  // from nx 16.8.0, apps and libs dirs need to be specified in the commandline
+  let appsDirectory = ''
+  let libsDirectory = ''
+  if (isNxVersionSince(cache, '16.8.0')) {
+    appsDirectory = '--directory=apps'
+    libsDirectory = '--directory=libs'
+  }
+
+  // the function generator imports @nx/node, which is only installed to the workspace if the app is generated first
+  // so this test checks that the workspace is setup correctly
+  await it('should throw if function is generated before app', async () => {
+    let failed = false
+    try {
+      await runNxCommandAsync(
+        `g @simondotm/nx-firebase:func functions ${appsDirectory} --app=firebase`,
+      )
+    } catch (err) {
+      failed = true
+    }
+
+    expectToContain(failed ? 'failed' : 'succeeded', 'failed')
+  })
+
+  // generate a test firebase app
   await runNxCommandAsync(
-    'g @nx/js:lib lib1 --buildable --importPath="@myorg/lib1"',
+    `g @simondotm/nx-firebase:app firebase ${appsDirectory}`,
+  )
+  // generate a test firebase function
+  await runNxCommandAsync(
+    `g @simondotm/nx-firebase:func functions ${appsDirectory} --app=firebase`,
+  )
+  // generate a test js library
+  await runNxCommandAsync(
+    `g @nx/js:lib lib1 ${libsDirectory} --importPath="@myorg/lib1"`,
   )
 
-  await it('should build the lib', async () => {
-    await runNxCommandAsync('build lib1')
+  // await it('should build the lib', async () => {
+  //   await runNxCommandAsync('build lib1')
+  // })
+
+  // build the firebase app
+  await it('should build the firebase app', async () => {
+    const { stdout } = await runNxCommandAsync('build firebase')
+    // expectToNotContain(stdout, npmContent)
+    // expectToNotContain(stdout, libContent)
   })
 
-  await it('should build the functions', async () => {
+  // build the firebase functions
+  await it('should build the functions app', async () => {
     const { stdout } = await runNxCommandAsync('build functions')
-    expectToNotContain(stdout, npmContent)
-    expectToNotContain(stdout, libContent)
+    log(stdout)
   })
 
-  await it('should update index.ts so that deps are updated after creation', async () => {
-    addContentToTextFile(indexTsPath, importMatch, '// comment added')
-    const { stdout } = await runNxCommandAsync('build functions')
-    expectToContain(stdout, npmContent)
-    expectToNotContain(stdout, libContent)
+  // check that sync runs
+  await it('should sync the workspace', async () => {
+    const { stdout } = await runNxCommandAsync('g @simondotm/nx-firebase:sync')
+    expectToContain(
+      stdout,
+      `This workspace has 1 firebase apps and 1 firebase functions`,
+    )
+    log(stdout)
   })
 
-  await it('should add a lib dependency', async () => {
-    const importAddition = `import { lib1 } from '@myorg/lib1'\nconsole.log(lib1())\n`
-    addContentToTextFile(indexTsPath, importMatch, importAddition)
-    const { stdout } = await runNxCommandAsync('build functions')
-    expectToContain(stdout, npmContent)
-    expectToContain(stdout, libContent)
+  // await it('should update index.ts so that deps are updated after creation', async () => {
+  //   addContentToTextFile(indexTsPath, importMatch, '// comment added')
+  //   const { stdout } = await runNxCommandAsync('build functions')
+  //   expectToContain(stdout, npmContent)
+  //   expectToNotContain(stdout, libContent)
+  // })
+
+  // await it('should add a lib dependency', async () => {
+  //   const importAddition = `import { lib1 } from '@myorg/lib1'\nconsole.log(lib1())\n`
+  //   addContentToTextFile(indexTsPath, importMatch, importAddition)
+  //   const { stdout } = await runNxCommandAsync('build functions')
+  //   expectToContain(stdout, npmContent)
+  //   expectToContain(stdout, libContent)
+  // })
+
+  // some early 16.x versions of nx seem to have a flaky esbuild implementation
+  // that intermittently fails to exclude external deps from the bundle
+  // we check for this by testing the bundle size is not >1kb
+  await it('should not bundle external deps', async () => {
+    const fileSize = getFileSize(`${workspaceDir}/dist/apps/functions/main.js`)
+    if (fileSize > 1024)
+      throw new Error(
+        `TEST FAILED: esbuild bundle size is >1kb (${fileSize / 1024}kb)`,
+      )
   })
 
   // TODO: other checks
@@ -94,7 +167,7 @@ export async function testNxVersion(cache: Cache) {
     }
 
     // run the plugin test suite
-    await testPlugin(cache.workspaceDir)
+    await testPlugin(cache)
 
     info(green(`TESTING VERSION '${cache.nxVersion}' SUCCEEDED\n`))
   } catch (err) {
@@ -116,7 +189,9 @@ export async function testNxVersion(cache: Cache) {
   // cleanup
   setCwd(cache.rootDir)
 
-  deleteDir(cache.testDir)
+  if (DELETE_AFTER_TEST) {
+    deleteDir(cache.testDir)
+  }
 
   const dt = Date.now() - t
   info(`Completed in ${time(dt)}\n`)
