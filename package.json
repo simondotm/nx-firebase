@@ -10,13 +10,14 @@
     "e2e": "nx run nx-firebase-e2e:e2e --silent=false --bail=true",
     "release": "cd packages/nx-firebase && npm version",
     "release-help": "echo `npm run version -- v1.2.3` to set package version & commit tag",
-    "compat:test": "npm run build && nx run compat:build && node dist/e2e/compat/main.js",
+    "compat:test": "nx reset & npm run build && nx run compat:build && node dist/e2e/compat/main.js",
     "compat:clean": "nx run compat:build && node dist/e2e/compat/main.js --clean",
     "compat:setup": "npm run build && nx run compat:build && node dist/e2e/compat/main.js --setup"
   },
   "private": true,
   "devDependencies": {
     "@nx/devkit": "17.1.3",
+    "@nx/eslint": "17.1.3",
     "@nx/eslint-plugin": "17.1.3",
     "@nx/jest": "17.1.3",
     "@nx/js": "17.1.3",
@@ -38,11 +39,11 @@
     "jest-environment-jsdom": "28.1.3",
     "nx": "17.1.3",
     "prettier": "2.8.8",
+    "semver": "^7.6.0",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
     "tslib": "^2.0.0",
-    "typescript": "4.8.4",
-    "@nx/eslint": "17.1.3"
+    "typescript": "4.8.4"
   },
   "dependencies": {
     "tslib": "^2.0.0"
