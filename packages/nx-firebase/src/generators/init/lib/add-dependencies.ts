@@ -29,17 +29,36 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     packageName: string,
     packageVersion: string,
   ) {
-    if (!packageJson.dependencies[packageName]) {
+    if (!packageJson.dependencies || !packageJson.dependencies[packageName]) {
+      // console.log('adding dependency', packageName, packageVersion)
       dependencies[packageName] = packageVersion
     }
+    //  else {
+    //   console.log(
+    //     'dependency already exists',
+    //     packageName,
+    //     packageJson.dependencies[packageName],
+    //   )
+    // }
   }
   function addDevDependencyIfNotPresent(
     packageName: string,
     packageVersion: string,
   ) {
-    if (!packageJson.devDependencies[packageName]) {
+    if (
+      !packageJson.devDependencies ||
+      !packageJson.devDependencies[packageName]
+    ) {
+      // console.log('adding dev dependency', packageName, packageVersion)
       devDependencies[packageName] = packageVersion
     }
+    // else {
+    //   console.log(
+    //     'dev dependency already exists',
+    //     packageName,
+    //     packageJson.devDependencies[packageName],
+    //   )
+    // }
   }
 
   // firebase dependencies
@@ -70,14 +89,17 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   // These dependencies are required by the plugin internals, most likely already in the host workspace
   // but add them if not. They are added with the same version that the host workspace is using.
   // This is cleaner than using peerDeps.
-  addDevDependencyIfNotPresent('@nx/devkit', workspaceNxVersion.version)
+  // SM Dec'23: @nx/devkit is a peer dependency now. No need to install via plugin.
+  // addDevDependencyIfNotPresent('@nx/devkit', workspaceNxVersion.version)
 
-  // used by the plugin function generator as a proxy for creating a typescript app
+  // console.log('workspaceNxVersion', workspaceNxVersion)
+
+  // @nx/node is used by the plugin function generator as a proxy for creating a typescript app
+  // since users have to create a firebase app before they generate a function, we can be sure
+  // this plugin init will have been run before the function generator that requires @nx/node is used
   addDevDependencyIfNotPresent('@nx/node', workspaceNxVersion.version)
-  addDevDependencyIfNotPresent('@nx/eslint', workspaceNxVersion.version)
-  addDevDependencyIfNotPresent('@nx/jest', workspaceNxVersion.version)
-  addDevDependencyIfNotPresent('@nx/esbuild', workspaceNxVersion.version)
-  addDevDependencyIfNotPresent('@nx/js', workspaceNxVersion.version)
 
+  // @nx/node has @nx/eslint, @nx/jest, @nx/js as dependencies, so they will come with @nx/node
+  // @nx/node plugin initialiser will install @nx/esbuild or @nx/webpack depending on the bundler option used
   return addDependenciesToPackageJson(tree, dependencies, devDependencies)
 }
