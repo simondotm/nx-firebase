@@ -19,13 +19,19 @@ export async function initGenerator(
   tree: Tree,
   rawOptions: InitGeneratorOptions,
 ): Promise<GeneratorCallback> {
+  // console.log('initGenerator')
+  const tasks: GeneratorCallback[] = []
   const options = normalizeOptions(rawOptions)
-  const nodeInitTask = await nodeInitGenerator(tree, options)
-  const installPackagesTask = addDependencies(tree)
+  tasks.push(addDependencies(tree))
   addGitIgnore(tree)
   addNxIgnore(tree)
 
-  return runTasksInSerial(nodeInitTask, installPackagesTask)
+  // no need to run the node init generator here.
+  // that will happen when a firebase app is generated
+  // console.log('running nodeInitGenerator')
+  // const nodeInitTask = await nodeInitGenerator(tree, options)
+  // tasks.push(nodeInitTask)
+  return runTasksInSerial(...tasks)
 }
 
 export default initGenerator
