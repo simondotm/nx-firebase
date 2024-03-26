@@ -42,3 +42,6 @@ Thumbs.db
 e2e.log
 
 .nx/cache
+
+# Plugin compatibility test suite output directory
+.nx-firebase
