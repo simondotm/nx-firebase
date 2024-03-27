@@ -156,11 +156,17 @@ describe('nx-firebase e2e', () => {
         packageJson.devDependencies['firebase-functions-test'],
       ).toBeDefined()
       expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
+      //SM: Mar'24: our plugin init generator now only add @nx/node
       expect(packageJson.devDependencies['@nx/node']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/esbuild']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/eslint']).toBeDefined()
+      // @nx/node package brings in @nx/js
+      // https://github.com/nrwl/nx/blob/fb90767af87c77955f8b8b7cace7cd0b5e3be27d/packages/node/package.json#L32
       expect(packageJson.devDependencies['@nx/js']).toBeDefined()
-      expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
+      // @nx/jest, @nx/eslint are package.json dependencies in later versions of Nx
+      expect(packageJson.devDependencies['@nx/eslint']).not.toBeDefined()
+      expect(packageJson.devDependencies['@nx/jest']).not.toBeDefined()
+
+      //SM: Mar'24: esbuild is added by @nx/node when functions are generated, depending on bundler option
+      expect(packageJson.devDependencies['@nx/esbuild']).not.toBeDefined()
     })
   })
 
@@ -252,6 +258,17 @@ describe('nx-firebase e2e', () => {
       expect(() => checkFilesExist(...expectedAppFiles(appData))).not.toThrow()
 
       validateProjectConfig(appData)
+
+      // should still not see any nx/node related packages when generating an app
+      // since we dont run the node generator in app generator
+      const packageJson = readJson(`package.json`)
+      // running the application generator runs the init generator, which adds @nx/node and these dependencies of @nx/node
+      expect(packageJson.devDependencies['@nx/eslint']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/jest']).toBeDefined()
+      expect(packageJson.devDependencies['@nx/js']).toBeDefined()
+      //SM: Mar'24: esbuild is added by @nx/node when functions are generated, depending on bundler option
+      expect(packageJson.devDependencies['@nx/esbuild']).not.toBeDefined()
+
 
       // cleanup - app
       await cleanAppAsync(appData)
@@ -355,6 +372,12 @@ describe('nx-firebase e2e', () => {
       ).toThrow()
 
       validateFunctionConfig(functionData, appData)
+
+
+      const packageJson = readJson(`package.json`)
+      //SM: Mar'24: esbuild is added by @nx/node when functions are generated, depending on bundler option
+      expect(packageJson.devDependencies['@nx/esbuild']).toBeDefined()
+
 
       // cleanup
       await cleanFunctionAsync(functionData)
