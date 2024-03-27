@@ -1,6 +1,6 @@
 import type { GeneratorCallback, Tree } from '@nx/devkit'
 import { convertNxGenerator, runTasksInSerial } from '@nx/devkit'
-import { initGenerator as nodeInitGenerator } from '@nx/node'
+// import { initGenerator as nodeInitGenerator } from '@nx/node'
 import { addDependencies, normalizeOptions } from './lib'
 import { addGitIgnore, addNxIgnore } from './lib/add-git-ignore-entry'
 import type { InitGeneratorOptions } from './schema'
