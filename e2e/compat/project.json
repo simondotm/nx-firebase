@@ -36,7 +36,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["e2e/compat/**/*.ts"]
@@ -46,8 +46,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/e2e/compat"],
       "options": {
-        "jestConfig": "e2e/compat/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "e2e/compat/jest.config.ts"
       }
     }
   },

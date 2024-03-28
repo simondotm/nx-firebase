@@ -127,7 +127,7 @@ describe('init generator', () => {
 
     const nxVersion = workspaceNxVersion.version
     expect(packageJson.devDependencies['@nx/node']).toBe(nxVersion)
-    expect(packageJson.devDependencies['@nx/linter']).toBe(nxVersion)
+    expect(packageJson.devDependencies['@nx/eslint']).toBe(nxVersion)
     expect(packageJson.devDependencies['@nx/jest']).toBe(nxVersion)
     expect(packageJson.devDependencies['@nx/esbuild']).toBe(nxVersion)
     expect(packageJson.devDependencies['@nx/js']).toBe(nxVersion)

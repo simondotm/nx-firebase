@@ -98,7 +98,7 @@ describe('function generator', () => {
               dependsOn: ['build'],
             },
             lint: {
-              executor: '@nx/linter:eslint',
+              executor: '@nx/eslint:lint',
               outputs: ['{options.outputFile}'],
               options: {
                 lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],
@@ -109,13 +109,6 @@ describe('function generator', () => {
               outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
               options: {
                 jestConfig: 'apps/my-firebase-function/jest.config.ts',
-                passWithNoTests: true,
-              },
-              configurations: {
-                ci: {
-                  ci: true,
-                  codeCoverage: true,
-                },
               },
             },
           }),

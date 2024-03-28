@@ -6,14 +6,11 @@
   - [Firebase Function Projects](#firebase-function-projects)
   - [Firebase Function Configs](#firebase-function-configs)
 
-
 ## Overview
 
 Whilst Nx Firebase plugin provides convenient generators for firebase apps and functions, it is perfectly possible to manually create nx projects yourself with the same functionality.
 
 The `project.json` and `firebase.json` config schemas are below.
-
-
 
 ## Firebase Application Projects
 
@@ -23,7 +20,6 @@ We add all function app projects as implicit dependencies, so that building the 
 
 We tag all dependent projects so that we can use Nx `run-many` with tag specifiers for buid actions like `watch`, `test` and `lint`.
 
-
 ```
 {
   "name": "your-firebase-app-project-name",
@@ -32,7 +28,7 @@ We tag all dependent projects so that we can use Nx `run-many` with tag specifie
   "projectType": "application",
   "implicitDependencies": [
     "your-firebase-function-project-name",
-  ],  
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -119,7 +115,7 @@ We tag all dependent projects so that we can use Nx `run-many` with tag specifie
 
 ## Firebase Function Projects
 
-Function projects can export as many firebase functions as you like. 
+Function projects can export as many firebase functions as you like.
 
 Functions use `esbuild` to compile & bundle the code.
 
@@ -154,7 +150,7 @@ Functions use `esbuild` to compile & bundle the code.
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/your-firebase-function-project-name/**/*.ts"]
@@ -204,7 +200,7 @@ functions: [
       "source": "dist/apps/your-function-project-name",
       "runtime": "nodejs16",
       "ignore": [ "*.local" ]
-    }  
+    }
 ]
 
 ```

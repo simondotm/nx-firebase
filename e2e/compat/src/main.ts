@@ -8,11 +8,14 @@
  * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
-import { green, info, red, time } from './app/utils/log'
+import { green, info, log, red, setLogFile, time } from './app/utils/log'
 import { setupNxWorkspace } from './app/setup'
 import { testVersions } from './app/versions'
 import { clean, testNxVersion } from './app/test'
 import { getCache } from './app/utils/cache'
+import { customExec } from './app/utils/exec'
+import { defaultCwd } from './app/utils/cwd'
+import { exit } from 'process'
 
 // Force CI environment if necessary
 // process.env.CI = 'true'
@@ -41,6 +44,9 @@ async function main(options: CmdOptions) {
     }
   }
 
+  info(`Packing plugin '${defaultCwd}/dist/packages/nx-firebase'...`)
+  await customExec(`npm pack`, `${defaultCwd}/dist/packages/nx-firebase`)
+
   //-----------------------------------------------------------------------
   // setup phase - generates workspaces for each Nx minor release
   //-----------------------------------------------------------------------
@@ -64,13 +70,17 @@ async function main(options: CmdOptions) {
       //  gzip's and caches them for re-use
       // splitting the setup phase from the test phase allows us to cache
       // node_modules in CI github actions for this compat test
+
+      const cache = getCache(release, pluginVersion)
+
+      setLogFile(`${cache.rootDir}/${cache.nxVersion}.log.txt`)
+
       info(
         `-- ${
           testCounter + 1
         }/${testMatrixSize} --------------------------------------------------------------------------\n`,
       )
 
-      const cache = getCache(release, pluginVersion)
       await setupNxWorkspace(cache, options.force)
       ++testCounter
 

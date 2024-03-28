@@ -2,6 +2,7 @@ import * as fs from 'fs'
 // import { readJsonFile, writeJsonFile } from '@nx/devkit'
 // import { exit } from 'process'
 import { log } from './log'
+import { dirname } from 'path'
 
 /**
  * Set current working directory
@@ -15,11 +16,17 @@ export function setCwd(dir: string) {
   log(`Switched cwd to '${process.cwd()}'`)
 }
 
+/**
+ * Ensure given directory path to filename or dir exists, create if it doesn't
+ * @param path - filename or directory path
+ * @returns true if path already exists
+ */
 export function ensureDir(path: string) {
-  const pathExists = fs.existsSync(path)
+  const dir = dirname(path)
+  const pathExists = fs.existsSync(dir)
   if (!pathExists) {
-    log(`Creating dir '${path}'...`)
-    fs.mkdirSync(path, { recursive: true })
+    console.log(`Creating dir '${dir}'...`)
+    fs.mkdirSync(dir, { recursive: true })
   }
   return pathExists
 }
@@ -57,4 +64,9 @@ export function addContentToTextFile(
   }
   const replaced = content.replace(match, `${match}\n${addition}`)
   fs.writeFileSync(path, replaced)
+}
+
+export function getFileSize(path: string) {
+  const stats = fs.statSync(path)
+  return stats.size
 }
