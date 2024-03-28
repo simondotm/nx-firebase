@@ -24,5 +24,6 @@
     "@nx/devkit": ">= 16.1.1",
     "@nx/workspace": ">= 16.1.1",
     "nx": ">= 16.1.1"
-  }
+  },
+  "dependencies": {}
 }
