@@ -262,7 +262,7 @@ export function expectedAppProjectTargets(appProject: ProjectData) {
     getconfig: {
       executor: 'nx:run-commands',
       options: {
-        command: `nx run ${appProject.projectName}:firebase functions:config:get > ${appProject.projectDir}/environment/.runtimeconfig.json`,
+        command: `npx firebase functions:config:get > ${appProject.projectDir}/environment/.runtimeconfig.json`,
       },
     },
     emulate: {
