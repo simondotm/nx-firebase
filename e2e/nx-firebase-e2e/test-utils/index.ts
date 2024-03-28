@@ -270,7 +270,7 @@ export function expectedAppProjectTargets(appProject: ProjectData) {
       options: {
         commands: [
           `nx run ${appProject.projectName}:killports`,
-          `nx run ${appProject.projectName}:firebase emulators:start --import=${appProject.projectDir}/.emulators --export-on-exit`,
+          `nx run ${appProject.projectName}:firebase emulators:start --import=${appProject.projectDir}/.emulators --export-on-exit --inspect-functions`,
         ],
         parallel: false,
       },
@@ -318,6 +318,7 @@ export function expectedFunctionProjectTargets(functionProject: ProjectData, app
         thirdParty: false,
         target: "node16",
         esbuildOptions: {
+          sourcemap: true,
           logLevel: "info"
         }
       }
