@@ -9,6 +9,7 @@ import {
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { functionGenerator } from './function'
 import applicationGenerator from '../application/application'
+import { workspaceNxVersion } from '../../utils'
 
 describe('function generator', () => {
   let tree: Tree
@@ -121,6 +122,16 @@ describe('function generator', () => {
           }),
         )
         expect(project.targets.serve).toBeUndefined()
+
+        // check that function generator ran the @nx/node init generator
+        // which adds the necessary dependencies for a node project
+        const packageJson = readJson(tree, 'package.json')
+        const nxVersion = workspaceNxVersion.version
+        expect(packageJson.devDependencies['@nx/linter']).toBe(nxVersion)
+        expect(packageJson.devDependencies['@nx/jest']).toBe(nxVersion)
+        expect(packageJson.devDependencies['@nx/esbuild']).toBe(nxVersion)
+        expect(packageJson.devDependencies['@nx/js']).toBe(nxVersion)
+
       })
 
       it('should update tags', async () => {
