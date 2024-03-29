@@ -9,6 +9,8 @@ jobs:
   verify_tag:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           PACKAGE_VERSION=$(node -p "require('./packages/nx-firebase/package.json').version")
