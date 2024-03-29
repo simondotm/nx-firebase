@@ -1,2 +1,1 @@
-export interface InitGeneratorOptions {
-}
+export type InitGeneratorOptions = unknown
