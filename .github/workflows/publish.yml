@@ -9,13 +9,16 @@ jobs:
   verify_tag:
     runs-on: ubuntu-latest
     steps:
-      # Match the tag to the package version
-      - name: match-tag-to-package-version
-        id: match-tag-to-package-version
-        uses: geritol/match-tag-to-package-version@0.2.0
-        with:
-          TAG_PREFIX: v # Optional, default prefix is ""
-          # TAG_PREFIX may also be defined under the 'env' key.     
+      - run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          PACKAGE_VERSION=$(node -p "require('./packages/nx-firebase/package.json').version")
+          echo "Tag version: $TAG_VERSION"
+          echo "Package version: $PACKAGE_VERSION"
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match package.json version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+        shell: bash
 
   publish_github:
     needs: [verify_tag]    
