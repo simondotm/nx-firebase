@@ -6,7 +6,19 @@ on:
     types: [released]
 
 jobs:
+  verify_tag:
+    runs-on: ubuntu-latest
+    steps:
+      # Match the tag to the package version
+      - name: match-tag-to-package-version
+        id: match-tag-to-package-version
+        uses: geritol/match-tag-to-package-version@0.2.0
+        with:
+          TAG_PREFIX: v # Optional, default prefix is ""
+          # TAG_PREFIX may also be defined under the 'env' key.     
+
   publish_github:
+    needs: [verify_tag]    
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,7 +28,7 @@ jobs:
           node-version: 16.x
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
-      #- run: npm run addscope
+      #- run: npm run addscope     
       - run: npm ci
 
       - name: Build plugin
@@ -33,6 +45,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_npm:
+    needs: [verify_tag]       
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
