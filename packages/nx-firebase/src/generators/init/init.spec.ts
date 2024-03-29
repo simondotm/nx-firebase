@@ -119,8 +119,6 @@ describe('init generator', () => {
     expect(packageJson.dependencies['firebase']).toBe(testVersion)
     expect(packageJson.dependencies['firebase-admin']).toBe(testVersion)
     expect(packageJson.dependencies['firebase-functions']).toBe(testVersion)
-    // expect(packageJson.dependencies['tslib']).toBe(testVersion)
-
     expect(packageJson.devDependencies['firebase-functions-test']).toBe(
       testVersion,
     )
@@ -131,16 +129,6 @@ describe('init generator', () => {
     expect(packageJson.devDependencies['@nx/node']).toBe(nxVersion)
   })
 
-  //SM: Mar'24 - init generator does not add jest config
-  // it('should add jest config when unitTestRunner is jest', async () => {
-  //   await initGenerator(tree, { unitTestRunner: 'jest' })
-  //   expect(tree.exists('jest.config.ts')).toBe(true)
-  // })
-
-  // it('should not add jest config when unitTestRunner is none', async () => {
-  //   await initGenerator(tree, { unitTestRunner: 'none' })
-  //   expect(tree.exists('jest.config.ts')).toBe(false)
-  // })
 
   // describe('--skipFormat', () => {
   //   it('should format files by default', async () => {
