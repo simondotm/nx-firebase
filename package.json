@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "start": "nx serve",
     "build": "nx run nx-firebase:build",
     "test": "nx run nx-firebase:test",
