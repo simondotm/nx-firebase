@@ -27,32 +27,23 @@ jobs:
         node-version: [18]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
       - uses: pnpm/action-setup@v3
-        name: Install pnpm
         with:
           run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
+      - run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        shell: bash
       - uses: actions/cache@v4
-        name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm install
+      - run: pnpm install
 
 
       # # Setup steps
@@ -82,34 +73,24 @@ jobs:
         node-version: [18]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
       - uses: pnpm/action-setup@v3
-        name: Install pnpm
         with:
           run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
+      - run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        shell: bash
       - uses: actions/cache@v4
-        name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm install
-      - name: Build
-        run: pnpm run build
+      - run: pnpm install
+      - run: pnpm run build
 
       # - uses: actions/checkout@v4
       # - uses: actions/setup-node@v4
@@ -140,34 +121,24 @@ jobs:
         node-version: [18]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
       - uses: pnpm/action-setup@v3
-        name: Install pnpm
         with:
           run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
+      - run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        shell: bash
       - uses: actions/cache@v4
-        name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm install      
-      - name: Lint Affected Apps
-        run: pnpm run lint
+      - run: pnpm install    
+      - run: pnpm run lint
       # - uses: actions/checkout@v4
       # - uses: actions/setup-node@v4
       #   with:
@@ -193,32 +164,23 @@ jobs:
         node-version: [18]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
       - uses: pnpm/action-setup@v3
-        name: Install pnpm
         with:
           run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
+      - run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        shell: bash
       - uses: actions/cache@v4
-        name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm install      
+      - run: pnpm install    
       - run: pnpm run test
       # - uses: actions/checkout@v4
       # - uses: actions/setup-node@v4
@@ -245,32 +207,24 @@ jobs:
         node-version: [18]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
       - uses: pnpm/action-setup@v3
-        name: Install pnpm
         with:
           run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
+      - run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        shell: bash
       - uses: actions/cache@v4
-        name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Install dependencies
-        run: pnpm install      
+      - run: pnpm install
+      - run: pnpm run e2e
       # - uses: actions/checkout@v4
       # - uses: actions/setup-node@v4
       #   with:
@@ -281,4 +235,4 @@ jobs:
       #   with:
       #     path: node_modules
       #     key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - run: npm run e2e
+      # - run: npm run e2e
