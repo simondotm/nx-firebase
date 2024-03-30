@@ -1,6 +1,4 @@
 # Build, Test, Lint & e2e pushes.
-# TODO: use the .nvmrc for node versions
-# https://github.com/actions/setup-node/issues/32
 name: CI
 
 on:
@@ -19,124 +17,64 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    env:
-      CI: true
-
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
-      # Setup steps
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - name: Install npm
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: npm ci
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
 
   build:
     needs: [setup]
-
     runs-on: ubuntu-latest
-    env:
-      CI: true
-
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - name: Build
-        run: npm run build
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install      
+      - run: pnpm run build
 
   lint:
     needs: [setup]
-
     runs-on: ubuntu-latest
-    env:
-      CI: true
-
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - name: Lint Affected Apps
-        run: npm run lint
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install      
+      - run: pnpm run lint
 
   test:
     needs: [setup]
-
     runs-on: ubuntu-latest
-    env:
-      CI: true
-
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - run: npm run test
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install      
+      - run: pnpm run test
 
   # e2e might be too much work todo for every push, lets see.
   e2e:
     needs: [setup]
-
     runs-on: ubuntu-latest
-    env:
-      CI: true
-
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache node modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      - run: npm run e2e
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install      
+      - run: pnpm run e2e

@@ -2,7 +2,7 @@ import * as fs from 'fs'
 // import { readJsonFile, writeJsonFile } from '@nx/devkit'
 // import { exit } from 'process'
 import { log } from './log'
-import { dirname } from 'path'
+
 
 /**
  * Set current working directory
@@ -17,15 +17,14 @@ export function setCwd(dir: string) {
 }
 
 /**
- * Ensure given directory path to filename or dir exists, create if it doesn't
- * @param path - filename or directory path
+ * Ensure given directory path exists, create if it doesn't
+ * @param dir - directory path
  * @returns true if path already exists
  */
-export function ensureDir(path: string) {
-  const dir = dirname(path)
+export function ensureDir(dir: string) {
   const pathExists = fs.existsSync(dir)
   if (!pathExists) {
-    console.log(`Creating dir '${dir}'...`)
+    console.log(` - Creating dir '${dir}'...`)
     fs.mkdirSync(dir, { recursive: true })
   }
   return pathExists
