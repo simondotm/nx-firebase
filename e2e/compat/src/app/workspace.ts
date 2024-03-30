@@ -32,7 +32,7 @@ export async function installPlugin(cache: Cache) {
     // )
 
     // const pluginVersion = `${cache.pluginVersion}`
-    const pluginVersion = `2.1.2`
+    const pluginVersion = `2.2.0`
 
     // log(
     //   `Packing plugin '${cache.pluginWorkspace}/dist/packages/nx-firebase}'...`,
