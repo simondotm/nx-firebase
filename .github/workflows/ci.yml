@@ -22,15 +22,11 @@ jobs:
     env:
       CI: true
 
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: '.nvmrc'
       - uses: pnpm/action-setup@v3
         with:
           run_install: false
@@ -68,15 +64,11 @@ jobs:
     env:
       CI: true
 
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: '.nvmrc'
       - uses: pnpm/action-setup@v3
         with:
           run_install: false
@@ -116,15 +108,12 @@ jobs:
     env:
       CI: true
 
-    strategy:
-      matrix:
-        node-version: [18]
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: '.nvmrc'
       - uses: pnpm/action-setup@v3
         with:
           run_install: false
@@ -159,15 +148,12 @@ jobs:
     env:
       CI: true
 
-    strategy:
-      matrix:
-        node-version: [18]
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: '.nvmrc'
       - uses: pnpm/action-setup@v3
         with:
           run_install: false
@@ -202,15 +188,11 @@ jobs:
     env:
       CI: true
 
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: '.nvmrc'
       - uses: pnpm/action-setup@v3
         with:
           run_install: false
