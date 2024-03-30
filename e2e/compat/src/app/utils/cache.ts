@@ -1,12 +1,9 @@
+import { CACHE_DIR } from '../config'
 import { defaultCwd } from './cwd'
 import { info } from './log'
 import { satisfies } from 'semver'
 
 export const localPluginVersion = 'local'
-
-// const CACHE_DIR = `${defaultCwd}/node_modules/.cache/nx-firebase`
-const CACHE_DIR = `${defaultCwd}/.nx-firebase`
-// const CACHE_DIR = `${defaultCwd}/../.nx-firebase`
 
 export type Cache = {
   nxVersion: string
