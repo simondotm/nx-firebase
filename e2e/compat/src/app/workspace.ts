@@ -48,10 +48,10 @@ export async function installPlugin(cache: Cache) {
     await customExec(`cp -rf ${pluginFileSrc} ${pluginFileDst}`)
 
     log(`Installing plugin '${pluginFileDst}'...`)
-    await customExec(`npm i ${pluginFileDst} --save-dev ${legacyPeerDeps}`)
+    await customExec(`pnpm i ${pluginFileDst} --save-dev ${legacyPeerDeps}`)
   } else {
     await customExec(
-      `npm i @simondotm/nx-firebase@${cache.pluginVersion} --save-dev ${legacyPeerDeps}`,
+      `pnpm i @simondotm/nx-firebase@${cache.pluginVersion} --save-dev ${legacyPeerDeps}`,
     )
   }
 }
@@ -59,8 +59,9 @@ export async function installPlugin(cache: Cache) {
 export async function createWorkspace(cache: Cache) {
   cleanWorkspace(cache.workspaceDir)
   const nxCloudOption = isNxVersionSince(cache, '17.3.2') ? 'skip' : 'false'
+  const packageManger = 'pnpm'
   await customExec(
-    `npx create-nx-workspace@${cache.nxVersion} --preset=apps --interactive=false --name=myorg --nxCloud=${nxCloudOption}`,
+    `npx create-nx-workspace@${cache.nxVersion} --preset=apps --interactive=false --name=myorg --nxCloud=${nxCloudOption} --packageManager=${packageManger}`,
   )
   setCwd(cache.workspaceDir)
 
