@@ -3,18 +3,19 @@ const DEFAULT_LOG_FILE = `${process.cwd()}/e2e.log`
 
 import * as fs from 'fs'
 import { ensureDir } from './utils'
+import { dirname } from 'path'
 
 let LOG_FILE: string | undefined
 
 function writeLog(msg: string) {
-  ensureDir(LOG_FILE)
+  ensureDir(dirname(LOG_FILE))
   fs.appendFileSync(LOG_FILE, `${msg}\n`)
 }
 
 export function setLogFile(path?: string) {
   LOG_FILE = path || DEFAULT_LOG_FILE
   console.log(`Logging to '${LOG_FILE}'`)
-  ensureDir(LOG_FILE)
+  ensureDir(dirname(LOG_FILE))
   fs.writeFileSync(LOG_FILE, '') // reset log file
 }
 
