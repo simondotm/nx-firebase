@@ -1,3 +1,4 @@
+import { info } from './log'
 import { log } from './log'
 import { exec } from 'child_process'
 
@@ -13,9 +14,10 @@ export async function customExec(
 ): Promise<{ stdout: string; stderr: string }> {
   const cwd = dir ? dir : process.cwd()
   return new Promise((resolve, reject) => {
-    log(`Executing command '${command}' in '${cwd}'`)
+    info(`Executing command '${command}' in '${cwd}'`)
     const process = exec(
       command,
+      { cwd: cwd },
       //      { cwd: cwd, env: { NX_DAEMON: 'false' } }, // force CI type environment so Nx Daemon doesn't act up with multiple instances
       // { cwd: cwd, env: { CI: 'true' } }, // force CI type environment so Nx Daemon doesn't act up with multiple instances
       (error, stdout, stderr) => {
@@ -44,6 +46,7 @@ export async function customExec(
 }
 
 export async function runNxCommandAsync(command: string, dir?: string) {
-  const result = await customExec(`npx nx ${command} --verbose`, dir)
+  const cmd = `npx nx ${command} --verbose`
+  const result = await customExec(cmd, dir)
   return result
 }

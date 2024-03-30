@@ -1,7 +1,7 @@
 import * as fs from 'fs'
-import { Cache } from './utils/cache'
+import { Cache, isNxVersionSince } from './utils/cache'
 import { customExec, runNxCommandAsync } from './utils/exec'
-import { log } from './utils/log'
+import { info, log } from './utils/log'
 import { deleteDir, ensureDir, setCwd } from './utils/utils'
 
 export function createTestDir(testDir: string) {
@@ -27,9 +27,28 @@ export async function installPlugin(cache: Cache) {
   const legacyPeerDeps = requireLegacyPeerDeps ? '--legacy-peer-deps' : ''
   if (cache.isLocalPlugin) {
     // install the plugin from the nx-firebase workspace as a local file dependency
-    await customExec(
-      `npm i ${cache.pluginWorkspace}/dist/packages/nx-firebase --save-dev ${legacyPeerDeps}`,
-    )
+    // await customExec(
+    //   `npm i ${cache.pluginWorkspace}/dist/packages/nx-firebase --save-dev ${legacyPeerDeps}`,
+    // )
+
+    // const pluginVersion = `${cache.pluginVersion}`
+    const pluginVersion = `2.2.0`
+
+    // log(
+    //   `Packing plugin '${cache.pluginWorkspace}/dist/packages/nx-firebase}'...`,
+    // )
+    // await customExec(
+    //   `npm pack`,
+    //   `${cache.pluginWorkspace}/dist/packages/nx-firebase`,
+    // )
+
+    const pluginFileSrc = `${cache.pluginWorkspace}/dist/packages/nx-firebase/simondotm-nx-firebase-${pluginVersion}.tgz`
+    const pluginFileDst = `${cache.workspaceDir}/simondotm-nx-firebase-${pluginVersion}.tgz`
+    log(`Copying plugin '${pluginFileSrc}' to '${pluginFileDst}'...`)
+    await customExec(`cp -rf ${pluginFileSrc} ${pluginFileDst}`)
+
+    log(`Installing plugin '${pluginFileDst}'...`)
+    await customExec(`npm i ${pluginFileDst} --save-dev ${legacyPeerDeps}`)
   } else {
     await customExec(
       `npm i @simondotm/nx-firebase@${cache.pluginVersion} --save-dev ${legacyPeerDeps}`,
@@ -39,8 +58,9 @@ export async function installPlugin(cache: Cache) {
 
 export async function createWorkspace(cache: Cache) {
   cleanWorkspace(cache.workspaceDir)
+  const nxCloudOption = isNxVersionSince(cache, '17.3.2') ? 'skip' : 'false'
   await customExec(
-    `npx create-nx-workspace@${cache.nxVersion} --preset=apps --interactive=false --name=myorg --nxCloud=false`,
+    `npx create-nx-workspace@${cache.nxVersion} --preset=apps --interactive=false --name=myorg --nxCloud=${nxCloudOption}`,
   )
   setCwd(cache.workspaceDir)
 
@@ -60,10 +80,13 @@ export async function createWorkspace(cache: Cache) {
   }
 
   // we meed this plugin for test suite libs
-  await customExec(`npm i @nx/js@${cache.nxVersion} --save-dev`)
+  // update: @nx/node plugin brings in this dependency
+  // https://github.com/nrwl/nx/blob/fb90767af87c77955f8b8b7cace7cd0b5e3be27d/packages/node/package.json#L32
+  // so we dont need to install it here as long as we run @simondotm/nx-firebase:init first
+  // await customExec(`npm i @nx/js@${cache.nxVersion} --save-dev`)
 
   if (!cache.deferPluginInstall) {
-    log(`Installing plugin in workspace...`)
+    info(`Installing plugin in workspace...`)
     // // these should be installed with the plugin I guess?
     // // if we dont install them here, they'll be found in the parent workspace node_modules
     // await customExec(`npm i @nx/js@${cache.nxVersion} --save-dev`)
@@ -73,7 +96,7 @@ export async function createWorkspace(cache: Cache) {
     await installPlugin(cache)
 
     // run the plugin initialiser to ensure we have the correct dependencies installed
-    log(`Initialising plugin in workspace...`)
+    info(`Initialising plugin in workspace...`)
     await runNxCommandAsync(`g @simondotm/nx-firebase:init`)
   }
 

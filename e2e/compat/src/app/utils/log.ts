@@ -2,12 +2,20 @@ const ENABLE_LOG = false
 const DEFAULT_LOG_FILE = `${process.cwd()}/e2e.log`
 
 import * as fs from 'fs'
+import { ensureDir } from './utils'
 
 let LOG_FILE: string | undefined
 
+function writeLog(msg: string) {
+  ensureDir(LOG_FILE)
+  fs.appendFileSync(LOG_FILE, `${msg}\n`)
+}
+
 export function setLogFile(path?: string) {
   LOG_FILE = path || DEFAULT_LOG_FILE
-  fs.writeFileSync(LOG_FILE, '')
+  console.log(`Logging to '${LOG_FILE}'`)
+  ensureDir(LOG_FILE)
+  fs.writeFileSync(LOG_FILE, '') // reset log file
 }
 
 setLogFile()
@@ -16,12 +24,13 @@ export function log(msg: string) {
   if (ENABLE_LOG) {
     console.log(msg)
   }
-  fs.appendFileSync(LOG_FILE, `${msg}\n`)
+  writeLog(msg)
 }
 
 export function info(msg: string) {
   console.log(msg)
-  fs.appendFileSync(LOG_FILE, `${msg}\n`)
+  writeLog(msg)
+  // fs.appendFileSync(LOG_FILE, `${msg}\n`)
 }
 
 export function time(ms: number) {

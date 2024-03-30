@@ -31,9 +31,7 @@ export async function setupNxWorkspace(cache: Cache, force = false) {
 
     ensureDir(cache.rootDir)
 
-    setLogFile(`${cache.rootDir}/${cache.nxVersion}.log.txt`)
-
-    log(
+    info(
       `Creating new Nx workspace version ${cache.nxVersion} in directory '${cache.testDir}'`,
     )
 
@@ -55,7 +53,7 @@ export async function setupNxWorkspace(cache: Cache, force = false) {
       deleteDir(cache.testDir)
     } else {
       log(
-        `WQokspace archive '${cache.archiveFile}' already exists for '${cache.workspaceDir}', no setup required`,
+        `Workspace archive '${cache.archiveFile}' already exists for '${cache.workspaceDir}', no setup required`,
       )
     }
     info(green(`SETUP VERSION '${cache.nxVersion}' SUCCEEDED\n`))

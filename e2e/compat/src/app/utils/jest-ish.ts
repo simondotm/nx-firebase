@@ -58,7 +58,8 @@ export function expectToNotContain(
 
 // hacky jest-like tester
 export async function it(testName: string, testFunc: () => Promise<void>) {
-  log(` - ${testName}`)
+  info(` - it ${testName}`)
+  log(` - it ${testName}`)
   try {
     await testFunc()
   } catch (err) {
