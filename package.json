@@ -2,6 +2,7 @@
   "name": "simondotm",
   "version": "0.0.0",
   "license": "MIT",
+  "packageManager": "pnpm@8.15.5",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "start": "nx serve",
