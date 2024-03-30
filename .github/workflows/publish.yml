@@ -9,7 +9,7 @@ jobs:
   verify_tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
@@ -26,11 +26,10 @@ jobs:
     needs: [verify_tag]    
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 18
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
       #- run: npm run addscope     
@@ -53,11 +52,11 @@ jobs:
     needs: [verify_tag]       
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: 18
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
 

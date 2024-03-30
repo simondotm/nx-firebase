@@ -24,17 +24,17 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16,18]
+        node-version: [18]
 
     steps:
       # Setup steps
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
@@ -51,16 +51,16 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16,18]
+        node-version: [18]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
@@ -76,16 +76,16 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16,18]
+        node-version: [18]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
@@ -101,16 +101,16 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16,18]
+        node-version: [18]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
@@ -126,16 +126,16 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16,18]
+        node-version: [18]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
         id: cache-node-modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
