@@ -84,7 +84,6 @@ describe('init generator', () => {
     expect(packageJson.dependencies['firebase-functions']).toBe(
       firebaseFunctionsVersion,
     )
-    expect(packageJson.dependencies['tslib']).toBeDefined()
 
     expect(packageJson.devDependencies['firebase-functions-test']).toBe(
       firebaseFunctionsTestVersion,
@@ -93,6 +92,9 @@ describe('init generator', () => {
       firebaseToolsVersion,
     )
     expect(packageJson.devDependencies['kill-port']).toBe(killportVersion)
+
+    expect(packageJson.dependencies['tslib']).not.toBeDefined()
+    
   })
 
   it('should only add dependencies if not already present', async () => {
@@ -117,8 +119,6 @@ describe('init generator', () => {
     expect(packageJson.dependencies['firebase']).toBe(testVersion)
     expect(packageJson.dependencies['firebase-admin']).toBe(testVersion)
     expect(packageJson.dependencies['firebase-functions']).toBe(testVersion)
-    // expect(packageJson.dependencies['tslib']).toBe(testVersion)
-
     expect(packageJson.devDependencies['firebase-functions-test']).toBe(
       testVersion,
     )
@@ -127,23 +127,8 @@ describe('init generator', () => {
 
     const nxVersion = workspaceNxVersion.version
     expect(packageJson.devDependencies['@nx/node']).toBe(nxVersion)
-    expect(packageJson.devDependencies['@nx/eslint']).toBe(nxVersion)
-    expect(packageJson.devDependencies['@nx/jest']).toBe(nxVersion)
-    expect(packageJson.devDependencies['@nx/esbuild']).toBe(nxVersion)
-    expect(packageJson.devDependencies['@nx/js']).toBe(nxVersion)
   })
 
-  it('should add jest config when unitTestRunner is jest', async () => {
-    await initGenerator(tree, { unitTestRunner: 'jest' })
-
-    expect(tree.exists('jest.config.ts')).toBe(true)
-  })
-
-  it('should not add jest config when unitTestRunner is none', async () => {
-    await initGenerator(tree, { unitTestRunner: 'none' })
-
-    expect(tree.exists('jest.config.ts')).toBe(false)
-  })
 
   // describe('--skipFormat', () => {
   //   it('should format files by default', async () => {

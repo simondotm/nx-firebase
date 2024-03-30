@@ -1,39 +1,23 @@
 import type { GeneratorCallback, Tree } from '@nx/devkit'
-import { convertNxGenerator, runTasksInSerial } from '@nx/devkit'
-// import { initGenerator as nodeInitGenerator } from '@nx/node'
-import { addDependencies, normalizeOptions } from './lib'
+import { addDependencies } from './lib'
 import { addGitIgnore, addNxIgnore } from './lib/add-git-ignore-entry'
 import type { InitGeneratorOptions } from './schema'
 
 /**
- * `nx g @simondotm/nx-firebase:init` is based on the `@nx/nest` plugin
- *   which in turn is based on the `@nx/node` plugin
- *
+ * `nx g @simondotm/nx-firebase:init` 
+ * 
  * Ensures the necessary firebase packages are installed in the nx workspace
- * The `@nx/node` init generate also ensures jest configs
+ * It also adds `@nx/node` if it is not already installed
  *
- * Docs say its for internal use only, but nest uses it, so we use it :)
- * https://nx.dev/packages/node/generators/init
  */
 export async function initGenerator(
   tree: Tree,
-  rawOptions: InitGeneratorOptions,
+  options: InitGeneratorOptions,
 ): Promise<GeneratorCallback> {
-  // console.log('initGenerator')
-  const tasks: GeneratorCallback[] = []
-  const options = normalizeOptions(rawOptions)
-  tasks.push(addDependencies(tree))
   addGitIgnore(tree)
   addNxIgnore(tree)
-
-  // no need to run the node init generator here.
-  // that will happen when a firebase app is generated
-  // console.log('running nodeInitGenerator')
-  // const nodeInitTask = await nodeInitGenerator(tree, options)
-  // tasks.push(nodeInitTask)
-  return runTasksInSerial(...tasks)
+  return addDependencies(tree)
 }
 
 export default initGenerator
 
-export const initSchematic = convertNxGenerator(initGenerator)

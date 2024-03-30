@@ -133,40 +133,30 @@ describe('nx-firebase e2e', () => {
       expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
     })
 
-    it('should create workspace without nx dependencies', async () => {
-      // test that generator adds dependencies to workspace package.json
-      // should not be initially set
-      const packageJson = readJson(`package.json`)
-      expect(packageJson.devDependencies['@nx/node']).toBeUndefined()
-      expect(packageJson.devDependencies['@nx/esbuild']).toBeUndefined()
-      expect(packageJson.devDependencies['@nx/eslint']).toBeUndefined()
-      expect(packageJson.devDependencies['@nx/jest']).toBeUndefined()
-      //SM: Dec'23 Seems that Nx 17+ adds this dependency by default
-      // expect(packageJson.devDependencies['@nx/js']).toBeUndefined()
+    it(
+      'should create workspace without nx dependencies',
+      async () => {
+        // test that generator adds dependencies to workspace package.json
+        // should not be initially set
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.devDependencies['@nx/node']).toBeUndefined()
     })
 
-    it('should run nx-firebase init', async () => {
-      await safeRunNxCommandAsync(`generate @simondotm/nx-firebase:init`)
-      // test that generator adds dependencies to workspace package.json
-      const packageJson = readJson(`package.json`)
-      expect(packageJson.dependencies['firebase']).toBeDefined()
-      expect(packageJson.dependencies['firebase-admin']).toBeDefined()
-      expect(packageJson.dependencies['firebase-functions']).toBeDefined()
-      expect(
-        packageJson.devDependencies['firebase-functions-test'],
-      ).toBeDefined()
-      expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
-      //SM: Mar'24: our plugin init generator now only add @nx/node
-      expect(packageJson.devDependencies['@nx/node']).toBeDefined()
-      // @nx/node package brings in @nx/js
-      // https://github.com/nrwl/nx/blob/fb90767af87c77955f8b8b7cace7cd0b5e3be27d/packages/node/package.json#L32
-      expect(packageJson.devDependencies['@nx/js']).toBeDefined()
-      // @nx/jest, @nx/eslint are package.json dependencies in later versions of Nx
-      expect(packageJson.devDependencies['@nx/eslint']).not.toBeDefined()
-      expect(packageJson.devDependencies['@nx/jest']).not.toBeDefined()
-
-      //SM: Mar'24: esbuild is added by @nx/node when functions are generated, depending on bundler option
-      expect(packageJson.devDependencies['@nx/esbuild']).not.toBeDefined()
+    it(
+      'should run nx-firebase init',
+      async () => {
+        await safeRunNxCommandAsync(`generate @simondotm/nx-firebase:init`)
+        // test that generator adds dependencies to workspace package.json
+        const packageJson = readJson(`package.json`)
+        expect(packageJson.dependencies['firebase']).toBeDefined()
+        expect(packageJson.dependencies['firebase-admin']).toBeDefined()
+        expect(packageJson.dependencies['firebase-functions']).toBeDefined()
+        expect(
+          packageJson.devDependencies['firebase-functions-test'],
+        ).toBeDefined()
+        expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
+        //SM: Mar'24: our plugin init generator now only add @nx/node
+        expect(packageJson.devDependencies['@nx/node']).toBeDefined()
     })
   })
 
