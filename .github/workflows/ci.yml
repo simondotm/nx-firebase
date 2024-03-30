@@ -1,6 +1,4 @@
 # Build, Test, Lint & e2e pushes.
-# TODO: use the .nvmrc for node versions
-# https://github.com/actions/setup-node/issues/32
 name: CI
 
 on:
@@ -19,9 +17,7 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-
     steps:
-
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
@@ -30,65 +26,10 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
 
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version-file: '.nvmrc'
-      # - uses: pnpm/action-setup@v3
-      #   with:
-      #     run_install: false
-      # - run: |
-      #     echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      #   shell: bash
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: ${{ env.STORE_PATH }}
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pnpm-store-
-      # - run: pnpm install
-
-
-      # # Setup steps
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      # - name: Cache node modules
-      #   id: cache-node-modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: node_modules
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      # - name: Install npm
-      #   if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      #   run: npm ci
-
   build:
     needs: [setup]
-
     runs-on: ubuntu-latest
-
     steps:
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version-file: '.nvmrc'
-      # - uses: pnpm/action-setup@v3
-      #   with:
-      #     run_install: false
-      # - run: |
-      #     echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      #   shell: bash
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: ${{ env.STORE_PATH }}
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pnpm-store-
-      # - run: pnpm install
-
-
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
@@ -98,47 +39,10 @@ jobs:
       - run: pnpm install      
       - run: pnpm run build
 
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-
-      # - name: Install dependencies
-      #   run: pnpm install          
-
-      # - name: Cache node modules
-      #   id: cache-node-modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: node_modules
-      #     key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      # - name: Build
-      #   run: npm run build
-
   lint:
     needs: [setup]
-
     runs-on: ubuntu-latest
-
     steps:
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version-file: '.nvmrc'
-      # - uses: pnpm/action-setup@v3
-      #   with:
-      #     run_install: false
-      # - run: |
-      #     echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      #   shell: bash
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: ${{ env.STORE_PATH }}
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pnpm-store-
-      # - run: pnpm install
-      
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
@@ -147,43 +51,11 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install      
       - run: pnpm run lint
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      # - name: Cache node modules
-      #   id: cache-node-modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: node_modules
-      #     key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      # - name: Lint Affected Apps
-      #   run: npm run lint
 
   test:
     needs: [setup]
-
     runs-on: ubuntu-latest
-
     steps:
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version-file: '.nvmrc'
-      # - uses: pnpm/action-setup@v3
-      #   with:
-      #     run_install: false
-      # - run: |
-      #     echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      #   shell: bash
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: ${{ env.STORE_PATH }}
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pnpm-store-
-      # - run: pnpm install
-      
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
@@ -192,43 +64,12 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install      
       - run: pnpm run test
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      # - name: Cache node modules
-      #   id: cache-node-modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: node_modules
-      #     key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      # - run: npm run test
 
   # e2e might be too much work todo for every push, lets see.
   e2e:
     needs: [setup]
-
     runs-on: ubuntu-latest
-
     steps:
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version-file: '.nvmrc'
-      # - uses: pnpm/action-setup@v3
-      #   with:
-      #     run_install: false
-      # - run: |
-      #     echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      #   shell: bash
-      # - uses: actions/cache@v4
-      #   with:
-      #     path: ${{ env.STORE_PATH }}
-      #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pnpm-store-
-      # - run: pnpm install
-
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
@@ -237,14 +78,3 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install      
       - run: pnpm run e2e
-      # - uses: actions/checkout@v4
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      # - name: Cache node modules
-      #   id: cache-node-modules
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: node_modules
-      #     key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-      # - run: npm run e2e
