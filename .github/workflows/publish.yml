@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           PACKAGE_VERSION=$(node -p "require('./packages/nx-firebase/package.json').version")
@@ -27,23 +26,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'          
           registry-url: 'https://npm.pkg.github.com/simondotm'
           #scope: '@simondotm'
       #- run: npm run addscope     
-      - run: npm ci
+      - run: pnpm install
 
       - name: Build plugin
         run: npx nx build nx-firebase
 
       - name: Create package
-        run: npm pack
+        run: pnpm pack
         working-directory: ./dist/packages/nx-firebase
 
       - name: Publish to GitHub Packages
-        run: npm publish
+        run: pnpm publish
         working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,18 +54,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Setup .npmrc file to publish to npm
+      - uses: pnpm/action-setup@v3
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'          
           registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
+      - run: pnpm install
 
       - name: Build plugin
         run: npx nx build nx-firebase
 
       - name: Publish to NPM
-        run: npm publish --access=public
+        run: pnpm publish --access=public
         working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
