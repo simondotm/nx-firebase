@@ -15,7 +15,6 @@ import {
   appGeneratorAsync,
   cleanAppAsync,
   cleanFunctionAsync,
-  testDebug,
   functionGeneratorAsync,
   getProjectData,
   syncGeneratorAsync,
@@ -31,6 +30,7 @@ import {
   renameProjectAsync,
   migrateGeneratorAsync,
 } from '../test-utils'
+import { testDebug, red, green } from '../test-utils/test-logger'
 import { expectStrings, expectNoStrings } from '../test-utils/test-helpers'
 
 import { ProjectConfiguration, joinPathFragments } from '@nx/devkit'
@@ -114,9 +114,6 @@ describe('nx-firebase e2e', () => {
     // some work which can help clean up e2e leftovers
     runNxCommandAsync('reset')
   })
-
-
-
 
   describe('workspace setup', () => {
 
