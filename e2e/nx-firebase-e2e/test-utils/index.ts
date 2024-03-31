@@ -19,6 +19,17 @@ export interface ProjectData {
 const ENABLE_TEST_DEBUG_INFO = true
 const STRIP_ANSI_MATCHER = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 
+// https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
+const GREEN_FG = '\x1b[32m'
+const RED_FG = '\x1b[31m'
+const RESET_FG = '\x1b[0m'
+
+export function green(text: string) {
+  return `${GREEN_FG}${text}${RESET_FG}`
+}
+export function red(text: string) {
+  return `${RED_FG}${text}${RESET_FG}`
+}
 
 export function testDebug(info: string) {
   if (ENABLE_TEST_DEBUG_INFO) {
@@ -33,28 +44,34 @@ export async function safeRunNxCommandAsync(cmd: string)
     const result = await runNxCommandAsync(`${cmd} --verbose`, { silenceError: true })
     // strip chalk TTY ANSI codes from output
     result.stdout = result.stdout.replace(STRIP_ANSI_MATCHER, '')
-    result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')    
+    result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')   
+    testDebug(green(result.stdout))
+    testDebug(red(result.stderr))
+
+
     return result
   }
   catch (e) {
+    testDebug(red(`ERROR: Running command ${(e as Error).message}`))
     throw e 
   }
 }
 
 export async function runTargetAsync(projectData: ProjectData, target: string = 'build') {
 
-  if (target === 'build') {
-      // need to reset Nx here for e2e test to work
-      // otherwise it bundles node modules in the main.js output too
-      // I think this is a problem with dep-graph, since it works if main.ts
-      // is modified before first build      
-      await runNxCommandAsync('reset')    
-  }
+  //SM: Mar'24 - this seems legacy, not sure if needed
+  // if (target === 'build') {
+  //     // need to reset Nx here for e2e test to work
+  //     // otherwise it bundles node modules in the main.js output too
+  //     // I think this is a problem with dep-graph, since it works if main.ts
+  //     // is modified before first build      
+  //     await runNxCommandAsync('reset')    
+  // }
 
-  const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
-  testDebug(result.stdout)
-  testDebug(result.stderr)
+  const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
+  // testDebug(result.stdout)
+  // testDebug(result.stderr)
 
   if (target === 'build') {
     expectStrings(result.stdout, [
@@ -86,34 +103,36 @@ export async function renameProjectAsync(projectData: ProjectData, renameProject
 }
 
 export async function appGeneratorAsync(projectData: ProjectData, params: string = '') {
+  testDebug(`- appGeneratorAsync ${projectData.projectName} ${params}`)
   const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:app ${projectData.name} --directory=${projectData.directory} ${params}`)
-  testDebug(`- appGeneratorAsync ${projectData.projectName}`)
-  testDebug(result.stdout)
+  // testDebug(result.stdout)
 
   return result
 }
 
 export async function functionGeneratorAsync(projectData: ProjectData, params: string = '') {
+  testDebug(`- functionGeneratorAsync ${projectData.projectName} ${params}`)
   const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:function ${projectData.name} --directory=${projectData.directory} ${params}`)
-  testDebug(`- functionGeneratorAsync ${projectData.projectName}`)
-  testDebug(result.stdout)
-  testDebug(result.stderr)
+  // testDebug(result.stdout)
+  // testDebug(result.stderr)
   return result
 }
 
 export async function libGeneratorAsync(projectData: ProjectData, params: string = '') {
-  const result = await safeRunNxCommandAsync(`g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`)
   testDebug(`- libGeneratorAsync ${projectData.projectName}`)
-  testDebug(result.stdout)
-  testDebug(result.stderr)  
+  const result = await safeRunNxCommandAsync(`g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`)
+  // testDebug(result.stdout)
+  // testDebug(result.stderr)  
   return result
 }
 
 export async function syncGeneratorAsync(params: string = '') {
+  testDebug(`- syncGeneratorAsync ${params}`)
   return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:sync ${params}`)
 }
 
 export async function migrateGeneratorAsync(params: string = '') {
+  testDebug(`- migrateGeneratorAsync ${params}`)
   return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:migrate ${params}`)
 }
 
@@ -360,7 +379,7 @@ export function expectedFunctionProjectTargets(
       dependsOn: ['build'],
     },
     lint: {
-      executor: '@nx/eslint:lint',
+      executor: '@nx/linter:eslint',
       outputs: ['{options.outputFile}'],
       options: {
         lintFilePatterns: [`${functionProject.projectDir}/**/*.ts`],
@@ -372,6 +391,12 @@ export function expectedFunctionProjectTargets(
       options: {
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
       },
+      configurations: {
+        ci: {
+          ci: true,
+          codeCoverage: true,
+        },
+      },      
     },
   }
 }

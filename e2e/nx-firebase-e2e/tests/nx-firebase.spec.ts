@@ -177,7 +177,7 @@ describe('nx-firebase e2e', () => {
           checkFilesExist(`${buildableLibData.projectDir}/package.json`),
         ).not.toThrow()
 
-        const result = await runNxCommandAsync(
+        const result = await safeRunNxCommandAsync(
           `build ${buildableLibData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
@@ -196,7 +196,7 @@ describe('nx-firebase e2e', () => {
           checkFilesExist(`${subDirBuildableLibData.projectDir}/package.json`),
         ).not.toThrow()
 
-        const result = await runNxCommandAsync(
+        const result = await safeRunNxCommandAsync(
           `build ${subDirBuildableLibData.projectName}`,
         )
         expect(result.stdout).toContain(compileComplete)
@@ -613,7 +613,7 @@ describe('nx-firebase e2e', () => {
       'should sync firebase workspace with no changes',
       async () => {
         const result = await syncGeneratorAsync()
-        testDebug(result.stdout)
+        // testDebug(result.stdout)
         expect(result.stdout).not.toContain('CHANGE')
         expect(result.stdout).not.toContain('UPDATE')
         expect(result.stdout).not.toContain('CREATE')
@@ -632,7 +632,7 @@ describe('nx-firebase e2e', () => {
             `--project`
           ) 
           const result = await syncGeneratorAsync(`--app=${appData.projectName} --project=test`)
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
           expectStrings(result.stdout, [
             `CHANGE setting firebase target --project for '${appData.projectName}' to '--project=test'`,
             `UPDATE apps/${appData.projectName}/project.json`,
@@ -656,7 +656,7 @@ describe('nx-firebase e2e', () => {
             `--project=test`
           ) 
           const result = await syncGeneratorAsync(`--app=${appData.projectName} --project=test2`)
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
           expectStrings(result.stdout, [
             `CHANGE updating firebase target --project for '${appData.projectName}' to '--project=test2'`,
             `UPDATE apps/${appData.projectName}/project.json`,
@@ -683,7 +683,7 @@ describe('nx-firebase e2e', () => {
           await removeProjectAsync(functionData)
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
           expectStrings(result.stdout, [
             `CHANGE Firebase function '${functionData.projectName}' was deleted, removing function codebase from '${appData.configName}'`,            
             `UPDATE ${appData.configName}`,
@@ -704,7 +704,7 @@ describe('nx-firebase e2e', () => {
           await removeProjectAsync(appData)
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
           expectStrings(result.stdout, [
             `DELETE ${appData.configName}`,
           ])
@@ -732,7 +732,7 @@ describe('nx-firebase e2e', () => {
           await removeProjectAsync(appData)
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
           expectStrings(result.stderr, [
             `None of the Firebase apps in this workspace use 'firebase.json' as their config. Firebase CLI may not work as expected. This can be fixed by renaming the config for one of your firebase projects to 'firebase.json'.`,
           ])
@@ -763,7 +763,7 @@ describe('nx-firebase e2e', () => {
      
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
 
           expectStrings(result.stdout, [
             `CHANGE Firebase function '${functionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
@@ -801,7 +801,7 @@ describe('nx-firebase e2e', () => {
           await renameProjectAsync(appData, renamedAppData)
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
 
           expectStrings(result.stdout, [
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
@@ -876,7 +876,7 @@ describe('nx-firebase e2e', () => {
           await renameProjectAsync(functionData, renamedFunctionData)
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
 
           expectStrings(result.stdout, [
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase:name tag`,
@@ -966,7 +966,7 @@ describe('nx-firebase e2e', () => {
           await renameProjectAsync(appData, renamedAppData)
 
           const result = await syncGeneratorAsync()
-          testDebug(result.stdout)
+          // testDebug(result.stdout)
 
           expectStrings(result.stdout, [
             `CHANGE Firebase app '${appData.projectName}' was renamed to '${renamedAppData.projectName}', renamed config file to '${renamedAppData.configName}'`,
@@ -1028,12 +1028,11 @@ describe('nx-firebase e2e', () => {
         const result = await runTargetAsync(appData, 'lint')
         expectStrings(result.stdout, [
           `nx run ${appData.projectName}:lint`,
-          `Running target lint for 2 projects`,
           `nx run ${functionData.projectName}:lint`,
           `nx run ${functionData2.projectName}:lint`,
           `All files pass linting`,
-          `Successfully ran target lint for 2 projects`,
           `Successfully ran target lint for project ${appData.projectName}`,
+          `Successfully ran target lint for project ${functionData.projectName}`,
         ])
 
         // cleanup
@@ -1149,7 +1148,7 @@ describe('nx-firebase e2e', () => {
         await functionGeneratorAsync(functionData, `--app ${appData.projectName}`)
         
         const result = await migrateGeneratorAsync()
-        testDebug(result.stdout)
+        // testDebug(result.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,
         ])
@@ -1182,7 +1181,7 @@ describe('nx-firebase e2e', () => {
 
         // run migrate script
         const result2 = await migrateGeneratorAsync()
-        testDebug(result2.stdout)
+        // testDebug(result2.stdout)
         expectStrings(result2.stdout, [
           `MIGRATE Added default environment file 'environment/.env' for firebase app '${appData.projectName}'`,
           `MIGRATE Added default environment file 'environment/.env.local' for firebase app '${appData.projectName}'`,
@@ -1206,7 +1205,7 @@ describe('nx-firebase e2e', () => {
 
         // run it again
         const result3 = await migrateGeneratorAsync()
-        testDebug(result3.stdout)
+        // testDebug(result3.stdout)
         expectStrings(result.stdout, [
           `Running plugin migrations for workspace`,
         ])        
