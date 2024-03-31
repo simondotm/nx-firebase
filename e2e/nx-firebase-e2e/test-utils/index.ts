@@ -1,3 +1,7 @@
 export * from './test-helpers'
 export * from './test-logger'
 export * from './utils'
+export * from './test-commands'
+export * from './test-project-data'
+export * from './test-apps'
+export * from './test-functions'
