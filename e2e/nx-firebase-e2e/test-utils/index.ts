@@ -56,7 +56,8 @@ export async function safeRunNxCommandAsync(cmd: string)
     }
     // getting wierd lock file errors from Nx, so retry at least once
     let result = await runCommand(cmd)
-    if (result.stderr.includes('LOCK-FILES-CHANGED')) {
+    if (result.stdout.includes('LOCK-FILES-CHANGED') || result.stderr.includes('LOCK-FILES-CHANGED')) {
+      testDebug(red(`Re-running command ${cmd} due to LOCK-FILES-CHANGED`))
       result = await runCommand(cmd)
     }
 
