@@ -29,9 +29,12 @@ import {
   removeProjectAsync,
   renameProjectAsync,
   migrateGeneratorAsync,
+  expectStrings, 
+  expectNoStrings,
+  testDebug,
+  red,
+  green
 } from '../test-utils'
-import { testDebug, red, green } from '../test-utils/test-logger'
-import { expectStrings, expectNoStrings } from '../test-utils/test-helpers'
 
 import { ProjectConfiguration, joinPathFragments } from '@nx/devkit'
 
