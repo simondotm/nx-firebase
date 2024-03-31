@@ -16,14 +16,12 @@ import {
   cleanAppAsync,
   cleanFunctionAsync,
   testDebug,
-  expectStrings,
   functionGeneratorAsync,
   getProjectData,
   syncGeneratorAsync,
   safeRunNxCommandAsync,
   validateProjectConfig,
   validateFunctionConfig,
-  expectNoStrings,
   libGeneratorAsync,
   runTargetAsync,
   getMainTs,
@@ -33,6 +31,8 @@ import {
   renameProjectAsync,
   migrateGeneratorAsync,
 } from '../test-utils'
+import { expectStrings, expectNoStrings } from '../test-utils/test-helpers'
+
 import { ProjectConfiguration, joinPathFragments } from '@nx/devkit'
 
 

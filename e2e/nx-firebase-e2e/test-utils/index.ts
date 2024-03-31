@@ -1,6 +1,7 @@
 
 import { joinPathFragments, names } from '@nx/devkit'
 import { readJson, runNxCommandAsync } from '@nx/plugin/testing'
+import { expectStrings, expectNoStrings } from './test-helpers'
 
 const NPM_SCOPE = '@proj'
 
@@ -80,6 +81,7 @@ export async function runTargetAsync(projectData: ProjectData, target: string = 
   //     await runNxCommandAsync('reset')    
   // }
   if (target === 'build') {
+    // getting wierd errors with Nx 16.8.1 where is says it cannot find the project
     // need to reset Nx here for e2e test to work
     // I dont think the Nx daemon has enough time to update its cache
     // after generation of a new project and building it right away
@@ -174,17 +176,7 @@ export async function cleanFunctionAsync(projectData: ProjectData) {
 }  
 
 
-export function expectStrings(input: string, contains: string[]) {
-  contains.forEach((item) => {
-    expect(input).toContain(item)
-  })
-}
 
-export function expectNoStrings(input: string, contains: string[]) {
-  contains.forEach((item) => {
-    expect(input).not.toContain(item)
-  })
-}
 
 /**
  * Generate test project data
