@@ -170,7 +170,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library',
       async () => {
-        await libGeneratorAsync(buildableLibData, `--buildable --importPath="${buildableLibData.npmScope}"`)
+        await libGeneratorAsync(buildableLibData, `--bundler=tsc --importPath="${buildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
@@ -189,7 +189,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library in subdir',
       async () => {
-        await libGeneratorAsync(subDirBuildableLibData, `--buildable --importPath="${subDirBuildableLibData.npmScope}"`)
+        await libGeneratorAsync(subDirBuildableLibData, `--bundler=tsc --importPath="${subDirBuildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
@@ -208,7 +208,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should create non-buildable typescript library',
       async () => {
-        await libGeneratorAsync(nonbuildableLibData, `--buildable=false --importPath="${nonbuildableLibData.npmScope}"`)
+        await libGeneratorAsync(nonbuildableLibData, `--bundler=none --importPath="${nonbuildableLibData.npmScope}"`)
 
         expect(() =>
           checkFilesExist(`${nonbuildableLibData.projectDir}/package.json`),
@@ -224,7 +224,7 @@ describe('nx-firebase e2e', () => {
       'should create non-buildable typescript library in subdir',
       async () => {
         // const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
-        await libGeneratorAsync(subDirNonbuildableLibData, `--buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`)
+        await libGeneratorAsync(subDirNonbuildableLibData, `--bundler=none --importPath="${subDirNonbuildableLibData.npmScope}"`)
 
         expect(() =>
           checkFilesExist(`${subDirNonbuildableLibData.projectDir}/package.json`),
