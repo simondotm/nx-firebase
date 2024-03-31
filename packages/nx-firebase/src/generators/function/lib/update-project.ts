@@ -3,11 +3,11 @@ import {
   readProjectConfiguration,
   updateProjectConfiguration,
 } from '@nx/devkit'
-import type { NormalizedOptions } from '../schema'
+import type { NormalizedSchema } from '../schema'
 import type { FunctionAssetsEntry, FunctionAssetsGlob } from '../../../types'
 
-export function updateProject(tree: Tree, options: NormalizedOptions): void {
-  const project = readProjectConfiguration(tree, options.projectName)
+export function updateProject(host: Tree, options: NormalizedSchema): void {
+  const project = readProjectConfiguration(host, options.projectName)
 
   const firebaseAppProject = options.firebaseAppProject
 
@@ -61,11 +61,11 @@ export function updateProject(tree: Tree, options: NormalizedOptions): void {
   // Instead we serve at the firebase app project
   delete project.targets.serve
 
-  updateProjectConfiguration(tree, options.projectName, project)
+  updateProjectConfiguration(host, options.projectName, project)
 
   // Add function project as implicit dep of firebase app project
   firebaseAppProject.implicitDependencies ||= []
   firebaseAppProject.implicitDependencies.push(options.projectName)
   firebaseAppProject.implicitDependencies.sort()
-  updateProjectConfiguration(tree, options.app, firebaseAppProject)
+  updateProjectConfiguration(host, options.app, firebaseAppProject)
 }

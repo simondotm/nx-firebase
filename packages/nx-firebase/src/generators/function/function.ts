@@ -12,69 +12,114 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 
 import { initGenerator } from '../init/init'
 import {
+  firebaseNodeEngine,
   getFirebaseConfigFromProject,
   getProjectName,
   updateTsConfig,
 } from '../../utils'
 
 import { addFunctionConfig, createFiles, updateProject } from './lib'
-import type { FunctionGeneratorOptions, NormalizedOptions } from './schema'
+import type { Schema, NormalizedSchema } from './schema'
+import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils'
 
-export function normalizeOptions(
-  tree: Tree,
-  options: FunctionGeneratorOptions,
-): NormalizedOptions {
-  const { projectName, projectRoot } = getProjectName(
-    tree,
-    options.name,
-    options.directory,
-  )
+export async function normalizeOptions(
+  host: Tree,
+  options: Schema,
+  callingGenerator = '@simondotm/nx-firebase:function',
+): Promise<NormalizedSchema> {
+  const {
+    projectName: appProjectName,
+    projectRoot,
+    projectNameAndRootFormat,
+  } = await determineProjectNameAndRootOptions(host, {
+    name: options.name,
+    projectType: 'application',
+    directory: options.directory,
+    projectNameAndRootFormat: options.projectNameAndRootFormat,
+    rootProject: options.rootProject,
+    callingGenerator,
+  });
+
+  options.rootProject = projectRoot === '.';
+  options.projectNameAndRootFormat = projectNameAndRootFormat;
+
+  const parsedTags = options.tags
+    ? options.tags.split(',').map((s) => s.trim())
+    : [];  
+
+  // const { projectName, projectRoot } = getProjectName(
+  //   host,
+  //   options.name,
+  //   options.directory,
+  // )
 
   // get & validate the firebase app project this function will be attached to
   const firebaseApp = names(options.app).fileName
-  const projects = getProjects(tree)
+  const projects = getProjects(host)
   if (!projects.has(firebaseApp)) {
     throw new Error(
       `A firebase application project called '${firebaseApp}' was not found in this workspace.`,
     )
   }
 
-  const firebaseAppProject = readProjectConfiguration(tree, firebaseApp)
+  const firebaseAppProject = readProjectConfiguration(host, firebaseApp)
 
   // read the firebase config used by the parent app project
   const firebaseConfigName = getFirebaseConfigFromProject(
-    tree,
+    host,
     firebaseAppProject,
   )
 
+
   return {
     ...options,
-    runTime: options.runTime || '16',
-    format: options.format || 'esm',
+    name: names(options.name).fileName,
+    projectName: appProjectName,
     projectRoot,
-    projectName,
+    parsedTags,
     firebaseConfigName,
     firebaseAppProject,
-  }
+  };  
+
+  // return {
+  //   ...options,
+  //   runTime: options.runTime || '16',
+  //   format: options.format || 'esm',
+  //   projectRoot,
+  //   projectName,
+  //   firebaseConfigName,
+  //   firebaseAppProject,
+  // }
 }
 
 /**
  * Firebase 'functions' application generator
  * Uses the `@nx/node` application generator as a base implementation
  *
- * @param tree
- * @param rawOptions
+ * @param host
+ * @param schema
  * @returns
  */
 export async function functionGenerator(
-  tree: Tree,
-  rawOptions: FunctionGeneratorOptions,
+  host: Tree,
+  schema: Schema,
 ): Promise<GeneratorCallback> {
   const tasks: GeneratorCallback[] = []
-  const options = normalizeOptions(tree, rawOptions)
+
+  const options = await normalizeOptions(host, {
+    projectNameAndRootFormat: 'derived',
+    runTime: firebaseNodeEngine,
+    ...schema
+  })
+
+  if (!options.runTime) {
+    throw new Error("No runtime specified for the function app")
+  }
+
+  // const options = normalizeOptions(host, schema)
 
   // initialise plugin
-  const initTask = await initGenerator(tree, {})
+  const initTask = await initGenerator(host, {})
   tasks.push(initTask)
 
   // We use @nx/node:app to scaffold our function application, then modify as required
@@ -85,9 +130,10 @@ export async function functionGenerator(
     `firebase:function,firebase:name:${options.projectName},firebase:dep:${options.firebaseAppProject.name}` +
     (options.tags ? `,${options.tags}` : '')
 
-  const nodeApplicationTask = await nodeApplicationGenerator(tree, {
+  const nodeApplicationTask = await nodeApplicationGenerator(host, {
     name: options.name,
     directory: options.directory,
+    projectNameAndRootFormat: options.projectNameAndRootFormat,
     tags,
     setParserOptionsProject: options.setParserOptionsProject,
     skipFormat: options.skipFormat,
@@ -99,20 +145,20 @@ export async function functionGenerator(
   tasks.push(nodeApplicationTask)
 
   // generate function app specific files
-  createFiles(tree, options)
+  createFiles(host, options)
 
   // update TS config for esm or cjs
-  updateTsConfig(tree, options.projectRoot, options.runTime, options.format)
+  updateTsConfig(host, options.projectRoot, options.runTime, options.format)
 
   // reconfigure the @nx/node:app to suit firebase functions
-  updateProject(tree, options)
+  updateProject(host, options)
 
   // update firebase functions config
-  addFunctionConfig(tree, options)
+  addFunctionConfig(host, options)
 
   // ensures newly added files are formatted to match workspace style
   if (!options.skipFormat) {
-    await formatFiles(tree)
+    await formatFiles(host)
   }
 
   return runTasksInSerial(...tasks)

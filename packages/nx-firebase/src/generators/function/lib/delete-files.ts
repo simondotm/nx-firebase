@@ -1,13 +1,13 @@
 import type { Tree } from '@nx/devkit'
 import { joinPathFragments } from '@nx/devkit'
-import type { NormalizedOptions } from '../schema'
+import type { NormalizedSchema } from '../schema'
 
 /**
  * Delete unwanted files created by the node generator
- * @param tree
+ * @param host
  * @param options
  */
-export function deleteFiles(tree: Tree, options: NormalizedOptions): void {
+export function deleteFiles(host: Tree, options: NormalizedSchema): void {
   const nodeFilesToDelete = [
     joinPathFragments(options.projectRoot, 'src', 'main.ts'),
     joinPathFragments(options.projectRoot, 'src', 'app', '.gitkeep'),
@@ -27,6 +27,6 @@ export function deleteFiles(tree: Tree, options: NormalizedOptions): void {
   ]
 
   for (const path of nodeFilesToDelete) {
-    tree.delete(path)
+    host.delete(path)
   }
 }
