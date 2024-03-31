@@ -41,17 +41,24 @@ export async function safeRunNxCommandAsync(cmd: string)
 {
   testDebug(`- safeRunNxCommandAsync ${cmd}`)
   try {
-    const result = await runNxCommandAsync(`${cmd} --verbose`, { silenceError: true })
-    // strip chalk TTY ANSI codes from output
-    result.stdout = result.stdout.replace(STRIP_ANSI_MATCHER, '')
-    result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')   
-    if (result.stdout) {
-      testDebug(green(result.stdout))
+    async function runCommand(cmd: string) {
+      const result = await runNxCommandAsync(`${cmd} --verbose`, { silenceError: true })
+      // strip chalk TTY ANSI codes from output
+      result.stdout = result.stdout.replace(STRIP_ANSI_MATCHER, '')
+      result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')   
+      if (result.stdout) {
+        testDebug(green(result.stdout))
+      }
+      if (result.stderr) {
+        testDebug(red(result.stderr))
+      }
+      return result
     }
-    if (result.stderr) {
-      testDebug(red(result.stderr))
+    // getting wierd lock file errors from Nx, so retry at least once
+    let result = await runCommand(cmd)
+    if (result.stderr.includes('LOCK-FILES-CHANGED')) {
+      result = await runCommand(cmd)
     }
-
 
     return result
   }
@@ -71,6 +78,12 @@ export async function runTargetAsync(projectData: ProjectData, target: string = 
   //     // is modified before first build      
   //     await runNxCommandAsync('reset')    
   // }
+  if (target === 'build') {
+    // need to reset Nx here for e2e test to work
+    // I dont think the Nx daemon has enough time to update its cache
+    // after generation of a new project and building it right away
+    await runNxCommandAsync('reset')    
+  }  
 
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
