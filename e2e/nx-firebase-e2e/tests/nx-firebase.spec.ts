@@ -268,7 +268,7 @@ describe('nx-firebase e2e', () => {
         await appGeneratorAsync(appData)
 
         // test app builder
-        // at this point there are no functions so it doe nothing
+        // at this point there are no functions so it does nothing
         const result = await runNxCommandAsync(`build ${appData.projectName}`)
         expect(result.stdout).toContain("Build succeeded.")
 
@@ -1031,8 +1031,8 @@ describe('nx-firebase e2e', () => {
           `nx run ${functionData.projectName}:lint`,
           `nx run ${functionData2.projectName}:lint`,
           `All files pass linting`,
+          `Successfully ran target lint for 2 projects`,          
           `Successfully ran target lint for project ${appData.projectName}`,
-          `Successfully ran target lint for project ${functionData.projectName}`,
         ])
 
         // cleanup
