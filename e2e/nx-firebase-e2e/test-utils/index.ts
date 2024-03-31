@@ -45,8 +45,12 @@ export async function safeRunNxCommandAsync(cmd: string)
     // strip chalk TTY ANSI codes from output
     result.stdout = result.stdout.replace(STRIP_ANSI_MATCHER, '')
     result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')   
-    testDebug(green(result.stdout))
-    testDebug(red(result.stderr))
+    if (result.stdout) {
+      testDebug(green(result.stdout))
+    }
+    if (result.stderr) {
+      testDebug(red(result.stderr))
+    }
 
 
     return result
@@ -390,6 +394,7 @@ export function expectedFunctionProjectTargets(
       outputs: [`{workspaceRoot}/coverage/{projectRoot}`],
       options: {
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
+        passWithNoTests: true,
       },
       configurations: {
         ci: {
