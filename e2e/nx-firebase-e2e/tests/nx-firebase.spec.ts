@@ -189,7 +189,7 @@ describe('nx-firebase e2e', () => {
     it(
       'should create buildable typescript library in subdir',
       async () => {
-        await libGeneratorAsync(subDirBuildableLibData, `--directory=${subDirBuildableLibData.dir} --buildable --importPath="${subDirBuildableLibData.npmScope}"`)
+        await libGeneratorAsync(subDirBuildableLibData, `--buildable --importPath="${subDirBuildableLibData.npmScope}"`)
 
         // no need to test the js library generator, only that it ran ok
         expect(() =>
@@ -224,7 +224,7 @@ describe('nx-firebase e2e', () => {
       'should create non-buildable typescript library in subdir',
       async () => {
         // const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
-        await libGeneratorAsync(subDirNonbuildableLibData, `--directory=${subDirNonbuildableLibData.dir} --buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`)
+        await libGeneratorAsync(subDirNonbuildableLibData, `--buildable=false --importPath="${subDirNonbuildableLibData.npmScope}"`)
 
         expect(() =>
           checkFilesExist(`${subDirNonbuildableLibData.projectDir}/package.json`),
@@ -277,26 +277,22 @@ describe('nx-firebase e2e', () => {
     })
 
     describe('--directory', () => {
-      it(
-        'should create nx-firebase app in the specified directory',
-        async () => {
-          const appData = getProjectData('apps', uniq('firebaseSetupApp'), { dir: 'subdir' })
-          await appGeneratorAsync(appData,
-            `--directory ${appData.dir}`,
-          )
-          expect(() =>
-            checkFilesExist(
-              ...expectedAppFiles(appData),
-            ),
-          ).not.toThrow()
+      it('should create nx-firebase app in the specified directory', async () => {
+        const appData = getProjectData('apps', uniq('firebaseSetupApp'), {
+          dir: 'subdir',
+        })
+        await appGeneratorAsync(appData)
+        expect(() =>
+          checkFilesExist(...expectedAppFiles(appData)),
+        ).not.toThrow()
 
-          const project = readJson(`${appData.projectDir}/project.json`)
-          expect(project.name).toEqual(`${appData.projectName}`)
+        const project = readJson(`${appData.projectDir}/project.json`)
+        expect(project.name).toEqual(`${appData.projectName}`)
 
-          validateProjectConfig(appData)  
+        validateProjectConfig(appData)
 
-          // cleanup - app
-          await cleanAppAsync(appData)                
+        // cleanup - app
+        await cleanAppAsync(appData)
       })
     })
 
