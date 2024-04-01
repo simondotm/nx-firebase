@@ -39,6 +39,11 @@ export function getProjectData(
   // we want to maintain the kebab-case name for the project/dir
   // but we need to ensure the 'apps' or 'libs' prefix is added to the --directory
 
+  // EDIT: Actually this isn't true, it defaults to derived, for now, but the e2e project
+  // setup doesnt seem to set a layout, or a derived default, so thats why we have to consider
+  // that here, because without apps/libs layout we get different project names in the e2e tests.
+  // See projectNameAndRootFormat option
+
   // const dir = options?.dir ? `${names(options.dir).fileName}` : ''
   const d = options?.dir ? `${names(options.dir).fileName}` : ''
   const dir = joinPathFragments(type, d)

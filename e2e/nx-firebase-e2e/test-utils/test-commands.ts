@@ -5,7 +5,6 @@ import { ProjectData } from './test-project-data'
 
 const STRIP_ANSI_MATCHER = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 
-
 export async function safeRunNxCommandAsync(cmd: string)
 {
   testDebug(`- safeRunNxCommandAsync ${cmd}`)
@@ -58,8 +57,6 @@ export async function runTargetAsync(projectData: ProjectData, target: string = 
 
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
-  // testDebug(result.stdout)
-  // testDebug(result.stderr)
 
   if (target === 'build') {
     expectStrings(result.stdout, [
@@ -93,24 +90,18 @@ export async function renameProjectAsync(projectData: ProjectData, renameProject
 export async function appGeneratorAsync(projectData: ProjectData, params: string = '') {
   testDebug(`- appGeneratorAsync ${projectData.projectName} ${params}`)
   const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:app ${projectData.name} --directory=${projectData.directory} ${params}`)
-  // testDebug(result.stdout)
-
   return result
 }
 
 export async function functionGeneratorAsync(projectData: ProjectData, params: string = '') {
   testDebug(`- functionGeneratorAsync ${projectData.projectName} ${params}`)
   const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:function ${projectData.name} --directory=${projectData.directory} ${params}`)
-  // testDebug(result.stdout)
-  // testDebug(result.stderr)
   return result
 }
 
 export async function libGeneratorAsync(projectData: ProjectData, params: string = '') {
   testDebug(`- libGeneratorAsync ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(`g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`)
-  // testDebug(result.stdout)
-  // testDebug(result.stderr)  
   return result
 }
 
