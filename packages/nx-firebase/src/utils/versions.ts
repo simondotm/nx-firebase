@@ -1,5 +1,5 @@
 // Declare target version of Nx that the plugin is currently compatible with
-export const pluginNxVersion = '^16.1.1'
+export const pluginNxVersion = '^16.8.1'
 export const pluginNxVersionMajor = 16
 
 // Tslib version changes with each Nx version
