@@ -4,9 +4,6 @@ import { packageVersions } from '../__generated__/nx-firebase-versions'
 export const pluginNxVersion = `^${packageVersions.nx}`
 export const pluginNxVersionMajor = parseInt(packageVersions.nx.split('.')[0])
 
-// Tslib version changes with each Nx version
-export const tsLibVersion = '^2.0.0'
-
 // Firebase packages are not managed by the plugin
 // but they are added if they do not exist already in the workspace
 export const firebaseAdminVersion = `^${packageVersions['firebase-admin']}`
