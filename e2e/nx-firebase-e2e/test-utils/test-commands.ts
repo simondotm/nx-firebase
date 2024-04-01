@@ -47,13 +47,13 @@ export async function runTargetAsync(projectData: ProjectData, target: string = 
   //     // is modified before first build      
   //     await runNxCommandAsync('reset')    
   // }
-  if (target === 'build') {
-    // getting wierd errors with Nx 16.8.1 where is says it cannot find the project
-    // need to reset Nx here for e2e test to work
-    // I dont think the Nx daemon has enough time to update its cache
-    // after generation of a new project and building it right away
-    await runNxCommandAsync('reset')    
-  }  
+  // if (target === 'build') {
+  //   // getting wierd errors with Nx 16.8.1 where is says it cannot find the project
+  //   // need to reset Nx here for e2e test to work
+  //   // I dont think the Nx daemon has enough time to update its cache
+  //   // after generation of a new project and building it right away
+  //   await safeRunNxCommandAsync('reset')    
+  // }  
 
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
