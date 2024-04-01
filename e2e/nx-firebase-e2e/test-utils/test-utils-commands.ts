@@ -1,7 +1,7 @@
-import { expectStrings, expectNoStrings } from './test-helpers'
-import { testDebug, red, green } from './test-logger'
+import { expectStrings, expectNoStrings } from './test-utils-helpers'
+import { testDebug, red, green } from './test-utils-logger'
 import { runNxCommandAsync } from '@nx/plugin/testing'
-import { ProjectData } from './test-project-data'
+import { ProjectData } from './test-utils-project-data'
 
 const STRIP_ANSI_MATCHER = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 

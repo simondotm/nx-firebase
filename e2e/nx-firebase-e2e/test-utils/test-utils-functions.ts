@@ -1,5 +1,5 @@
 
-import type { ProjectData } from './test-project-data'
+import type { ProjectData } from './test-utils-project-data'
 import { readJson } from '@nx/plugin/testing'
 
 export function expectedFunctionProjectTargets(
