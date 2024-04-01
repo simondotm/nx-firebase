@@ -16,6 +16,11 @@ import {
   runTargetAsync,
   expectStrings, 
 } from '../test-utils'
+import { detectPackageManager } from '@nx/devkit'
+
+const packageManager = detectPackageManager()
+const packageLockFile = packageManager === 'npm' ? 'package-lock.json' : packageManager === 'pnpm' ? 'pnpm-lock.yaml' : 'yarn.lock'
+
 
 function expectedFunctionFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
@@ -74,6 +79,7 @@ export function testFunction() {
           checkFilesExist(
             `dist/${functionData.projectDir}/main.js`,
             `dist/${functionData.projectDir}/package.json`,
+            `dist/${functionData.projectDir}/${packageLockFile}`,
             `dist/${functionData.projectDir}/.env`,
             `dist/${functionData.projectDir}/.env.local`,
             `dist/${functionData.projectDir}/.secret.local`,
@@ -104,6 +110,7 @@ export function testFunction() {
           checkFilesExist(
             `dist/${functionData.projectDir}/main.js`,
             `dist/${functionData.projectDir}/package.json`,
+            `dist/${functionData.projectDir}/${packageLockFile}`,
             `dist/${functionData.projectDir}/.env`,
             `dist/${functionData.projectDir}/.env.local`,
             `dist/${functionData.projectDir}/.secret.local`,
