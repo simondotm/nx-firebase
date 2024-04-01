@@ -5,7 +5,7 @@ export const pluginNxVersion = `^${packageVersions.nx}`
 export const pluginNxVersionMajor = parseInt(packageVersions.nx.split('.')[0])
 
 // Target node 16 for all firebase projects now
-export const firebaseNodeEngine = '16' // packageVersions['node'] // hard coded to 16 until we update Nx to v17
+export const firebaseNodeEngine = packageVersions.nodeEngine
 export const firebaseNodeRuntime = `nodejs${firebaseNodeEngine}`
 
 // https://stackoverflow.com/questions/59787574/typescript-tsconfig-settings-for-node-js-12

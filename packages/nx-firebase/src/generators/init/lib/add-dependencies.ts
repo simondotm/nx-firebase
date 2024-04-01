@@ -39,14 +39,14 @@ export function addDependencies(tree: Tree): GeneratorCallback {
 
   // Firebase packages are not managed by the plugin
   // but they are added if they do not exist already in the workspace
-  addDependencyIfNotPresent('firebase', `^${packageVersions['firebase']}`)
+  addDependencyIfNotPresent('firebase', `^${packageVersions.firebase}`)
   addDependencyIfNotPresent(
     'firebase-admin',
-    `^${packageVersions['firebase-admin']}`,
+    `^${packageVersions.firebaseAdmin}`,
   )
   addDependencyIfNotPresent(
     'firebase-functions',
-    `^${packageVersions['firebase-functions']}`,
+    `^${packageVersions.firebaseFunctions}`,
   )
 
   //SM: not convinced we should be adding tslib in this plugin
@@ -55,16 +55,16 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   // firebase dev dependencies
   addDevDependencyIfNotPresent(
     'firebase-tools',
-    `^${packageVersions['firebase-tools']}`,
+    `^${packageVersions.firebaseTools}`,
   )
   addDevDependencyIfNotPresent(
     'firebase-functions-test',
-    `^${packageVersions['firebase-functions-test']}`,
+    `^${packageVersions.firebaseFunctionsTest}`,
   )
 
   // kill-port is used by the emulate target to ensure clean emulator startup
   // since Nx doesn't kill processes cleanly atm
-  addDevDependencyIfNotPresent('kill-port', `^${packageVersions['kill-port']}`)
+  addDevDependencyIfNotPresent('kill-port', `^${packageVersions.killPort}`)
 
   // @nx/node is used by the plugin function generator as a proxy for creating a typescript app
   // since users have to create a firebase app before they generate a function, we can be sure
