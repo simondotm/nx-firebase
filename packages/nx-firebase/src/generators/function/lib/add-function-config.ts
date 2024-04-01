@@ -1,9 +1,9 @@
 import { Tree, joinPathFragments, updateJson } from '@nx/devkit'
 import type { FirebaseConfig, FirebaseFunction } from '../../../types'
-import type { NormalizedOptions } from '../schema'
+import type { NormalizedSchema } from '../schema'
 
-export function addFunctionConfig(tree: Tree, options: NormalizedOptions) {
-  updateJson(tree, options.firebaseConfigName, (json: FirebaseConfig) => {
+export function addFunctionConfig(host: Tree, options: NormalizedSchema) {
+  updateJson(host, options.firebaseConfigName, (json: FirebaseConfig) => {
     const functionConfig = {
       codebase: options.projectName,
       source: joinPathFragments('dist', options.projectRoot),

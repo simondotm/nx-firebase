@@ -1,3 +1,4 @@
+import { PACKAGE_MANAGER } from '../config'
 import { info } from './log'
 import { log } from './log'
 import { exec } from 'child_process'
@@ -46,7 +47,8 @@ export async function customExec(
 }
 
 export async function runNxCommandAsync(command: string, dir?: string) {
-  const cmd = `npx nx ${command} --verbose`
+  const exec = PACKAGE_MANAGER === 'npm' ? 'npx' : 'pnpm exec'
+  const cmd = `${exec} nx ${command} --verbose`
   const result = await customExec(cmd, dir)
   return result
 }

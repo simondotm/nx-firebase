@@ -1,6 +1,6 @@
 import { generateFiles, joinPathFragments, Tree } from '@nx/devkit'
 
-import type { NormalizedOptions } from '../schema'
+import type { NormalizedSchema } from '../schema'
 
 /**
  * Generate the firebase app specific files
@@ -8,7 +8,7 @@ import type { NormalizedOptions } from '../schema'
  * @param tree
  * @param options
  */
-export function createFiles(tree: Tree, options: NormalizedOptions): void {
+export function createFiles(tree: Tree, options: NormalizedSchema): void {
   const firebaseAppConfig = options.firebaseConfigName
 
   const substitutions = {

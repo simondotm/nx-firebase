@@ -1,14 +1,14 @@
 import { offsetFromRoot, Tree } from '@nx/devkit'
 import { generateFiles, joinPathFragments } from '@nx/devkit'
-import type { NormalizedOptions } from '../schema'
+import type { NormalizedSchema } from '../schema'
 
 /**
  * Generate the firebase app specific files
  *
- * @param tree
+ * @param host
  * @param options
  */
-export function createFiles(tree: Tree, options: NormalizedOptions): void {
+export function createFiles(host: Tree, options: NormalizedSchema): void {
   const firebaseAppConfig = options.firebaseConfigName
   const firebaseAppConfigPath = joinPathFragments(
     offsetFromRoot(options.projectRoot),
@@ -40,7 +40,7 @@ export function createFiles(tree: Tree, options: NormalizedOptions): void {
   // 1. so that they dont clutter up the root workspace
   // 2. so that they are located within the nx firebase application project they relate to
   generateFiles(
-    tree,
+    host,
     joinPathFragments(__dirname, '..', 'files'),
     options.projectRoot,
     substitutions,

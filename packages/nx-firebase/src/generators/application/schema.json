@@ -12,24 +12,29 @@
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "What name would you like to use for the firebase node application?"
+      "x-prompt": "What name would you like to use for the firebase application?"
     },
     "directory": {
-      "description": "The directory of the new application.",
-      "type": "string"
+      "description": "A directory where the application is placed.",
+      "type": "string",
+      "alias": "d"
     },
     "tags": {
-      "description": "Add tags to the application (used for linting).",
-      "type": "string"
+      "type": "string",
+      "description": "Add tags to the project (used for linting)",
+      "alias": "t"
+    },
+    "projectNameAndRootFormat": {
+      "description": "Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`).",
+      "type": "string",
+      "enum": ["as-provided", "derived"]
     },
     "project": {
       "type": "string",
-      "description": "The firebase project that should be associated with this application",
+      "description": "The firebase CLI project that should be associated with this application",
       "default": ""
     }
   },
   "additionalProperties": false,
-  "required": [
-    "name"
-  ]
+  "required": ["name"]
 }

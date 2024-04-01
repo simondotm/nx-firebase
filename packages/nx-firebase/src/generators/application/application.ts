@@ -4,23 +4,46 @@ import {
   convertNxGenerator,
   runTasksInSerial,
   addProjectConfiguration,
+  names,
 } from '@nx/devkit'
 
 import { createFiles } from './lib'
 
-import { getProjectName } from '../../utils'
-import type { ApplicationGeneratorOptions, NormalizedOptions } from './schema'
+// import { getProjectName } from '../../utils'
+import type { Schema, NormalizedSchema } from './schema'
 import initGenerator from '../init/init'
+import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils'
 
-export function normalizeOptions(
-  tree: Tree,
-  options: ApplicationGeneratorOptions,
-): NormalizedOptions {
-  const { projectName, projectRoot } = getProjectName(
-    tree,
-    options.name,
-    options.directory,
-  )
+export async function normalizeOptions(
+  host: Tree,
+  options: Schema,
+  callingGenerator = '@simondotm/nx-firebase:application'
+): Promise<NormalizedSchema> {
+  const {
+    projectName: appProjectName,
+    projectRoot,
+    projectNameAndRootFormat,
+  } = await determineProjectNameAndRootOptions(host, {
+    name: options.name,
+    projectType: 'application',
+    directory: options.directory,
+    projectNameAndRootFormat: options.projectNameAndRootFormat,
+    rootProject: options.rootProject,
+    callingGenerator,
+  });
+
+  options.rootProject = projectRoot === '.';
+  options.projectNameAndRootFormat = projectNameAndRootFormat;
+
+  const parsedTags = options.tags
+    ? options.tags.split(',').map((s) => s.trim())
+    : [];  
+
+  // const { projectName, projectRoot } = getProjectName(
+  //   host,
+  //   options.name,
+  //   options.directory,
+  // )
 
   /**
    * Plugin filename naming convention for firebase.json config is:
@@ -31,52 +54,65 @@ export function normalizeOptions(
    * - plugin can try `firebase.<projectname>.json` and use if exists
    * - otherwise fallback is `firebase.json`
    */
-  const firebaseConfigName = tree.exists('firebase.json')
-    ? `firebase.${projectName}.json`
+  const firebaseConfigName = host.exists('firebase.json')
+    ? `firebase.${appProjectName}.json`
     : 'firebase.json'
 
   // firebase config name has to be unique.
-  if (tree.exists(firebaseConfigName)) {
+  if (host.exists(firebaseConfigName)) {
     throw Error(
       `There is already a firebase configuration called '${firebaseConfigName}' in this workspace. Please use a different project name.`,
     )
   }
 
+
   return {
     ...options,
+    name: names(options.name).fileName,
+    projectName: appProjectName,
     projectRoot,
-    projectName,
+    parsedTags,
     firebaseConfigName,
-  }
+  };  
+
+  // return {
+  //   ...options,
+  //   projectRoot,
+  //   projectName,
+  //   firebaseConfigName,
+  // }
 }
 
 /**
  * Firebase application generator
  *
- * @param tree
- * @param rawOptions
+ * @param host
+ * @param schema
  * @returns
  */
 export async function applicationGenerator(
-  tree: Tree,
-  rawOptions: ApplicationGeneratorOptions,
+  host: Tree,
+  schema: Schema,
 ): Promise<GeneratorCallback> {
-  const options = normalizeOptions(tree, rawOptions)
-  const initTask = await initGenerator(tree, {})
+  const options = await normalizeOptions(host, {
+    projectNameAndRootFormat: 'derived',
+    ...schema
+  })
+  const initTask = await initGenerator(host, {})
 
   const firebaseCliProject = options.project
     ? ` --project=${options.project}`
     : ''
 
-  const tags = [`firebase:app`, `firebase:name:${options.projectName}`]
-  if (options.tags) {
-    options.tags.split(',').map((s) => {
-      s.trim()
-      tags.push(s)
-    })
-  }
+  const tags = [`firebase:app`, `firebase:name:${options.projectName}`, ...options.parsedTags]
+  // if (options.tags) {
+  //   options.tags.split(',').map((s) => {
+  //     s.trim()
+  //     tags.push(s)
+  //   })
+  // }
 
-  addProjectConfiguration(tree, options.projectName, {
+  addProjectConfiguration(host, options.projectName, {
     root: options.projectRoot,
     projectType: 'application',
     targets: {
@@ -157,7 +193,7 @@ export async function applicationGenerator(
     tags,
   })
 
-  createFiles(tree, options)
+  createFiles(host, options)
 
   return runTasksInSerial(initTask)
 }

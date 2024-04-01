@@ -16,12 +16,19 @@
       "x-prompt": "What name would you like to use for the firebase function project?"
     },
     "directory": {
-      "description": "The directory of the new function project.",
-      "type": "string"
+      "description": "A directory where the function is placed.",
+      "type": "string",
+      "alias": "d"
     },
     "tags": {
-      "description": "Add tags to the application (used for linting).",
-      "type": "string"
+      "type": "string",
+      "description": "Add tags to the project (used for linting)",
+      "alias": "t"
+    },
+    "projectNameAndRootFormat": {
+      "description": "Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`).",
+      "type": "string",
+      "enum": ["as-provided", "derived"]
     },
     "setParserOptionsProject": {
       "type": "boolean",
@@ -43,14 +50,13 @@
       "description": "The name of the parent Nx firebase application project this function will be added to.",
       "type": "string",
       "x-prompt": "Which firebase Nx application project will this function be created for?"
-    },       
+    },
     "runTime": {
       "description": "The node runtime target for this function.",
       "type": "string",
       "enum": ["16", "18", "20"],
       "default": "16"
     }
-
   },
   "additionalProperties": false,
   "required": ["name", "app"]
