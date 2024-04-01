@@ -5,6 +5,7 @@
   "packageManager": "pnpm@8.15.5",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "postinstall": "node ./tools/generate-package-versions.js",
     "start": "nx serve",
     "build": "nx run nx-firebase:build",
     "test": "nx run nx-firebase:test",
