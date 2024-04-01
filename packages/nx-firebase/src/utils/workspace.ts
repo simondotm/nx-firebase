@@ -1,5 +1,5 @@
 import { logger, readJsonFile, workspaceRoot } from '@nx/devkit'
-import { pluginNxVersion, pluginNxVersionMajor } from './versions'
+import { packageVersions } from '../__generated__/nx-firebase-versions'
 
 type PackageJson = {
   dependencies: {
@@ -49,10 +49,12 @@ function readNxWorkspaceVersion(): WorkspaceVersion {
 export const workspaceNxVersion = readNxWorkspaceVersion()
 
 export function checkNxVersion() {
+  // Declare target version of Nx that the plugin is currently compatible with
+  const pluginNxVersionMajor = parseInt(packageVersions.nx.split('.')[0])
   if (workspaceNxVersion) {
-    if (workspaceNxVersion.major > pluginNxVersionMajor) {
+    if (workspaceNxVersion.major !== pluginNxVersionMajor) {
       logger.warn(
-        `WARNING: @simondotm/nx-firebase plugin for Nx version (${pluginNxVersion}) may not be compatible with your version of Nx (${workspaceNxVersion.version})`,
+        `WARNING: This version of @simondotm/nx-firebase plugin was built for Nx version ^${packageVersions.nx}, and may not be compatible with your version of Nx (${workspaceNxVersion.version})`,
       )
     }
   } else {

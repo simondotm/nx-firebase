@@ -5,14 +5,7 @@ import {
   addDependenciesToPackageJson,
 } from '@nx/devkit'
 import { workspaceNxVersion } from '../../../utils'
-import {
-  firebaseVersion,
-  firebaseAdminVersion,
-  firebaseFunctionsVersion,
-  firebaseToolsVersion,
-  firebaseFunctionsTestVersion,
-  killportVersion,
-} from '../../../utils/versions'
+import { packageVersions } from '../../../__generated__/nx-firebase-versions'
 
 export function addDependencies(tree: Tree): GeneratorCallback {
   const dependencies: Record<string, string> = {}
@@ -44,24 +37,34 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     }
   }
 
-  // firebase dependencies
-  addDependencyIfNotPresent('firebase', firebaseVersion)
-  addDependencyIfNotPresent('firebase-admin', firebaseAdminVersion)
-  addDependencyIfNotPresent('firebase-functions', firebaseFunctionsVersion)
+  // Firebase packages are not managed by the plugin
+  // but they are added if they do not exist already in the workspace
+  addDependencyIfNotPresent('firebase', `^${packageVersions.firebase}`)
+  addDependencyIfNotPresent(
+    'firebase-admin',
+    `^${packageVersions.firebaseAdmin}`,
+  )
+  addDependencyIfNotPresent(
+    'firebase-functions',
+    `^${packageVersions.firebaseFunctions}`,
+  )
 
   //SM: not convinced we should be adding tslib in this plugin
   //addDependencyIfNotPresent('tslib', tsLibVersion)
 
   // firebase dev dependencies
-  addDevDependencyIfNotPresent('firebase-tools', firebaseToolsVersion)
+  addDevDependencyIfNotPresent(
+    'firebase-tools',
+    `^${packageVersions.firebaseTools}`,
+  )
   addDevDependencyIfNotPresent(
     'firebase-functions-test',
-    firebaseFunctionsTestVersion,
+    `^${packageVersions.firebaseFunctionsTest}`,
   )
 
   // kill-port is used by the emulate target to ensure clean emulator startup
   // since Nx doesn't kill processes cleanly atm
-  addDevDependencyIfNotPresent('kill-port', killportVersion)
+  addDevDependencyIfNotPresent('kill-port', `^${packageVersions.killPort}`)
 
   // @nx/node is used by the plugin function generator as a proxy for creating a typescript app
   // since users have to create a firebase app before they generate a function, we can be sure

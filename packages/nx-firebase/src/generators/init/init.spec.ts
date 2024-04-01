@@ -1,14 +1,7 @@
 import type { Tree } from '@nx/devkit'
 import * as devkit from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
-import {
-  firebaseAdminVersion,
-  firebaseFunctionsTestVersion,
-  firebaseFunctionsVersion,
-  firebaseToolsVersion,
-  firebaseVersion,
-  killportVersion,
-} from '../../utils/versions'
+import { packageVersions } from '../../__generated__/nx-firebase-versions'
 import { initGenerator } from './init'
 import { gitIgnoreRules, nxIgnoreRules } from './lib'
 import { workspaceNxVersion } from '../../utils'
@@ -77,24 +70,27 @@ describe('init generator', () => {
     await initGenerator(tree, {})
 
     const packageJson = devkit.readJson(tree, 'package.json')
-    expect(packageJson.dependencies['firebase']).toBe(firebaseVersion)
+    expect(packageJson.dependencies['firebase']).toBe(
+      `^${packageVersions.firebase}`,
+    )
     expect(packageJson.dependencies['firebase-admin']).toBe(
-      firebaseAdminVersion,
+      `^${packageVersions.firebaseAdmin}`,
     )
     expect(packageJson.dependencies['firebase-functions']).toBe(
-      firebaseFunctionsVersion,
+      `^${packageVersions.firebaseFunctions}`,
     )
 
     expect(packageJson.devDependencies['firebase-functions-test']).toBe(
-      firebaseFunctionsTestVersion,
+      `^${packageVersions.firebaseFunctionsTest}`,
     )
     expect(packageJson.devDependencies['firebase-tools']).toBe(
-      firebaseToolsVersion,
+      `^${packageVersions.firebaseTools}`,
     )
-    expect(packageJson.devDependencies['kill-port']).toBe(killportVersion)
+    expect(packageJson.devDependencies['kill-port']).toBe(
+      `^${packageVersions.killPort}`,
+    )
 
     expect(packageJson.dependencies['tslib']).not.toBeDefined()
-    
   })
 
   it('should only add dependencies if not already present', async () => {
@@ -128,7 +124,6 @@ describe('init generator', () => {
     const nxVersion = workspaceNxVersion.version
     expect(packageJson.devDependencies['@nx/node']).toBe(nxVersion)
   })
-
 
   // describe('--skipFormat', () => {
   //   it('should format files by default', async () => {

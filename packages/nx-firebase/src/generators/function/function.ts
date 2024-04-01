@@ -12,7 +12,6 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 
 import { initGenerator } from '../init/init'
 import {
-  firebaseNodeEngine,
   getFirebaseConfigFromProject,
   getProjectName,
   updateTsConfig,
@@ -21,6 +20,7 @@ import {
 import { addFunctionConfig, createFiles, updateProject } from './lib'
 import type { Schema, NormalizedSchema } from './schema'
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils'
+import { packageVersions } from '../../__generated__/nx-firebase-versions'
 
 export async function normalizeOptions(
   host: Tree,
@@ -38,14 +38,14 @@ export async function normalizeOptions(
     projectNameAndRootFormat: options.projectNameAndRootFormat,
     rootProject: options.rootProject,
     callingGenerator,
-  });
+  })
 
-  options.rootProject = projectRoot === '.';
-  options.projectNameAndRootFormat = projectNameAndRootFormat;
+  options.rootProject = projectRoot === '.'
+  options.projectNameAndRootFormat = projectNameAndRootFormat
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
-    : [];  
+    : []
 
   // const { projectName, projectRoot } = getProjectName(
   //   host,
@@ -70,7 +70,6 @@ export async function normalizeOptions(
     firebaseAppProject,
   )
 
-
   return {
     ...options,
     name: names(options.name).fileName,
@@ -79,7 +78,7 @@ export async function normalizeOptions(
     parsedTags,
     firebaseConfigName,
     firebaseAppProject,
-  };  
+  }
 
   // return {
   //   ...options,
@@ -107,13 +106,15 @@ export async function functionGenerator(
   const tasks: GeneratorCallback[] = []
 
   const options = await normalizeOptions(host, {
+    // set default options
     projectNameAndRootFormat: 'derived',
-    runTime: firebaseNodeEngine,
-    ...schema
+    runTime: packageVersions.nodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
+    // apply overrides from user
+    ...schema,
   })
 
   if (!options.runTime) {
-    throw new Error("No runtime specified for the function app")
+    throw new Error('No runtime specified for the function app')
   }
 
   // const options = normalizeOptions(host, schema)
