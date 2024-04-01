@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "projects": {
-    "nx-firebase": "packages/nx-firebase",
-    "nx-firebase-e2e": "e2e/nx-firebase-e2e"
-  }
-}
