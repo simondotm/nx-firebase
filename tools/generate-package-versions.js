@@ -3,7 +3,7 @@ const fs = require("fs")
 
 const packageJson = require('../package.json')
 const nvmVersion = fs.readFileSync(path.join(__dirname, '..', '.nvmrc'), 'utf8')
-const nodeVersion = parseInt(nvmVersion.trim().split('.')[0])
+const nodeVersion = nvmVersion.trim().split('.')[0]
 
 const file = path.join(__dirname, '..', 'packages', 'nx-firebase', 'src', '__generated__', 'nx-firebase-versions.ts')
 

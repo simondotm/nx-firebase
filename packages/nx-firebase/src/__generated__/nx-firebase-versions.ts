@@ -11,7 +11,7 @@ export const packageVersions = {
   "firebase-functions-test": "3.1.0",
   "firebase-tools": "12.4.5",
   "kill-port": "2.0.1",
-  "node": 18
+  "node": "18"
 }
 
 export type PackageVersions = typeof packageVersions
