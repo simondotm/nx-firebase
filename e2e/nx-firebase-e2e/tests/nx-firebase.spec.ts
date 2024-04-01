@@ -1,6 +1,8 @@
 import {
   ensureNxProject,
+  readJson,
   runNxCommandAsync,
+  updateFile,
 } from '@nx/plugin/testing'
 
 import { testWorkspace } from './test-workspace'
@@ -35,6 +37,11 @@ jest.setTimeout(JEST_TIMEOUT)
 
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
+const workspaceLayout = {
+        appsDir: "apps",
+        libsDir: "libs",
+        projectNameAndRootFormat: "derived"
+      }
 
 describe('nx-firebase e2e', () => {
   // Setting up individual workspaces per
@@ -44,7 +51,14 @@ describe('nx-firebase e2e', () => {
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
   beforeAll(async () => {
-    ensureNxProject(pluginName, pluginPath)    
+    ensureNxProject(pluginName, pluginPath)
+
+    // Nx 16.8.1 defaults to as-provided, lets override this for my own sanity
+    updateFile('nx.json', (text) => {
+      const json = JSON.parse(text)
+      json.workspaceLayout = workspaceLayout
+      return JSON.stringify(json, null, 2)   
+    })
   }, JEST_TIMEOUT)
 
   afterAll(() => {
@@ -52,6 +66,16 @@ describe('nx-firebase e2e', () => {
     // some work which can help clean up e2e leftovers
     runNxCommandAsync('reset')
   })
+
+  // dummy test to ensure setup is working
+  describe('ensureNxProject', () => {
+    it(
+      'should successfuly configure workspace layout',
+      () => {
+        const nxJson = readJson('nx.json')
+        expect(nxJson.workspaceLayout).toMatchObject(workspaceLayout)
+      })
+    })
 
   // run test suites
   testWorkspace()
