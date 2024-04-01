@@ -23,11 +23,13 @@ export async function safeRunNxCommandAsync(cmd: string)
       return result
     }
     // getting wierd lock file errors from Nx, so retry at least once
+    // SM Mar'24: this was due to 16.8.1+ e2e tests having the Nx Daemon enabled
+    // It's now disabled
     let result = await runCommand(cmd)
-    if (result.stdout.includes('LOCK-FILES-CHANGED') || result.stderr.includes('LOCK-FILES-CHANGED')) {
-      testDebug(red(`Re-running command ${cmd} due to LOCK-FILES-CHANGED`))
-      result = await runCommand(cmd)
-    }
+    // if (result.stdout.includes('LOCK-FILES-CHANGED') || result.stderr.includes('LOCK-FILES-CHANGED')) {
+    //   testDebug(red(`Re-running command ${cmd} due to LOCK-FILES-CHANGED`))
+    //   result = await runCommand(cmd)
+    // }
 
     return result
   }
@@ -38,23 +40,6 @@ export async function safeRunNxCommandAsync(cmd: string)
 }
 
 export async function runTargetAsync(projectData: ProjectData, target: string = 'build') {
-
-  //SM: Mar'24 - this seems legacy, not sure if needed
-  // if (target === 'build') {
-  //     // need to reset Nx here for e2e test to work
-  //     // otherwise it bundles node modules in the main.js output too
-  //     // I think this is a problem with dep-graph, since it works if main.ts
-  //     // is modified before first build      
-  //     await runNxCommandAsync('reset')    
-  // }
-  // if (target === 'build') {
-  //   // getting wierd errors with Nx 16.8.1 where is says it cannot find the project
-  //   // need to reset Nx here for e2e test to work
-  //   // I dont think the Nx daemon has enough time to update its cache
-  //   // after generation of a new project and building it right away
-  //   await safeRunNxCommandAsync('reset')    
-  // }  
-
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
 

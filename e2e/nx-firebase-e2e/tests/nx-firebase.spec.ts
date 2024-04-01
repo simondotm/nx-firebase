@@ -81,8 +81,8 @@ describe('nx-firebase e2e', () => {
     runNxCommandAsync('reset')
   })
 
-  // dummy test to ensure setup is working
-  describe('ensureNxProject', () => {
+  // test to ensure workspace setup is working
+  describe('ensureNxProject workspace', () => {
     it(
       'should successfuly configure workspace layout',
       () => {
