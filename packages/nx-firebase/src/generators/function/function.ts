@@ -12,7 +12,6 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 
 import { initGenerator } from '../init/init'
 import {
-  firebaseNodeEngine,
   getFirebaseConfigFromProject,
   getProjectName,
   updateTsConfig,
@@ -21,6 +20,7 @@ import {
 import { addFunctionConfig, createFiles, updateProject } from './lib'
 import type { Schema, NormalizedSchema } from './schema'
 import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils'
+import { packageVersions } from '../../__generated__/nx-firebase-versions'
 
 export async function normalizeOptions(
   host: Tree,
@@ -106,8 +106,10 @@ export async function functionGenerator(
   const tasks: GeneratorCallback[] = []
 
   const options = await normalizeOptions(host, {
+    // set default options
     projectNameAndRootFormat: 'derived',
-    runTime: firebaseNodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
+    runTime: packageVersions.nodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
+    // apply overrides from user
     ...schema,
   })
 
