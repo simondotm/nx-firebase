@@ -14,6 +14,15 @@ import { testSync } from './test-sync'
 import { testTargets } from './test-targets'
 import { testMigrate } from './test-migrate'
 
+/**
+ * Nx 16.8.1 is giving me a massive headache with the daemon running during e2e tests
+ * We get missing projects and LOCK_FILE_CHANGED errors
+ * So we force CI environment variable to be true to ensure it is disabled
+ * At least this way we know what runs locally will also match in actual CI environments
+ * https://nx.dev/concepts/more-concepts/nx-daemon#turning-it-off
+ */
+process.env['CI'] = "true"
+
 const JEST_TIMEOUT = 190000
 jest.setTimeout(JEST_TIMEOUT)
 
@@ -56,9 +65,14 @@ describe('nx-firebase e2e', () => {
     // Nx 16.8.1 defaults to as-provided, lets override this for my own sanity
     updateFile('nx.json', (text) => {
       const json = JSON.parse(text)
+      console.debug(json)
       json.workspaceLayout = workspaceLayout
+      // Disabling daemon for e2e tests as well, even though CI is enabled
+      json.tasksRunnerOptions.default.useDaemonProcess = false
       return JSON.stringify(json, null, 2)   
     })
+    // ensure daemon is off for e2e test
+    runNxCommandAsync('reset')    
   }, JEST_TIMEOUT)
 
   afterAll(() => {
@@ -74,6 +88,7 @@ describe('nx-firebase e2e', () => {
       () => {
         const nxJson = readJson('nx.json')
         expect(nxJson.workspaceLayout).toMatchObject(workspaceLayout)
+        expect(nxJson.tasksRunnerOptions.default.useDaemonProcess).toBe(false)
       })
     })
 
