@@ -38,14 +38,14 @@ export async function normalizeOptions(
     projectNameAndRootFormat: options.projectNameAndRootFormat,
     rootProject: options.rootProject,
     callingGenerator,
-  });
+  })
 
-  options.rootProject = projectRoot === '.';
-  options.projectNameAndRootFormat = projectNameAndRootFormat;
+  options.rootProject = projectRoot === '.'
+  options.projectNameAndRootFormat = projectNameAndRootFormat
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
-    : [];  
+    : []
 
   // const { projectName, projectRoot } = getProjectName(
   //   host,
@@ -70,7 +70,6 @@ export async function normalizeOptions(
     firebaseAppProject,
   )
 
-
   return {
     ...options,
     name: names(options.name).fileName,
@@ -79,7 +78,7 @@ export async function normalizeOptions(
     parsedTags,
     firebaseConfigName,
     firebaseAppProject,
-  };  
+  }
 
   // return {
   //   ...options,
@@ -108,12 +107,12 @@ export async function functionGenerator(
 
   const options = await normalizeOptions(host, {
     projectNameAndRootFormat: 'derived',
-    runTime: firebaseNodeEngine,
-    ...schema
+    runTime: firebaseNodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
+    ...schema,
   })
 
   if (!options.runTime) {
-    throw new Error("No runtime specified for the function app")
+    throw new Error('No runtime specified for the function app')
   }
 
   // const options = normalizeOptions(host, schema)
