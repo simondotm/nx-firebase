@@ -33,11 +33,12 @@ import {
   expectNoStrings,
   testDebug,
   red,
-  green
+  green,
 } from '../test-utils'
 
 import { ProjectConfiguration, joinPathFragments } from '@nx/devkit'
-
+import { testWorkspace } from './test-workspace'
+import { testLibraries, buildableLibData, nonbuildableLibData, subDirBuildableLibData, subDirNonbuildableLibData } from './test-libraries'
 
 const JEST_TIMEOUT = 190000
 jest.setTimeout(JEST_TIMEOUT)
@@ -62,14 +63,7 @@ jest.setTimeout(JEST_TIMEOUT)
 
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
-const compileComplete = 'Done compiling TypeScript files for project'
-const buildSuccess = 'Successfully ran target build for project'
 
-// libraries persist across all e2e tests
-const buildableLibData = getProjectData('libs', 'buildablelib')
-const nonbuildableLibData = getProjectData('libs', 'nonbuildablelib')
-const subDirBuildableLibData = getProjectData('libs', 'buildablelib', {dir: 'subdir'})
-const subDirNonbuildableLibData = getProjectData('libs', 'nonbuildablelib', {dir:'subdir'})
 
 function expectedAppFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
@@ -118,124 +112,16 @@ describe('nx-firebase e2e', () => {
     runNxCommandAsync('reset')
   })
 
-  describe('workspace setup', () => {
-
-    it(
-      'should create workspace without firebase dependencies',
-      async () => {
-        // test that generator adds dependencies to workspace package.json
-        // should not be initially set
-        const packageJson = readJson(`package.json`)
-        expect(packageJson.dependencies['firebase']).toBeUndefined()
-        expect(packageJson.dependencies['firebase-admin']).toBeUndefined()
-        expect(packageJson.dependencies['firebase-functions']).toBeUndefined()
-        expect(
-          packageJson.devDependencies['firebase-functions-test'],
-        ).toBeUndefined()
-        expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
-    })
-
-    it(
-      'should create workspace without nx dependencies',
-      async () => {
-        // test that generator adds dependencies to workspace package.json
-        // should not be initially set
-        const packageJson = readJson(`package.json`)
-        expect(packageJson.devDependencies['@nx/node']).toBeUndefined()
-    })
-
-    it(
-      'should run nx-firebase init',
-      async () => {
-        await safeRunNxCommandAsync(`generate @simondotm/nx-firebase:init`)
-        // test that generator adds dependencies to workspace package.json
-        const packageJson = readJson(`package.json`)
-        expect(packageJson.dependencies['firebase']).toBeDefined()
-        expect(packageJson.dependencies['firebase-admin']).toBeDefined()
-        expect(packageJson.dependencies['firebase-functions']).toBeDefined()
-        expect(
-          packageJson.devDependencies['firebase-functions-test'],
-        ).toBeDefined()
-        expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
-        //SM: Mar'24: our plugin init generator now only add @nx/node
-        expect(packageJson.devDependencies['@nx/node']).toBeDefined()
-    })
-  })
+  //--------------------------------------------------------------------------------------------------
+  // Test the workspace setup & init generator
+  //--------------------------------------------------------------------------------------------------  
+  testWorkspace()
 
 
   //--------------------------------------------------------------------------------------------------
   // Create Libraries for e2e function generator tests
   //--------------------------------------------------------------------------------------------------
-  describe('setup libraries', () => {
-    it(
-      'should create buildable typescript library',
-      async () => {
-        await libGeneratorAsync(buildableLibData, `--bundler=tsc --importPath="${buildableLibData.npmScope}"`)
-
-        // no need to test the js library generator, only that it ran ok
-        expect(() =>
-          checkFilesExist(`${buildableLibData.projectDir}/package.json`),
-        ).not.toThrow()
-
-        const result = await safeRunNxCommandAsync(
-          `build ${buildableLibData.projectName}`,
-        )
-        expect(result.stdout).toContain(compileComplete)
-        expect(result.stdout).toContain(
-          `${buildSuccess} ${buildableLibData.projectName}`,
-        )
-    })
-
-    it(
-      'should create buildable typescript library in subdir',
-      async () => {
-        await libGeneratorAsync(subDirBuildableLibData, `--bundler=tsc --importPath="${subDirBuildableLibData.npmScope}"`)
-
-        // no need to test the js library generator, only that it ran ok
-        expect(() =>
-          checkFilesExist(`${subDirBuildableLibData.projectDir}/package.json`),
-        ).not.toThrow()
-
-        const result = await safeRunNxCommandAsync(
-          `build ${subDirBuildableLibData.projectName}`,
-        )
-        expect(result.stdout).toContain(compileComplete)
-        expect(result.stdout).toContain(
-          `${buildSuccess} ${subDirBuildableLibData.projectName}`,
-        )
-    })
-
-    it(
-      'should create non-buildable typescript library',
-      async () => {
-        await libGeneratorAsync(nonbuildableLibData, `--bundler=none --importPath="${nonbuildableLibData.npmScope}"`)
-
-        expect(() =>
-          checkFilesExist(`${nonbuildableLibData.projectDir}/package.json`),
-        ).toThrow()
-
-        const project = readJson(
-          `${nonbuildableLibData.projectDir}/project.json`,
-        )
-        expect(project.targets.build).not.toBeDefined()
-    })
-
-    it(
-      'should create non-buildable typescript library in subdir',
-      async () => {
-        // const projectData = getProjectData('libs', 'nonbuildablelib', { dir: 'subdir' })          
-        await libGeneratorAsync(subDirNonbuildableLibData, `--bundler=none --importPath="${subDirNonbuildableLibData.npmScope}"`)
-
-        expect(() =>
-          checkFilesExist(`${subDirNonbuildableLibData.projectDir}/package.json`),
-        ).toThrow()
-
-        const project = readJson(
-          `${subDirNonbuildableLibData.projectDir}/project.json`,
-        )
-        expect(project.targets.build).not.toBeDefined()
-    })
-  })  
+  testLibraries()
   
   //--------------------------------------------------------------------------------------------------
   // Application generator e2e tests
