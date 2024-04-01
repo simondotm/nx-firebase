@@ -6,6 +6,9 @@ import {
   safeRunNxCommandAsync,
 } from '../test-utils'
 
+//--------------------------------------------------------------------------------------------------
+// Test the workspace setup & init generator
+//--------------------------------------------------------------------------------------------------  
 export function testWorkspace() {
   describe('workspace setup', () => {
 

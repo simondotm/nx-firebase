@@ -18,6 +18,10 @@ export const subDirNonbuildableLibData = getProjectData('libs', 'nonbuildablelib
 const compileComplete = 'Done compiling TypeScript files for project'
 const buildSuccess = 'Successfully ran target build for project'
 
+
+//--------------------------------------------------------------------------------------------------
+// Create Libraries for e2e function generator tests
+//--------------------------------------------------------------------------------------------------
 export function testLibraries() {
   describe('setup libraries', () => {
     it(
