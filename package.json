@@ -40,7 +40,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "firebase": "9.14.0",
     "firebase-admin": "11.10.1",
-    "firebase-functions": "4.4.1",
+    "firebase-functions": "4.8.2",
     "firebase-functions-test": "3.1.0",
     "firebase-tools": "12.4.5",
     "jest": "29.4.3",
