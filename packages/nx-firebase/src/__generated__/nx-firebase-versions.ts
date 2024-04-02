@@ -11,5 +11,5 @@ export const packageVersions = {
   firebaseTools: '12.4.5',
   killPort: '2.0.1',
   nodeEngine: '16',
-  googleCloudFunctionsFramework: '^3.3.0',
+  googleCloudFunctionsFramework: '3.3.0',
 }
