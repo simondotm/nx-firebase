@@ -1,6 +1,12 @@
-import { offsetFromRoot, Tree } from '@nx/devkit'
+import {
+  detectPackageManager,
+  offsetFromRoot,
+  Tree,
+  updateJson,
+} from '@nx/devkit'
 import { generateFiles, joinPathFragments } from '@nx/devkit'
 import type { NormalizedSchema } from '../schema'
+import { packageVersions } from '../../../__generated__/nx-firebase-versions'
 
 /**
  * Generate the firebase app specific files
@@ -45,4 +51,23 @@ export function createFiles(host: Tree, options: NormalizedSchema): void {
     options.projectRoot,
     substitutions,
   )
+
+  // set dependencies for the firebase function
+  const firebasePackageDependencies = {}
+  if (detectPackageManager() === 'pnpm') {
+    firebasePackageDependencies[
+      '@google-cloud/functions-framework'
+    ] = `^${packageVersions.googleCloudFunctionsFramework}`
+  }
+
+  if (Object.keys(firebasePackageDependencies).length > 0) {
+    updateJson(
+      host,
+      joinPathFragments(options.projectRoot, 'package.json'),
+      (json) => {
+        json.dependencies = firebasePackageDependencies
+        return json
+      },
+    )
+  }
 }
