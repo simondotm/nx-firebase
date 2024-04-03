@@ -8,7 +8,7 @@ updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       # Ignore updates to these packages:
       - dependency-name: "@nx*"
@@ -24,5 +24,6 @@ updates:
       - dependency-name: "tslib"
       - dependency-name: "typescript"
       # For all packages, ignore all patch updates
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
+      # EDIT: Actually, we'll take all updates, but this is a good example
+      # - dependency-name: "*"
+      #   update-types: ["version-update:semver-patch"]
