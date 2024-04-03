@@ -1,26 +1,20 @@
-import { get } from 'http'
 import { Cache, getCache, isNxVersionSince } from './utils/cache'
 import { customExec, runNxCommandAsync } from './utils/exec'
-import { expectToContain, expectToNotContain, it } from './utils/jest-ish'
+import { expectToContain, it } from './utils/jest-ish'
 import { green, info, log, red, setLogFile, time } from './utils/log'
-import {
-  addContentToTextFile,
-  deleteDir,
-  getFileSize,
-  setCwd,
-} from './utils/utils'
+import { deleteDir, getFileSize, setCwd } from './utils/utils'
 import { installPlugin } from './workspace'
 
-const npmContent = [
-  `Added 'npm' dependency 'firebase-admin'`,
-  `Added 'npm' dependency 'firebase-functions'`,
-]
+// const npmContent = [
+//   `Added 'npm' dependency 'firebase-admin'`,
+//   `Added 'npm' dependency 'firebase-functions'`,
+// ]
 
-const libContent = [`Copied 'lib' dependency '@myorg/lib1'`]
+// const libContent = [`Copied 'lib' dependency '@myorg/lib1'`]
 
-const importMatch = `import * as functions from "firebase-functions";`
+// const importMatch = `import * as functions from "firebase-functions";`
 
-const notCachedMatch = `[existing outputs match the cache, left as is]`
+// const notCachedMatch = `[existing outputs match the cache, left as is]`
 
 const DELETE_AFTER_TEST = false
 
@@ -31,7 +25,7 @@ const DELETE_AFTER_TEST = false
  */
 export async function testPlugin(cache: Cache) {
   const workspaceDir = cache.workspaceDir
-  const indexTsPath = `${workspaceDir}/apps/functions/src/index.ts`
+  // const indexTsPath = `${workspaceDir}/apps/functions/src/index.ts`
 
   // from nx 16.8.0, apps and libs dirs need to be specified in the commandline
   let appsDirectory = ''

@@ -1,6 +1,6 @@
 // setup re-usable workspaces for e2e testbed
 import { customExec } from './utils/exec'
-import { green, info, log, red, setLogFile } from './utils/log'
+import { green, info, log, red } from './utils/log'
 import {
   deleteDir,
   deleteFile,
