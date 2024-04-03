@@ -3,8 +3,9 @@ import {
   offsetFromRoot,
   Tree,
   updateJson,
+  generateFiles,
+  joinPathFragments,
 } from '@nx/devkit'
-import { generateFiles, joinPathFragments } from '@nx/devkit'
 import type { NormalizedSchema } from '../schema'
 import { packageVersions } from '../../../__generated__/nx-firebase-versions'
 

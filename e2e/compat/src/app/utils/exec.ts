@@ -1,6 +1,5 @@
 import { PACKAGE_MANAGER } from '../config'
-import { info } from './log'
-import { log } from './log'
+import { info, log } from './log'
 import { exec } from 'child_process'
 
 /**
