@@ -4,6 +4,9 @@
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "parserOptions": {
+        "project": ["packages/nx-firebase/tsconfig.*?.json"]
+      },            
       "rules": {}
     },
     {
