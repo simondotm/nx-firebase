@@ -1,4 +1,3 @@
-
 import type { ProjectData } from './test-utils-project-data'
 import { readJson } from '@nx/plugin/testing'
 
@@ -60,18 +59,20 @@ export function expectedFunctionProjectTargets(
           ci: true,
           codeCoverage: true,
         },
-      },      
+      },
     },
   }
 }
 
-
-export function validateFunctionConfig(functionProject: ProjectData, appProject: ProjectData) {
-    const project = readJson(
-      `${functionProject.projectDir}/project.json`,
-    )
-    // expect(project.root).toEqual(`apps/${projectName}`)
-    expect(project.targets).toEqual(
-      expect.objectContaining(expectedFunctionProjectTargets(functionProject, appProject)),
-    )
+export function validateFunctionConfig(
+  functionProject: ProjectData,
+  appProject: ProjectData,
+) {
+  const project = readJson(`${functionProject.projectDir}/project.json`)
+  // expect(project.root).toEqual(`apps/${projectName}`)
+  expect(project.targets).toEqual(
+    expect.objectContaining(
+      expectedFunctionProjectTargets(functionProject, appProject),
+    ),
+  )
 }

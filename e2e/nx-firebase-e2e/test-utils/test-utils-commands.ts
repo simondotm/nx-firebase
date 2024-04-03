@@ -3,17 +3,19 @@ import { testDebug, red, green } from './test-utils-logger'
 import { runNxCommandAsync } from '@nx/plugin/testing'
 import { ProjectData } from './test-utils-project-data'
 
-const STRIP_ANSI_MATCHER = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
+const STRIP_ANSI_MATCHER =
+  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g
 
-export async function safeRunNxCommandAsync(cmd: string)
-{
+export async function safeRunNxCommandAsync(cmd: string) {
   testDebug(`- safeRunNxCommandAsync ${cmd}`)
   try {
     async function runCommand(cmd: string) {
-      const result = await runNxCommandAsync(`${cmd} --verbose`, { silenceError: true })
+      const result = await runNxCommandAsync(`${cmd} --verbose`, {
+        silenceError: true,
+      })
       // strip chalk TTY ANSI codes from output
       result.stdout = result.stdout.replace(STRIP_ANSI_MATCHER, '')
-      result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')   
+      result.stderr = result.stderr.replace(STRIP_ANSI_MATCHER, '')
       if (result.stdout) {
         testDebug(green(result.stdout))
       }
@@ -32,61 +34,87 @@ export async function safeRunNxCommandAsync(cmd: string)
     // }
 
     return result
-  }
-  catch (e) {
+  } catch (e) {
     testDebug(red(`ERROR: Running command ${(e as Error).message}`))
-    throw e 
+    throw e
   }
 }
 
-export async function runTargetAsync(projectData: ProjectData, target: string = 'build') {
+export async function runTargetAsync(
+  projectData: ProjectData,
+  target: string = 'build',
+) {
   testDebug(`- runTargetAsync ${target} ${projectData.projectName}`)
-  const result = await safeRunNxCommandAsync(`${target} ${projectData.projectName}`)
+  const result = await safeRunNxCommandAsync(
+    `${target} ${projectData.projectName}`,
+  )
 
   if (target === 'build') {
     expectStrings(result.stdout, [
-      `Successfully ran target ${target} for project ${projectData.projectName}`
-    ])   
+      `Successfully ran target ${target} for project ${projectData.projectName}`,
+    ])
   }
 
-  return result 
+  return result
 }
 
 export async function removeProjectAsync(projectData: ProjectData) {
-  const result = await safeRunNxCommandAsync(`g @nx/workspace:remove ${projectData.projectName} --forceRemove`)
+  const result = await safeRunNxCommandAsync(
+    `g @nx/workspace:remove ${projectData.projectName} --forceRemove`,
+  )
   expectStrings(result.stdout, [
     `DELETE ${projectData.projectDir}/project.json`,
     `DELETE ${projectData.projectDir}`,
-  ])   
-  return result 
+  ])
+  return result
 }
 
-export async function renameProjectAsync(projectData: ProjectData, renameProjectData: ProjectData) {
+export async function renameProjectAsync(
+  projectData: ProjectData,
+  renameProjectData: ProjectData,
+) {
   //TODO: this wont work if destination project is in a subdir
-  const result = await safeRunNxCommandAsync(`g @nx/workspace:move --project=${projectData.projectName} --destination=${renameProjectData.projectName}`)
+  const result = await safeRunNxCommandAsync(
+    `g @nx/workspace:move --project=${projectData.projectName} --destination=${renameProjectData.projectName}`,
+  )
   expectStrings(result.stdout, [
     `DELETE apps/${projectData.projectName}/project.json`,
     `DELETE apps/${projectData.projectName}`,
     `CREATE apps/${renameProjectData.projectName}/project.json`,
-  ])   
-  return result 
+  ])
+  return result
 }
 
-export async function appGeneratorAsync(projectData: ProjectData, params: string = '') {
+export async function appGeneratorAsync(
+  projectData: ProjectData,
+  params: string = '',
+) {
   testDebug(`- appGeneratorAsync ${projectData.projectName} ${params}`)
-  const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:app ${projectData.name} --directory=${projectData.directory} ${params}`)
+  const result = await safeRunNxCommandAsync(
+    `g @simondotm/nx-firebase:app ${projectData.name} --directory=${projectData.directory} ${params}`,
+  )
   return result
 }
 
-export async function functionGeneratorAsync(projectData: ProjectData, params: string = '') {
+export async function functionGeneratorAsync(
+  projectData: ProjectData,
+  params: string = '',
+) {
   testDebug(`- functionGeneratorAsync ${projectData.projectName} ${params}`)
-  const result = await safeRunNxCommandAsync(`g @simondotm/nx-firebase:function ${projectData.name} --directory=${projectData.directory} ${params}`)
+  const result = await safeRunNxCommandAsync(
+    `g @simondotm/nx-firebase:function ${projectData.name} --directory=${projectData.directory} ${params}`,
+  )
   return result
 }
 
-export async function libGeneratorAsync(projectData: ProjectData, params: string = '') {
+export async function libGeneratorAsync(
+  projectData: ProjectData,
+  params: string = '',
+) {
   testDebug(`- libGeneratorAsync ${projectData.projectName}`)
-  const result = await safeRunNxCommandAsync(`g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`)
+  const result = await safeRunNxCommandAsync(
+    `g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`,
+  )
   return result
 }
 
@@ -97,12 +125,15 @@ export async function syncGeneratorAsync(params: string = '') {
 
 export async function migrateGeneratorAsync(params: string = '') {
   testDebug(`- migrateGeneratorAsync ${params}`)
-  return await safeRunNxCommandAsync(`g @simondotm/nx-firebase:migrate ${params}`)
+  return await safeRunNxCommandAsync(
+    `g @simondotm/nx-firebase:migrate ${params}`,
+  )
 }
 
-
-
-export async function cleanAppAsync(projectData: ProjectData, options = { appsRemaining:0, functionsRemaining: 0}) {
+export async function cleanAppAsync(
+  projectData: ProjectData,
+  options = { appsRemaining: 0, functionsRemaining: 0 },
+) {
   testDebug(`- cleanAppAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
   const result = await syncGeneratorAsync(projectData.projectName)
@@ -110,12 +141,11 @@ export async function cleanAppAsync(projectData: ProjectData, options = { appsRe
   expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
   expectStrings(result.stdout, [
     `This workspace has ${options.appsRemaining} firebase apps and ${options.functionsRemaining} firebase functions`,
-    `CHANGE Firebase config '${projectData.configName}' is no longer referenced by any firebase app, deleted`
+    `CHANGE Firebase config '${projectData.configName}' is no longer referenced by any firebase app, deleted`,
   ])
-}  
+}
 
 export async function cleanFunctionAsync(projectData: ProjectData) {
   testDebug(`- cleanFunctionAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
-}  
-
+}

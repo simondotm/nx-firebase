@@ -11,7 +11,7 @@
       "items": {
         "type": "string"
       }
-    }, 
+    },
     "__unparsed__": {
       "hidden": true,
       "type": "array",
@@ -22,7 +22,7 @@
         "$source": "unparsed"
       },
       "x-priority": "internal"
-    }           
+    }
   },
   "required": []
 }

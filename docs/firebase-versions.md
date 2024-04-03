@@ -115,4 +115,3 @@ New applications generated in new Nx workspaces by `@simondotm/nx-firebase` will
 - `firebase-admin` version 11.x
 
 V2.x of the plugin uses `esbuild` to bundle functions, and **_always_** outputs `esm` format code, so the minimum node runtime requirement is 16.
-

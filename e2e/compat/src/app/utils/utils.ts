@@ -3,7 +3,6 @@ import * as fs from 'fs'
 // import { exit } from 'process'
 import { log } from './log'
 
-
 /**
  * Set current working directory
  * @param dir
