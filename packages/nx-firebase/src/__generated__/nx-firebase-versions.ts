@@ -4,8 +4,8 @@
 //------------------------------------------------------------------------------
 export const packageVersions = {
   nx: '16.8.1',
-  firebase: '9.14.0',
-  firebaseAdmin: '11.10.1',
+  firebase: '10.10.0',
+  firebaseAdmin: '11.11.1',
   firebaseFunctions: '4.8.2',
   firebaseFunctionsTest: '3.1.0',
   firebaseTools: '12.4.5',
