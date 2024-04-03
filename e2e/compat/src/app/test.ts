@@ -109,6 +109,7 @@ export async function testPlugin(cache: Cache) {
   // some early 16.x versions of nx seem to have a flaky esbuild implementation
   // that intermittently fails to exclude external deps from the bundle
   // we check for this by testing the bundle size is not >1kb
+  // eslint-disable-next-line @typescript-eslint/require-await
   await it('should not bundle external deps', async () => {
     const fileSize = getFileSize(`${workspaceDir}/dist/apps/functions/main.js`)
     if (fileSize > 1024)

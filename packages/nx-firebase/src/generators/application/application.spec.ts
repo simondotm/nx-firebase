@@ -12,7 +12,7 @@ describe('application generator', () => {
     jest.clearAllMocks()
   })
 
-  it('should generate workspace', async () => {
+  it('should generate workspace', () => {
     expect(tree.exists(`firebase.json`)).toBeFalsy()
     expect(tree.exists(`.firebaserc`)).toBeFalsy()
     expect(tree.isFile(`package.json`)).toBeTruthy()

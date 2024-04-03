@@ -134,5 +134,6 @@ if (process.argv.length > 2) {
 if (options.clean) {
   clean()
 } else {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   main(options)
 }
