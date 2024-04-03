@@ -1,1 +1,3 @@
-export type InitGeneratorOptions = unknown
+export type InitGeneratorOptions = {
+  skipFormat?: boolean
+}

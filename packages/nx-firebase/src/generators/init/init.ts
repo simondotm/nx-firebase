@@ -1,4 +1,9 @@
-import type { GeneratorCallback, Tree } from '@nx/devkit'
+import {
+  runTasksInSerial,
+  type GeneratorCallback,
+  type Tree,
+  formatFiles,
+} from '@nx/devkit'
 import { addDependencies } from './lib'
 import { addGitIgnore, addNxIgnore } from './lib/add-git-ignore-entry'
 import type { InitGeneratorOptions } from './schema'
@@ -11,12 +16,17 @@ import type { InitGeneratorOptions } from './schema'
  *
  */
 export async function initGenerator(
-  tree: Tree,
-  _options: InitGeneratorOptions,
+  host: Tree,
+  schema: InitGeneratorOptions,
 ): Promise<GeneratorCallback> {
-  addGitIgnore(tree)
-  addNxIgnore(tree)
-  return addDependencies(tree)
+  const tasks: GeneratorCallback[] = []
+  addGitIgnore(host)
+  addNxIgnore(host)
+  if (!schema.skipFormat) {
+    await formatFiles(host)
+  }
+  tasks.push(addDependencies(host))
+  return runTasksInSerial(...tasks)
 }
 
 export default initGenerator
