@@ -7,7 +7,7 @@ export const packageVersions = {
   firebase: '10.10.0',
   firebaseAdmin: '11.11.1',
   firebaseFunctions: '4.8.2',
-  firebaseFunctionsTest: '3.1.0',
+  firebaseFunctionsTest: '3.1.1',
   firebaseTools: '12.4.5',
   killPort: '2.0.1',
   nodeEngine: '16',
