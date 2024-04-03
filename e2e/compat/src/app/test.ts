@@ -1,26 +1,20 @@
-import { get } from 'http'
 import { Cache, getCache, isNxVersionSince } from './utils/cache'
 import { customExec, runNxCommandAsync } from './utils/exec'
-import { expectToContain, expectToNotContain, it } from './utils/jest-ish'
+import { expectToContain, it } from './utils/jest-ish'
 import { green, info, log, red, setLogFile, time } from './utils/log'
-import {
-  addContentToTextFile,
-  deleteDir,
-  getFileSize,
-  setCwd,
-} from './utils/utils'
+import { deleteDir, getFileSize, setCwd } from './utils/utils'
 import { installPlugin } from './workspace'
 
-const npmContent = [
-  `Added 'npm' dependency 'firebase-admin'`,
-  `Added 'npm' dependency 'firebase-functions'`,
-]
+// const npmContent = [
+//   `Added 'npm' dependency 'firebase-admin'`,
+//   `Added 'npm' dependency 'firebase-functions'`,
+// ]
 
-const libContent = [`Copied 'lib' dependency '@myorg/lib1'`]
+// const libContent = [`Copied 'lib' dependency '@myorg/lib1'`]
 
-const importMatch = `import * as functions from "firebase-functions";`
+// const importMatch = `import * as functions from "firebase-functions";`
 
-const notCachedMatch = `[existing outputs match the cache, left as is]`
+// const notCachedMatch = `[existing outputs match the cache, left as is]`
 
 const DELETE_AFTER_TEST = false
 
@@ -31,7 +25,7 @@ const DELETE_AFTER_TEST = false
  */
 export async function testPlugin(cache: Cache) {
   const workspaceDir = cache.workspaceDir
-  const indexTsPath = `${workspaceDir}/apps/functions/src/index.ts`
+  // const indexTsPath = `${workspaceDir}/apps/functions/src/index.ts`
 
   // from nx 16.8.0, apps and libs dirs need to be specified in the commandline
   let appsDirectory = ''
@@ -75,7 +69,8 @@ export async function testPlugin(cache: Cache) {
 
   // build the firebase app
   await it('should build the firebase app', async () => {
-    const { stdout } = await runNxCommandAsync('build firebase')
+    await runNxCommandAsync('build firebase')
+    // const { stdout } = await runNxCommandAsync('build firebase')
     // expectToNotContain(stdout, npmContent)
     // expectToNotContain(stdout, libContent)
   })
@@ -114,6 +109,7 @@ export async function testPlugin(cache: Cache) {
   // some early 16.x versions of nx seem to have a flaky esbuild implementation
   // that intermittently fails to exclude external deps from the bundle
   // we check for this by testing the bundle size is not >1kb
+  // eslint-disable-next-line @typescript-eslint/require-await
   await it('should not bundle external deps', async () => {
     const fileSize = getFileSize(`${workspaceDir}/dist/apps/functions/main.js`)
     if (fileSize > 1024)

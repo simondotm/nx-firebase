@@ -1,4 +1,3 @@
-
 const ENABLE_TEST_DEBUG_INFO = true
 
 // https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
@@ -18,4 +17,3 @@ export function testDebug(info: string) {
     console.debug(info)
   }
 }
-

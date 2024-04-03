@@ -5,6 +5,6 @@
       "implementation": "./src/executors/serve/serve",
       "schema": "./src/executors/serve/schema.json",
       "description": "firebase cli emulation serve executor"
-    }    
+    }
   }
 }

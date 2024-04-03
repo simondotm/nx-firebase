@@ -30,6 +30,6 @@
       "factory": "./src/generators/migrate/migrate",
       "schema": "./src/generators/migrate/schema.json",
       "description": "nx-firebase project migration tool"
-    }    
+    }
   }
 }

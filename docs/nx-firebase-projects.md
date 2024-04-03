@@ -28,7 +28,7 @@ If you run `nx g @simondotm/nx-firebase:app` in an Nx workspace that already has
 
 ## Updating Firebase Configurations
 
-Once your Nx Firebase application has been initially generated you are free to change the firebase configurations however you like. 
+Once your Nx Firebase application has been initially generated you are free to change the firebase configurations however you like.
 
 The Firebase CLI usually warns you anyway if you try to deploy a feature that isn't yet enabled on your Firebase Project console.
 
@@ -43,7 +43,6 @@ It's fine to add multiple Firebase projects to your workspace `.firebaserc` file
 You can ensure this is always the case for commands like `nx deploy app` etc. by adding `--project <alias>` to any firebase commands in your nx-firebase application's targets.
 
 See also: [Changing Firebase CLI Project](./nx-firebase-sync.md#changing-firebase-cli-project)
-
 
 ## Deployment Environments
 

@@ -11,11 +11,7 @@ import {
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 
 import { initGenerator } from '../init/init'
-import {
-  getFirebaseConfigFromProject,
-  getProjectName,
-  updateTsConfig,
-} from '../../utils'
+import { getFirebaseConfigFromProject, updateTsConfig } from '../../utils'
 
 import { addFunctionConfig, createFiles, updateProject } from './lib'
 import type { Schema, NormalizedSchema } from './schema'

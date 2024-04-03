@@ -20,7 +20,7 @@ describe('function generator', () => {
     jest.clearAllMocks()
   })
 
-  it('should generate workspace', async () => {
+  it('should generate workspace', () => {
     expect(tree.exists(`firebase.json`)).toBeFalsy()
     expect(tree.exists(`.firebaserc`)).toBeFalsy()
     expect(tree.isFile(`package.json`)).toBeTruthy()
@@ -46,7 +46,7 @@ describe('function generator', () => {
     })
 
     describe('application setup', () => {
-      it('should create a firebase config with no functions', async () => {
+      it('should create a firebase config with no functions', () => {
         const firebaseConfig = readJson(tree, 'firebase.json')
         expect(firebaseConfig.functions.length).toEqual(0)
       })

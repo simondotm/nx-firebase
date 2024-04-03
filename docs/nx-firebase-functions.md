@@ -28,15 +28,15 @@ Generate a new Firebase function using:
 
 - **`nx g @simondotm/nx-firebase:function`**
 
-OR 
+OR
 
 - **`nx g @simondotm/nx-firebase:func`**
 
-| Options | Type | Description |
-|---|---|--|
-| `name` | required | the project name for your function |
-| `--app=<app-project-name>` | required | the firebase app this function will be a dependency of |
-| `--directory=dir` | optional | the directory this function will be located in |
+| Options                     | Type          | Description                                                |
+| --------------------------- | ------------- | ---------------------------------------------------------- |
+| `name`                      | required      | the project name for your function                         |
+| `--app=<app-project-name>`  | required      | the firebase app this function will be a dependency of     |
+| `--directory=dir`           | optional      | the directory this function will be located in             |
 | `--format=<'cjs' or 'esm'>` | default 'esm' | specify if esbuild should generated commonJs or ES6 output |
 
 ### Firebase Function Projects
@@ -57,9 +57,8 @@ To build your firebase function use this command:
 
 This will use `esbuild` to compile & bundle the input function Typescript source code to:
 
-* `dist/apps/<function-project-name>/main.js` - The bundled function code, in a single ESM format output file
-* `dist/apps/<function-project-name>/package.json` - The ESM format package file for firebase CLI to process and deploy
-
+- `dist/apps/<function-project-name>/main.js` - The bundled function code, in a single ESM format output file
+- `dist/apps/<function-project-name>/package.json` - The ESM format package file for firebase CLI to process and deploy
 
 ### Deploying a firebase function
 
@@ -90,60 +89,58 @@ See [here](./nx-firebase-applications.md#nx-firebase-application-project-targets
 
 The Nx-firebase plugin requires that Firebase function projects must always be a dependency of a single Firebase application project:
 
-*  This approach allows for multiple firebase projects in a single Nx workspace
-*  It ensures all functions can be [managed by the nx-firebase plugin](./nx-firebase-sync.md)
-*  Function application projects are added as `implicitDependencies` to the parent Firebase application, which ensures we can test, lint, build & deploy all functions from the top level Firebase application
-*  All functions share the same Firebase `--config` CLI option as the parent Firebase Application
-*  All functions share the same Firebase `--project` CLI option as the parent Firebase Application
-*  You can create as many Firebase function projects as you like
-*  Firebase function apps can export either just one or multiple firebase cloud functions
-*  When running the Firebase emulator using `serve`, **all** firebase function applications are built using `watch` mode, so local development is much more convenient
-
+- This approach allows for multiple firebase projects in a single Nx workspace
+- It ensures all functions can be [managed by the nx-firebase plugin](./nx-firebase-sync.md)
+- Function application projects are added as `implicitDependencies` to the parent Firebase application, which ensures we can test, lint, build & deploy all functions from the top level Firebase application
+- All functions share the same Firebase `--config` CLI option as the parent Firebase Application
+- All functions share the same Firebase `--project` CLI option as the parent Firebase Application
+- You can create as many Firebase function projects as you like
+- Firebase function apps can export either just one or multiple firebase cloud functions
+- When running the Firebase emulator using `serve`, **all** firebase function applications are built using `watch` mode, so local development is much more convenient
 
 ### Functions & Firebase Config
 
 When new Firebase function applications are generated in the workspace:
 
-* They are automatically added to the `functions[]` declaration in the project's `firebase.json` config file using the firebase CLI's `codebase` feature
-* The `codebase` name assigned to the function in the config is the function applications project name. 
-* When using firebase `deploy`, the CLI will deploy all `codebase`'s declared in the firebase config file
-
-
-
+- They are automatically added to the `functions[]` declaration in the project's `firebase.json` config file using the firebase CLI's `codebase` feature
+- The `codebase` name assigned to the function in the config is the function applications project name.
+- When using firebase `deploy`, the CLI will deploy all `codebase`'s declared in the firebase config file
 
 ### Functions & ESBuild
 
 `esbuild` is configured in the function's `project.json` to only bundle 'internal' source local to the workspace:
-* Import paths using TS aliases to `@nx/js` libraries will be resolved as internal imports. 
-* All external imports from `node_modules` will be added to the `package.json` as dependencies, since there is no good reason to bundle `node_modules` in node applications.
+
+- Import paths using TS aliases to `@nx/js` libraries will be resolved as internal imports.
+- All external imports from `node_modules` will be added to the `package.json` as dependencies, since there is no good reason to bundle `node_modules` in node applications.
 
 ### Using ES Modules output
 
 `esbuild` is also configured by default to always output bundled code as `esm` format modules:
 
-* This ensures tree-shaking is activated in the bundling process
-* Firebase functions with Node 16 or higher runtime all support ES modules
-* The bundled output code in `dist` is _much_ cleaner to review
-* We are only specifying that the _output_ bundle is `esm` format. The input source code sent to `esbuild` is Typescript code, which effectively uses ES6 module syntax anyway
-* **Therefore, it is not necessary to change your workspace to use `esm` format modules to use this plugin since `esbuild` builds from Typescript _source code_, not compiled JS.**
+- This ensures tree-shaking is activated in the bundling process
+- Firebase functions with Node 16 or higher runtime all support ES modules
+- The bundled output code in `dist` is _much_ cleaner to review
+- We are only specifying that the _output_ bundle is `esm` format. The input source code sent to `esbuild` is Typescript code, which effectively uses ES6 module syntax anyway
+- **Therefore, it is not necessary to change your workspace to use `esm` format modules to use this plugin since `esbuild` builds from Typescript _source code_, not compiled JS.**
 
 ### Using CommonJS output
 
 If you still use Node `require()` in your Typescript function code, the default `esm` output setting for `esbuild` may not work. Your options are:
+
 1. Refactor your code to use `import` instead of `require`
 2. Modify the function `project.json` to set esbuild `format` to `['cjs']`
 3. Generate your function applications with the `--format=cjs` option
-  
-Note that using `cjs` output may prevent tree-shaking optimizations.
 
+Note that using `cjs` output may prevent tree-shaking optimizations.
 
 ### Why ESBuild?
 
 While Webpack and Rollup are viable options for bundling node applications:
-* `esbuild` is designed for node, 
-* it is _very_ fast
-* it optimizes the output using tree-shaking, which is great for fast cold starts
-* and it works very simply out of the box with Nx without any need for additional configuration files.
+
+- `esbuild` is designed for node,
+- it is _very_ fast
+- it optimizes the output using tree-shaking, which is great for fast cold starts
+- and it works very simply out of the box with Nx without any need for additional configuration files.
 
 If you want to try Webpack or Rollup, just change your `build` target in the function's `project.json` accordingly.
 
@@ -151,11 +148,10 @@ If you want to try Webpack or Rollup, just change your `build` target in the fun
 
 This plugin does not set or recommend the minify option for esbuild.
 
-* It is not really necessary for cloud function node runtime environments
-* Obfuscation of the code is not necessary since it executes in a private server-side environment
-* There is minimal (if any) performance benefit to be had
-* If exceptions occur in the cloud run, stack traces will be readable if code is not minified
-
+- It is not really necessary for cloud function node runtime environments
+- Obfuscation of the code is not necessary since it executes in a private server-side environment
+- There is minimal (if any) performance benefit to be had
+- If exceptions occur in the cloud run, stack traces will be readable if code is not minified
 
 ## Node Runtimes for Firebase Functions
 
@@ -170,7 +166,7 @@ The required runtime is automatically set by the nx-firebase plugin function gen
       "runtime": "nodejs16",
       ...
 
-    }    
+    }
   ],
 ```
 

@@ -49,7 +49,9 @@ export async function installPlugin(cache: Cache) {
     await customExec(`cp -rf ${pluginFileSrc} ${pluginFileDst}`)
 
     log(`Installing plugin '${pluginFileDst}'...`)
-    await customExec(`${PACKAGE_MANAGER} i ${pluginFileDst} --save-dev ${legacyPeerDeps}`)
+    await customExec(
+      `${PACKAGE_MANAGER} i ${pluginFileDst} --save-dev ${legacyPeerDeps}`,
+    )
   } else {
     await customExec(
       `${PACKAGE_MANAGER} i @simondotm/nx-firebase@${cache.pluginVersion} --save-dev ${legacyPeerDeps}`,

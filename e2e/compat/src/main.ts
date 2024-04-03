@@ -8,14 +8,13 @@
  * - We only do light functional tests, this test matrix is for ensuring wide compatibility of plugin generator & executor
  */
 
-import { green, info, log, red, setLogFile, time } from './app/utils/log'
+import { green, info, red, setLogFile, time } from './app/utils/log'
 import { setupNxWorkspace } from './app/setup'
 import { testVersions } from './app/versions'
 import { clean, testNxVersion } from './app/test'
 import { getCache } from './app/utils/cache'
 import { customExec } from './app/utils/exec'
 import { defaultCwd } from './app/utils/cwd'
-import { exit } from 'process'
 
 // Force CI environment if necessary
 // process.env.CI = 'true'
@@ -135,5 +134,6 @@ if (process.argv.length > 2) {
 if (options.clean) {
   clean()
 } else {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   main(options)
 }

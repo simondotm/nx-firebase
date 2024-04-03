@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nx", "prettier"],
+  "plugins": ["@nx", "prettier", "unused-imports"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
@@ -24,14 +24,43 @@
     {
       "files": ["*.ts", "*.tsx"],
       "extends": ["plugin:@nx/typescript"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/ban-types": "warn",
+        "@typescript-eslint/no-var-requires": "warn",
+        "@typescript-eslint/no-inferrable-types": "warn",
+        "@typescript-eslint/no-empty-interface": "warn",
+        "@typescript-eslint/no-empty-function": "warn",
+        "no-prototype-builtins": "warn",
+        "no-useless-escape": "warn",
+        "no-inner-declarations": "off",
+        "no-fallthrough": "warn",
+        "no-irregular-whitespace": "warn",
+        "no-constant-condition": "warn",
+        "@typescript-eslint/require-await": "warn",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/await-thenable": "error",
+        "@typescript-eslint/no-namespace": "warn",
+        "@typescript-eslint/no-this-alias": "warn",
+        "@typescript-eslint/no-duplicate-imports": "error",        
+        "@typescript-eslint/no-unused-vars": "off",
+        "unused-imports/no-unused-imports": "warn",
+        "unused-imports/no-unused-vars": [
+          "warn",
+          {
+            "vars": "all",
+            "varsIgnorePattern": "^_",
+            "args": "after-used",
+            "argsIgnorePattern": "^_"
+          }
+        ]        
+      }
     },
     {
       "files": ["*.ts", "*.tsx"],
       "extends": ["plugin:prettier/recommended"],
       "rules": {
         "prettier/prettier": "warn"
-      }    
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

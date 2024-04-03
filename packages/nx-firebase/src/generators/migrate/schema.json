@@ -3,7 +3,6 @@
   "$id": "Migrate",
   "title": "",
   "type": "object",
-  "properties": {
-  },
+  "properties": {},
   "required": []
 }

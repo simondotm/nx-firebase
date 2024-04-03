@@ -17,7 +17,7 @@ import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/pr
 export async function normalizeOptions(
   host: Tree,
   options: Schema,
-  callingGenerator = '@simondotm/nx-firebase:application'
+  callingGenerator = '@simondotm/nx-firebase:application',
 ): Promise<NormalizedSchema> {
   const {
     projectName: appProjectName,
@@ -30,14 +30,14 @@ export async function normalizeOptions(
     projectNameAndRootFormat: options.projectNameAndRootFormat,
     rootProject: options.rootProject,
     callingGenerator,
-  });
+  })
 
-  options.rootProject = projectRoot === '.';
-  options.projectNameAndRootFormat = projectNameAndRootFormat;
+  options.rootProject = projectRoot === '.'
+  options.projectNameAndRootFormat = projectNameAndRootFormat
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
-    : [];  
+    : []
 
   // const { projectName, projectRoot } = getProjectName(
   //   host,
@@ -65,7 +65,6 @@ export async function normalizeOptions(
     )
   }
 
-
   return {
     ...options,
     name: names(options.name).fileName,
@@ -73,7 +72,7 @@ export async function normalizeOptions(
     projectRoot,
     parsedTags,
     firebaseConfigName,
-  };  
+  }
 
   // return {
   //   ...options,
@@ -96,7 +95,7 @@ export async function applicationGenerator(
 ): Promise<GeneratorCallback> {
   const options = await normalizeOptions(host, {
     projectNameAndRootFormat: 'derived',
-    ...schema
+    ...schema,
   })
   const initTask = await initGenerator(host, {})
 
@@ -104,7 +103,11 @@ export async function applicationGenerator(
     ? ` --project=${options.project}`
     : ''
 
-  const tags = [`firebase:app`, `firebase:name:${options.projectName}`, ...options.parsedTags]
+  const tags = [
+    `firebase:app`,
+    `firebase:name:${options.projectName}`,
+    ...options.parsedTags,
+  ]
   // if (options.tags) {
   //   options.tags.split(',').map((s) => {
   //     s.trim()

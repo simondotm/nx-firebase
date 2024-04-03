@@ -1,7 +1,15 @@
-const path = require("path")
-const fs = require("fs")
+const path = require('path')
+const fs = require('fs')
 
-const generatedFile = path.join(__dirname, '..', 'packages', 'nx-firebase', 'src', '__generated__', 'nx-firebase-versions.ts')
+const generatedFile = path.join(
+  __dirname,
+  '..',
+  'packages',
+  'nx-firebase',
+  'src',
+  '__generated__',
+  'nx-firebase-versions.ts',
+)
 
 const packageJson = require('../package.json')
 const nxVersion = packageJson.devDependencies['nx']
@@ -37,21 +45,16 @@ export const packageVersions = {
 }
 `
 
-
 function ensureDirectoryExistence(filePath) {
-  const dirname = path.dirname(filePath);
+  const dirname = path.dirname(filePath)
   if (fs.existsSync(dirname)) {
-    return true;
+    return true
   }
-  ensureDirectoryExistence(dirname);
-  fs.mkdirSync(dirname);
+  ensureDirectoryExistence(dirname)
+  fs.mkdirSync(dirname)
 }
 
 console.log(`Writing package versions to '${generatedFile}'`)
 
-
 ensureDirectoryExistence(generatedFile)
 fs.writeFileSync(generatedFile, data)
-
-
-

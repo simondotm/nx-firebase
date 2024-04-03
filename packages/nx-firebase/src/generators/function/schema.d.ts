@@ -29,10 +29,8 @@ export interface Schema {
   name: string
   directory?: string
   tags?: string
-  projectNameAndRootFormat?: ProjectNameAndRootFormat;  
-  rootProject?: boolean;
-
-
+  projectNameAndRootFormat?: ProjectNameAndRootFormat
+  rootProject?: boolean
 
   // subset of @nx/node:application options that we forward to node app generator
   setParserOptionsProject?: boolean
@@ -50,7 +48,7 @@ export interface Schema {
 interface NormalizedSchema extends Schema {
   projectName: string
   projectRoot: string
-  parsedTags: string[];
+  parsedTags: string[]
 
   firebaseConfigName: string
   firebaseAppProject: ProjectConfiguration

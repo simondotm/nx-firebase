@@ -34,14 +34,13 @@
 - Firebase Function projects can contain one or more firebase functions
 - You can generate as many Firebase Function projects as you need for your application
 
-
 ## Build Firebase Application
 
 **`nx build <app-project-name>`**
 
-- Compiles & builds all Firebase function applications linked to the Nx Firebase 
+- Compiles & builds all Firebase function applications linked to the Nx Firebase
 
-## Deploy Firebase Application 
+## Deploy Firebase Application
 
 **`nx deploy <app-project-name> [--only ...]`**
 

@@ -1,5 +1,3 @@
-
-
 import { joinPathFragments, names } from '@nx/devkit'
 
 const NPM_SCOPE = '@proj'
@@ -15,9 +13,6 @@ export interface ProjectData {
   npmScope: string
   configName: string
 }
-
-
-
 
 /**
  * Generate test project data

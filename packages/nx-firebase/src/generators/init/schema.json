@@ -4,6 +4,12 @@
   "title": "Init Firebase Plugin",
   "description": "Init Firebase Plugin.",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "skipFormat": {
+      "description": "Skip formatting files.",
+      "type": "boolean",
+      "default": false
+    }
+  },
   "required": []
 }

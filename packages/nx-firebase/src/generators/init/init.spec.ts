@@ -52,7 +52,7 @@ describe('init generator', () => {
     )
   })
 
-  it('should not have dependencies', async () => {
+  it('should not have dependencies', () => {
     const packageJson = devkit.readJson(tree, 'package.json')
     expect(packageJson.dependencies['firebase']).toBeUndefined()
     expect(packageJson.dependencies['firebase-admin']).toBeUndefined()

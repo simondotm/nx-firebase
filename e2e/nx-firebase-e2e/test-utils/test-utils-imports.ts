@@ -1,10 +1,5 @@
 import type { ProjectData } from './test-utils-project-data'
 
-
-
-
-
-
 const IMPORT_MATCH = `import * as logger from "firebase-functions/logger";`
 
 export function getMainTs() {
@@ -31,13 +26,17 @@ export const helloWorld = onRequest((request, response) => {
 `
 }
 
-
 /**
  * return the import function for a generated library
  */
 export function getLibImport(projectData: ProjectData) {
   // convert kebab-case project name to camelCase library import
-  const libName = projectData.projectName.split('-').map((part, index) => index > 0 ? part[0].toUpperCase() + part.substring(1) : part).join('')
+  const libName = projectData.projectName
+    .split('-')
+    .map((part, index) =>
+      index > 0 ? part[0].toUpperCase() + part.substring(1) : part,
+    )
+    .join('')
   return libName
 }
 
@@ -45,9 +44,3 @@ export function addImport(mainTs: string, addition: string) {
   const replaced = mainTs.replace(IMPORT_MATCH, `${IMPORT_MATCH}\n${addition}`)
   return replaced
 }
-
-
-
-
-
-

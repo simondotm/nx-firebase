@@ -27,40 +27,39 @@ This plugin was completely rewritten since V2.x to use esbuild for bundling clou
 
 ## v2.2.0
 
-* Fix package dependencies for `@nx/node`, plugin init generator now adds this if/when needed
-* This prevents scenarios where incorrect Nx plugin versions could be added to the user workspace
-* It may also fix an issue with `@nx/esbuild` plugin version being out of sync and bundling external dependencies incorrectly
-
+- Fix package dependencies for `@nx/node`, plugin init generator now adds this if/when needed
+- This prevents scenarios where incorrect Nx plugin versions could be added to the user workspace
+- It may also fix an issue with `@nx/esbuild` plugin version being out of sync and bundling external dependencies incorrectly
 
 ## v2.1.2
 
-* Include `@nx/devkit` as a peer dependency for the package
-* Listing in the [Nx plugin registry](https://nx.dev/plugin-registry)
+- Include `@nx/devkit` as a peer dependency for the package
+- Listing in the [Nx plugin registry](https://nx.dev/plugin-registry)
 
 ## v2.1.1
 
-* Fix issues in the v2.1.0 release
+- Fix issues in the v2.1.0 release
 
 ## v2.1.0
 
-* Added support for [environment variables](docs/nx-firebase-functions-environment.md)
-* Added support for [secrets](docs/nx-firebase-functions-environment.md#environment-file-types)
-* Added a custom `serve` executor that exits the Firebase Emulator suite properly
-* Fixes to `sync` generator to update firebase app and firebase function project targets when they are renamed
-* Added a custom `migrate` generator to ensure workspace configurations match the latest plugin version schemas
-* Updated plugin to be built against Nx 16.6.0
+- Added support for [environment variables](docs/nx-firebase-functions-environment.md)
+- Added support for [secrets](docs/nx-firebase-functions-environment.md#environment-file-types)
+- Added a custom `serve` executor that exits the Firebase Emulator suite properly
+- Fixes to `sync` generator to update firebase app and firebase function project targets when they are renamed
+- Added a custom `migrate` generator to ensure workspace configurations match the latest plugin version schemas
+- Updated plugin to be built against Nx 16.6.0
 
 ## v2.0.0
 
 Official v2 release
 
-* Updated default function template to match firebase CLI
+- Updated default function template to match firebase CLI
 
 ## v2.0.0-beta.1
 
-* Fixed issue with dependencies
-* Sort codebases
-* Updated documents
+- Fixed issue with dependencies
+- Sort codebases
+- Updated documents
 
 ## v2.0.0-beta.0
 
@@ -72,14 +71,14 @@ Users of earlier plugin versions must read [here for plugin v1 -> v2 migration i
 
 **Changes**
 
-* Plugin is completely rewritten 
-* Added `@simondotm/nx-firebase:function` generator
-* Firebase functions are now separate application nx projects
-* Now uses `esbuild` to compile & bundle firebase functions
-* Firebase functions no longer require Nx libraries to be buildable
-* Added `@simondotm/nx-firebase:sync` generator to manage Firebase workspaces
-* Minimum Nx version is now 16.1.1
-* Watch mode build of function code & libraries is now fully supported when running Firebase emulator
+- Plugin is completely rewritten
+- Added `@simondotm/nx-firebase:function` generator
+- Firebase functions are now separate application nx projects
+- Now uses `esbuild` to compile & bundle firebase functions
+- Firebase functions no longer require Nx libraries to be buildable
+- Added `@simondotm/nx-firebase:sync` generator to manage Firebase workspaces
+- Minimum Nx version is now 16.1.1
+- Watch mode build of function code & libraries is now fully supported when running Firebase emulator
 
 ## v1.1.0
 

@@ -8,17 +8,15 @@ Generate a new Firebase application using:
 
 **`nx g @simondotm/nx-firebase:application`**
 
-OR 
+OR
 
 **`nx g @simondotm/nx-firebase:app`**
 
-| Options | Type | Description |
-|---|---|--|
-| `name` | required | the project name for your firebase app |
-| `--directory=dir` | optional | the directory this app will be located in |
-| `--project=proj` | optional | the `--project` option that will be used for firebase CLI commands |
-
-
+| Options           | Type     | Description                                                        |
+| ----------------- | -------- | ------------------------------------------------------------------ |
+| `name`            | required | the project name for your firebase app                             |
+| `--directory=dir` | optional | the directory this app will be located in                          |
+| `--project=proj`  | optional | the `--project` option that will be used for firebase CLI commands |
 
 ## About Firebase Apps
 
@@ -58,4 +56,3 @@ These targets will be generated in `project.json` for your new Firebase applicat
 - `test` - Run Jest unit tests for all Firebase function applications linked to this Firebase application
 - `getconfig` - Fetch the firebase remote config
 - `firebase` - Run the firebase CLI with the appropriate firebase `--config` and firebase `--project` parameters automatically provided
-

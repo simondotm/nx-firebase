@@ -21,7 +21,7 @@ import { testMigrate } from './test-migrate'
  * At least this way we know what runs locally will also match in actual CI environments
  * https://nx.dev/concepts/more-concepts/nx-daemon#turning-it-off
  */
-process.env['CI'] = "true"
+process.env['CI'] = 'true'
 
 const JEST_TIMEOUT = 190000
 jest.setTimeout(JEST_TIMEOUT)
@@ -47,10 +47,10 @@ jest.setTimeout(JEST_TIMEOUT)
 const pluginName = '@simondotm/nx-firebase'
 const pluginPath = 'dist/packages/nx-firebase'
 const workspaceLayout = {
-        appsDir: "apps",
-        libsDir: "libs",
-        projectNameAndRootFormat: "derived"
-      }
+  appsDir: 'apps',
+  libsDir: 'libs',
+  projectNameAndRootFormat: 'derived',
+}
 
 describe('nx-firebase e2e', () => {
   // Setting up individual workspaces per
@@ -69,10 +69,10 @@ describe('nx-firebase e2e', () => {
       json.workspaceLayout = workspaceLayout
       // Disabling daemon for e2e tests as well, even though CI is enabled
       json.tasksRunnerOptions.default.useDaemonProcess = false
-      return JSON.stringify(json, null, 2)   
+      return JSON.stringify(json, null, 2)
     })
     // ensure daemon is off for e2e test
-    runNxCommandAsync('reset')    
+    runNxCommandAsync('reset')
   }, JEST_TIMEOUT)
 
   afterAll(() => {
@@ -83,14 +83,12 @@ describe('nx-firebase e2e', () => {
 
   // test to ensure workspace setup is working
   describe('ensureNxProject workspace', () => {
-    it(
-      'should successfuly configure workspace layout',
-      () => {
-        const nxJson = readJson('nx.json')
-        expect(nxJson.workspaceLayout).toMatchObject(workspaceLayout)
-        expect(nxJson.tasksRunnerOptions.default.useDaemonProcess).toBe(false)
-      })
+    it('should successfuly configure workspace layout', () => {
+      const nxJson = readJson('nx.json')
+      expect(nxJson.workspaceLayout).toMatchObject(workspaceLayout)
+      expect(nxJson.tasksRunnerOptions.default.useDaemonProcess).toBe(false)
     })
+  })
 
   // run test suites
   testWorkspace()
