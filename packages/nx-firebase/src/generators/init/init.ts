@@ -12,7 +12,7 @@ import type { InitGeneratorOptions } from './schema'
  */
 export async function initGenerator(
   tree: Tree,
-  options: InitGeneratorOptions,
+  _options: InitGeneratorOptions,
 ): Promise<GeneratorCallback> {
   addGitIgnore(tree)
   addNxIgnore(tree)

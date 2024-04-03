@@ -69,7 +69,8 @@ export async function testPlugin(cache: Cache) {
 
   // build the firebase app
   await it('should build the firebase app', async () => {
-    const { stdout } = await runNxCommandAsync('build firebase')
+    await runNxCommandAsync('build firebase')
+    // const { stdout } = await runNxCommandAsync('build firebase')
     // expectToNotContain(stdout, npmContent)
     // expectToNotContain(stdout, libContent)
   })
