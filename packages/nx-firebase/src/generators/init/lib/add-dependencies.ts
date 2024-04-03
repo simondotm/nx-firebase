@@ -3,6 +3,8 @@ import {
   readJson,
   Tree,
   addDependenciesToPackageJson,
+  detectPackageManager,
+  logger,
 } from '@nx/devkit'
 import { workspaceNxVersion } from '../../../utils'
 import { packageVersions } from '../../../__generated__/nx-firebase-versions'
@@ -20,10 +22,12 @@ export function addDependencies(tree: Tree): GeneratorCallback {
   function addDependencyIfNotPresent(
     packageName: string,
     packageVersion: string,
-  ) {
+  ): boolean {
     if (!packageJson.dependencies || !packageJson.dependencies[packageName]) {
       dependencies[packageName] = packageVersion
+      return true
     }
+    return false
   }
   function addDevDependencyIfNotPresent(
     packageName: string,
@@ -34,7 +38,9 @@ export function addDependencies(tree: Tree): GeneratorCallback {
       !packageJson.devDependencies[packageName]
     ) {
       devDependencies[packageName] = packageVersion
+      return true
     }
+    return false
   }
 
   // Firebase packages are not managed by the plugin
@@ -49,8 +55,19 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     `^${packageVersions.firebaseFunctions}`,
   )
 
-  //SM: not convinced we should be adding tslib in this plugin
-  //addDependencyIfNotPresent('tslib', tsLibVersion)
+  // if the workspace uses pnpm, we need to add the @google-cloud/functions-framework package
+  if (detectPackageManager() === 'pnpm') {
+    if (
+      addDependencyIfNotPresent(
+        '@google-cloud/functions-framework',
+        `^${packageVersions.googleCloudFunctionsFramework}`,
+      )
+    ) {
+      logger.info(
+        `This workspace is using pnpm, adding '@google-cloud/functions-framework' dependency for firebase functions compatibility\nSee https://github.com/firebase/firebase-tools/issues/5911#issuecomment-1730263400\n\n`,
+      )
+    }
+  }
 
   // firebase dev dependencies
   addDevDependencyIfNotPresent(

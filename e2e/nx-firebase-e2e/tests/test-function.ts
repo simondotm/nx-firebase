@@ -88,6 +88,16 @@ export function testFunction() {
 
         validateFunctionConfig(functionData, appData)
 
+        // check that google-cloud/functions-framework is added to package.json if pnpm being used
+        const packageJson = readJson(
+          `${functionData.projectDir}/package.json`,
+        )
+        if (detectPackageManager() === 'pnpm') {
+          expect(packageJson.dependencies['@google-cloud/functions-framework']).toBeDefined()
+        }else{
+          expect(packageJson.dependencies['@google-cloud/functions-framework']).not.toBeDefined()
+        }
+
         // cleanup
         await cleanFunctionAsync(functionData)              
         await cleanAppAsync(appData)              
@@ -116,6 +126,17 @@ export function testFunction() {
             `dist/${functionData.projectDir}/.secret.local`,
             ),
         ).not.toThrow()   
+
+        // check that nx preserves the function `package.json` dependencies in the output `package.json`
+        const packageJson = readJson(
+          `dist/${functionData.projectDir}/package.json`,
+        )
+        if (detectPackageManager() === 'pnpm') {
+          expect(packageJson.dependencies['@google-cloud/functions-framework']).toBeDefined()
+        }else{
+          expect(packageJson.dependencies['@google-cloud/functions-framework']).not.toBeDefined()
+        }
+
 
         // cleanup
         await cleanFunctionAsync(functionData)              

@@ -90,6 +90,17 @@ describe('init generator', () => {
       `^${packageVersions.killPort}`,
     )
 
+    // check that plugin init generator adds @google-cloud/functions-framework if pnpm is being used
+    if (devkit.detectPackageManager() === 'pnpm') {
+      expect(
+        packageJson.dependencies['@google-cloud/functions-framework'],
+      ).toBe(`^${packageVersions.googleCloudFunctionsFramework}`)
+    } else {
+      expect(
+        packageJson.dependencies['@google-cloud/functions-framework'],
+      ).not.toBeDefined()
+    }
+
     expect(packageJson.dependencies['tslib']).not.toBeDefined()
   })
 

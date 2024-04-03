@@ -5,6 +5,7 @@ import {
 import {
   safeRunNxCommandAsync,
 } from '../test-utils'
+import { detectPackageManager } from '@nx/devkit'
 
 //--------------------------------------------------------------------------------------------------
 // Test the workspace setup & init generator
@@ -48,9 +49,23 @@ export function testWorkspace() {
         expect(
           packageJson.devDependencies['firebase-functions-test'],
         ).toBeDefined()
+
+        // check that plugin init generator adds @google-cloud/functions-framework if pnpm is being used
+        if (detectPackageManager() === 'pnpm') {
+          expect(
+            packageJson.dependencies['@google-cloud/functions-framework'],
+          ).toBeDefined()
+        } else {
+          expect(
+            packageJson.dependencies['@google-cloud/functions-framework'],
+          ).not.toBeDefined()
+        }
+
+        // test that generator adds dev dependencies to workspace package.json
         expect(packageJson.devDependencies['firebase-tools']).toBeDefined()
         //SM: Mar'24: our plugin init generator now only add @nx/node
         expect(packageJson.devDependencies['@nx/node']).toBeDefined()
+
     })
   })
 }
