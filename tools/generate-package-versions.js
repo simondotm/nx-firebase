@@ -92,6 +92,9 @@ function updateTemplates() {
     if (src.includes('index.html')){
       data = data.replaceAll('{{VERSION}}', packageJson.devDependencies['firebase'])
     }    
+    if (src.includes('firestore.rules')){
+      data = data.replaceAll('{{IN_30_DAYS}}', '<%= IN_30_DAYS %>')
+    }
     maybeUpdateFile(dest, data)
   }
 }

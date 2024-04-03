@@ -3,6 +3,7 @@ import {
   runNxCommandAsync,
   uniq,
   checkFilesExist,
+  readFile,
 } from '@nx/plugin/testing'
 
 import {
@@ -10,13 +11,14 @@ import {
   appGeneratorAsync,
   cleanAppAsync,
   getProjectData,
+  testDebug,
   validateProjectConfig,
 } from '../test-utils'
-
 function expectedAppFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
   return [
     `${projectPath}/public/index.html`,
+    `${projectPath}/public/404.html`,
     `${projectPath}/database.rules.json`,
     `${projectPath}/firestore.indexes.json`,
     `${projectPath}/firestore.rules`,
@@ -40,6 +42,12 @@ export function testApplication() {
       expect(() => checkFilesExist(...expectedAppFiles(appData))).not.toThrow()
 
       validateProjectConfig(appData)
+
+      // check that the firestore.rules file has had the IN_30_DAYS placeholder replaced
+      const firestoreRules = readFile(`${appData.projectDir}/firestore.rules`)
+      testDebug(firestoreRules)
+      expect(firestoreRules).not.toContain('IN_30_DAYS')
+
 
       // cleanup - app
       await cleanAppAsync(appData)

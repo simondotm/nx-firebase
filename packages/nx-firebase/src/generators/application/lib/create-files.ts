@@ -11,11 +11,23 @@ import type { NormalizedSchema } from '../schema'
 export function createFiles(tree: Tree, options: NormalizedSchema): void {
   const firebaseAppConfig = options.firebaseConfigName
 
+  // Firebase SDK firestore.rules template has a placeholder for the date 30 days from now
+  // so we add that substitution here at the point of app generation
+  const date = new Date()
+  date.setDate(date.getDate() + 30)
+  const dateString = date
+    .toISOString()
+    .split('T')[0]
+    .split('-')
+    .map((v) => parseInt(v).toString())
+    .join(', ')
+
   const substitutions = {
     tmpl: '',
     projectName: options.projectName,
     projectRoot: options.projectRoot,
     firebaseAppConfig,
+    IN_30_DAYS: dateString,
   }
 
   // The default functions package.json & templated typescript source files are added here
