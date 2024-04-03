@@ -70,6 +70,9 @@ devDependencies:
   eslint-plugin-prettier:
     specifier: ^4.2.1
     version: 4.2.1(eslint-config-prettier@8.1.0)(eslint@8.46.0)(prettier@2.8.8)
+  eslint-plugin-unused-imports:
+    specifier: ^2.0.0
+    version: 2.0.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.46.0)
   firebase:
     specifier: 10.10.0
     version: 10.10.0
@@ -2618,23 +2621,6 @@ packages:
       - verdaccio
     dev: true
 
-  /@nrwl/js@16.8.1(@swc-node/register@1.4.2)(@swc/core@1.3.56)(@types/node@18.7.1)(nx@16.8.1)(typescript@5.1.6):
-    resolution: {integrity: sha512-I5kCtk0TUvcvJXnD6fbOI1+L4EBHbSZCXVCkv3eXKOeAj0cJ6cOt2g6S7DpWPf2P7zTq22XOPNJy3C8u9tCbgQ==}
-    dependencies:
-      '@nx/js': 16.8.1(@swc-node/register@1.4.2)(@swc/core@1.3.56)(@types/node@18.7.1)(nx@16.8.1)(typescript@5.1.6)
-    transitivePeerDependencies:
-      - '@babel/traverse'
-      - '@swc-node/register'
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - debug
-      - nx
-      - supports-color
-      - typescript
-      - verdaccio
-    dev: true
-
   /@nrwl/linter@16.8.1(@swc-node/register@1.4.2)(@swc/core@1.3.56)(@types/node@18.7.1)(eslint@8.46.0)(nx@16.8.1):
     resolution: {integrity: sha512-o7DhyvNk7qXG8qdhivEd4kYw1XGqOPlXHgDBJJHeL5ASN2HWl5EBclCvKJmoci1xIJGw/9q+mJxc1/mL8Zq3dQ==}
     dependencies:
@@ -2889,7 +2875,7 @@ packages:
       '@babel/preset-env': 7.22.10(@babel/core@7.22.11)
       '@babel/preset-typescript': 7.22.11(@babel/core@7.22.11)
       '@babel/runtime': 7.22.11
-      '@nrwl/js': 16.8.1(@swc-node/register@1.4.2)(@swc/core@1.3.56)(@types/node@18.7.1)(nx@16.8.1)(typescript@5.1.6)
+      '@nrwl/js': 16.8.1(@swc-node/register@1.4.2)(@swc/core@1.3.56)(@types/node@18.7.1)(nx@16.8.1)(typescript@4.8.4)
       '@nx/devkit': 16.8.1(nx@16.8.1)
       '@nx/workspace': 16.8.1(@swc-node/register@1.4.2)(@swc/core@1.3.56)
       '@phenomnomnominal/tsquery': 5.0.1(typescript@5.1.6)
@@ -6061,6 +6047,26 @@ packages:
       eslint-config-prettier: 8.1.0(eslint@8.46.0)
       prettier: 2.8.8
       prettier-linter-helpers: 1.0.0
+    dev: true
+
+  /eslint-plugin-unused-imports@2.0.0(@typescript-eslint/eslint-plugin@5.62.0)(eslint@8.46.0):
+    resolution: {integrity: sha512-3APeS/tQlTrFa167ThtP0Zm0vctjr4M44HMpeg1P4bK6wItarumq0Ma82xorMKdFsWpphQBlRPzw/pxiVELX1A==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      '@typescript-eslint/eslint-plugin': ^5.0.0
+      eslint: ^8.0.0
+    peerDependenciesMeta:
+      '@typescript-eslint/eslint-plugin':
+        optional: true
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)(typescript@4.8.4)
+      eslint: 8.46.0
+      eslint-rule-composer: 0.3.0
+    dev: true
+
+  /eslint-rule-composer@0.3.0:
+    resolution: {integrity: sha512-bt+Sh8CtDmn2OajxvNO+BX7Wn4CIWMpTRm3MaiKPCQcnnlm0CS2mhui6QaoeQugs+3Kj2ESKEEGJUdVafwhiCg==}
+    engines: {node: '>=4.0.0'}
     dev: true
 
   /eslint-scope@5.1.1:
