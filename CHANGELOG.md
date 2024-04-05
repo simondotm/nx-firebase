@@ -1,46 +1,24 @@
 # @simondotm/nx-firebase Changelog
 
-All notable changes to this project will be documented in this file.
 
-This plugin was completely rewritten since V2.x to use esbuild for bundling cloud functions. For documentation of the legacy v1.x plugin version see [here](https://github.com/simondotm/nx-firebase/tree/release/v1.1.0).
 
-- [@simondotm/nx-firebase Changelog](#simondotmnx-firebase-changelog)
-  - [v2.2.0](#v220)
-  - [v2.1.2](#v212)
-  - [v2.1.1](#v211)
-  - [v2.1.0](#v210)
-  - [v2.0.0](#v200)
-  - [v2.0.0-beta.1](#v200-beta1)
-  - [v2.0.0-beta.0](#v200-beta0)
-  - [v1.1.0](#v110)
-  - [v1.1.0-beta.0](#v110-beta0)
-  - [v1.0.0](#v100)
-  - [v0.13.0-beta.1](#v0130-beta1)
-  - [v0.13.0-beta.0](#v0130-beta0)
-  - [v0.3.4](#v034)
-  - [v0.3.3](#v033)
-  - [v0.3.2](#v032)
-  - [v0.3.1](#v031)
-  - [v0.3.0](#v030)
-  - [v0.2.3](#v023)
-  - [v0.2.2 - Initial Release](#v022---initial-release)
 
-## v2.2.0
+## v2.2.0 ![nx](https://img.shields.io/badge/Nx-v16.8.1-blue)
 
 - Fix package dependencies for `@nx/node`, plugin init generator now adds this if/when needed
 - This prevents scenarios where incorrect Nx plugin versions could be added to the user workspace
 - It may also fix an issue with `@nx/esbuild` plugin version being out of sync and bundling external dependencies incorrectly
 
-## v2.1.2
+## v2.1.2 ![nx](https://img.shields.io/badge/Nx-v16.6.0-blue)
 
 - Include `@nx/devkit` as a peer dependency for the package
 - Listing in the [Nx plugin registry](https://nx.dev/plugin-registry)
 
-## v2.1.1
+## v2.1.1 ![nx](https://img.shields.io/badge/Nx-v16.6.0-blue)
 
 - Fix issues in the v2.1.0 release
 
-## v2.1.0
+## v2.1.0 ![nx](https://img.shields.io/badge/Nx-v16.6.0-blue)
 
 - Added support for [environment variables](docs/nx-firebase-functions-environment.md)
 - Added support for [secrets](docs/nx-firebase-functions-environment.md#environment-file-types)
@@ -49,19 +27,19 @@ This plugin was completely rewritten since V2.x to use esbuild for bundling clou
 - Added a custom `migrate` generator to ensure workspace configurations match the latest plugin version schemas
 - Updated plugin to be built against Nx 16.6.0
 
-## v2.0.0
+## v2.0.0 ![nx](https://img.shields.io/badge/Nx-v16.1.1-blue)
 
 Official v2 release
 
 - Updated default function template to match firebase CLI
 
-## v2.0.0-beta.1
+## v2.0.0-beta.1 ![nx](https://img.shields.io/badge/Nx-v16.1.1-blue)
 
 - Fixed issue with dependencies
 - Sort codebases
 - Updated documents
 
-## v2.0.0-beta.0
+## v2.0.0-beta.0 ![nx](https://img.shields.io/badge/Nx-v16.1.1-blue)
 
 Initial beta of plugin version 2.0.
 
@@ -80,23 +58,27 @@ Users of earlier plugin versions must read [here for plugin v1 -> v2 migration i
 - Minimum Nx version is now 16.1.1
 - Watch mode build of function code & libraries is now fully supported when running Firebase emulator
 
-## v1.1.0
+# Version 2
+
+This plugin was completely rewritten since V2.x to use esbuild for bundling cloud functions. For documentation of the legacy v1.x plugin version see [here](https://github.com/simondotm/nx-firebase/tree/release/v1.1.0).
+
+## v1.1.0 ![nx](https://img.shields.io/badge/Nx-v16.1.1-blue)
 
 No changes from beta.
 
-## v1.1.0-beta.0
+## v1.1.0-beta.0 ![nx](https://img.shields.io/badge/Nx-v16.1.1-blue)
 
 Updated for Nx 16.1.1+
 
 - You will need to migrate your workspace to Nx 16.1.1 before updating the plugin
 
-## v1.0.0
+## v1.0.0 ![nx](https://img.shields.io/badge/Nx-v13.10.6-blue)
 
 First Major release. No change since `0.13.0-beta.1`.
 
 Compatible with Nx 13.10.6+
 
-## v0.13.0-beta.1
+## v0.13.0-beta.1 ![nx](https://img.shields.io/badge/Nx-v13.10.6-blue)
 
 **Changes**
 
@@ -110,7 +92,7 @@ Compatible with Nx 13.10.6+
 - Check the [targets documentation](docs/nx-firebase-targets.md) if you already have a workspace that is using nx-firebase
 - Remove `main` from `package.json` files in any nx-firebase apps in your workspace
 
-## v0.13.0-beta.0
+## v0.13.0-beta.0 ![nx](https://img.shields.io/badge/Nx-v13.10.6-blue)
 
 Due to the large number of API changes in Nx from version 12 to version 13.10, this plugin has been rewritten from scratch:
 
@@ -133,7 +115,11 @@ Due to the large number of API changes in Nx from version 12 to version 13.10, t
 
 Recommended minimum version of Nx is now 13.10.6. See [Nx Migration](docs/nx-migration.md) documentation for more information.
 
-## v0.3.4
+## v0.3.13 ![nx](https://img.shields.io/badge/Nx-v13.2.3-blue)
+
+
+
+## v0.3.4 ![nx](https://img.shields.io/badge/Nx-v13.2.3-blue)
 
 Interim release fixes for issues introduced in nx version 13.0.2+ where `createProjectGraph` was deprecated.
 
@@ -170,7 +156,7 @@ Nx version migrations below may handle this transition for you, but if not, you 
 
 See [Nx Migration](docs/nx-migration.md) documentation for more information.
 
-## v0.3.3
+## v0.3.3 ![nx](https://img.shields.io/badge/Nx-v12.3.4-blue)
 
 **General changes**
 
@@ -283,7 +269,8 @@ And in your `firebase.<appname>.json` config settings for `"emulators"` add `"au
     }
 ```
 
-## v0.3.2
+## v0.3.2 ![nx](https://img.shields.io/badge/Nx-v12.3.4-blue)
+
 
 - Plugin now detects incompatible Nx library dependencies and aborts compilation when found
 
@@ -295,14 +282,14 @@ Incompatible dependencies are as follows:
 If either of these two types of libraries are imported by Firebase functions, the compilation will be halted, since a functional app cannot be created with these types of dependencies.
 
 See the [README](README.md#using-nx-libraries-within-nested-sub-directories) for more information.
-
-## v0.3.1
+ 
+## v0.3.1 ![nx](https://img.shields.io/badge/Nx-v12.3.4-blue)
 
 - Removed undocumented/unusued `firebase` target in app generator. No longer needed.
 
 - `serve` target now builds `--with-deps` before watching to ensure all dependent local libraries are built. Note that `serve` only detects incremental changes to the main application, and not dependent libraries as well at this time.
 
-## v0.3.0
+## v0.3.0 ![nx](https://img.shields.io/badge/Nx-v12.3.4-blue)
 
 Project has been renamed from `@simondotm/nxfirebase` to `@simondotm/nx-firebase` to better match Nx plugin naming conventions. Took a deep breath and did it early before many installs occurred. Apologies to any users who this may have inconvenienced - I didn't realise I could deprecate packages until after I'd deleted & renamed the pnm project. Rest assured, I won't be making any further major modifications like this!
 
@@ -312,7 +299,7 @@ If you have already generated NxFirebase applications using `@simondotm/nxfireba
 2. `npm install @simondotm/nx-firebase --save-dev`
 3. Update the `builder` targets in any NxFirebase applications you already have in your `workspace.json` or `angular.json` config from `@simondotm/nxfirebase:build` to `@simondotm/nx-firebase:build`
 
-## v0.2.3
+## v0.2.3 ![nx](https://img.shields.io/badge/Nx-v12.3.4-blue)
 
 Built against Nx 12.3.4
 
@@ -367,6 +354,6 @@ v0.2.3 adds these targets to your `workspace.json` or `angular.json`, so for use
                 },
 ```
 
-## v0.2.2 - Initial Release
+## v0.2.2 - Initial Release ![nx](https://img.shields.io/badge/Nx-v12.1.1-blue)
 
 Built against Nx 12.1.1
