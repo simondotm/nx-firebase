@@ -30,7 +30,6 @@
 **Version information**
 
 - [Firebase Versions](./firebase-versions.md)
-- [Nx Versions](./nx-versions.md)
 
 _Note: Some of these may not always be upto date - it's hard work keeping track of external releases and compatibilities!_
 
