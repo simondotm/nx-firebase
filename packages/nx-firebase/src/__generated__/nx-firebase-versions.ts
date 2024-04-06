@@ -8,7 +8,7 @@ export const packageVersions = {
   firebaseAdmin: '11.11.1',
   firebaseFunctions: '4.8.2',
   firebaseFunctionsTest: '3.1.1',
-  firebaseTools: '12.4.5',
+  firebaseTools: '12.9.1',
   killPort: '2.0.1',
   nodeEngine: '16',
   googleCloudFunctionsFramework: '3.3.0',
