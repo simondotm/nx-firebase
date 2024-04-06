@@ -1,8 +1,5 @@
 # User Guide
 
-
-
-
 **Nx Firebase Generators**
 
 - [Firebase Applications](./nx-firebase-applications.md)
