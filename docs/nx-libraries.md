@@ -6,11 +6,10 @@ Nx-Firebase supports use of Nx Libraries within functions code.
 
 To use a shared library with an Nx Firebase Function Application, simply create a Typescript Nx node library in your workspace:
 
-**`nx g @nx/js:lib mylib --importPath="@myorg/mylib`**
+**`nx g @nx/js:lib mylib --importPath="@myorg/mylib [--bundler=<bundler>]`**
 
 > _Note: The `--importPath` option is highly recommended to ensure the correct typescript aliases and npm package configurations for your library._
 
-Since v2.x of the plugin, functions are bundled with esbuild, so
 
 ## Importing a library
 
@@ -32,10 +31,10 @@ OR
 
 ## Nx Library Notes
 
-Since v2 of the plugin now uses `esbuild` to bundle function code, we gain a few benefits:
+[Firebase functions](./nx-firebase-functions.md) use `esbuild` to bundle function code, we gain a few benefits:
 
 - Nx takes care of ensuring all necessary dependencies will be also built.
-- It no longer matters if libraries are buildable or non-buildable
+- It does not matter if libraries are buildable or non-buildable, as `esbuild` builds from Typescript sources, however buildable libraries may be preferred since `esbuild` does not do type checking of imported libraries.
 - We do not have to worry about how we structure libraries anymore for optimal function runtime.
 - For instance, we can use barrel imports freely, since `esbuild` will treeshake unused code and inline imports into the bundled output `main.js`
 - We can create as many libraries as we wish for our functions to use, and organise them in whatever makes most sense for the workspace

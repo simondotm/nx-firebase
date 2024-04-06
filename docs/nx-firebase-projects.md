@@ -12,7 +12,7 @@
 
 [Firebase projects](https://firebase.google.com/docs/projects/learn-more) are created in the firebase web console, and then specified in your local workspace configurations as deployment targets in your `.firebaserc` file.
 
-`nx-firebase` assumes a mapping of one `@simondotm/nx-firebase:app` to one firebase project and configuration file.
+`nx-firebase` assumes a mapping of one `@simondotm/nx-firebase:app` to one firebase CLI project and one [Firebase configuration file](./nx-firebase-project-structure.md#firebase-function-configs).
 
 ## Nx Workspaces With Single Firebase Projects
 

@@ -17,6 +17,7 @@ OR
 | `name`            | required | the project name for your firebase app                             |
 | `--directory=dir` | optional | the directory this app will be located in                          |
 | `--project=proj`  | optional | the `--project` option that will be used for firebase CLI commands |
+| `--projectNameAndRootFormat` | optional | `derived` or `as-provided` see [projectNameAndRootFormat](https://nx.dev/nx-api/node/generators/application#projectnameandrootformat) |
 
 ## About Firebase Apps
 
@@ -31,6 +32,7 @@ When a new Nx Firebase application project is generated in the workspace it will
 - Default `database.rules.json` for Firebase realtime database
 - Default `storage.rules` for Firebase storage rules
 - Default `public/index.html` for Firebase hosting - _you can delete this if your firebase configuration for hosting points elsewhere_.
+- Default `public/404.html` for Firebase hosting - _you can delete this if your firebase configuration for hosting points elsewhere_.
 - Default [environment variables](./nx-firebase-functions-environment.md) for your firebase functions
 
 **And in the workspace root:**

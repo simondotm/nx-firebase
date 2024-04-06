@@ -14,7 +14,7 @@ Please note that these migrations are provided on a 'best effort' basis, due to 
     - [5. Library updates](#5-library-updates)
     - [6. Check Migration](#6-check-migration)
 
-## Migrating to plugin v2.1 from v2.0
+## Migrating from plugin v2.0.0 to v2.1.0
 
 Plugin version 2.1 [added some new features](../CHANGELOG.md#v210) that required changes to the project configurations.
 
@@ -27,7 +27,7 @@ This tool will run checks on your workspace firebase apps, functions and configu
 
 > Please note, this generator is not the same as Nx's own migration tool, so always review the changes it makes to ensure they are appropriate for your workspace.
 
-## Migration to plugin v2.x from v1.x
+## Migration from plugin v1.x to v2.0.0
 
 Version 2.x of this plugin has been completely rewritten, and uses a completely new approach to building & deploying, so migrating an existing Nx workspace using V1 of the plugin to use V2 requires some manual migration procedures.
 
