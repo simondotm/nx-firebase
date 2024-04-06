@@ -6,7 +6,17 @@
 
 ## v2.3.0 ![nx](https://img.shields.io/badge/Nx-v16.8.1-blue) ![nx](https://img.shields.io/badge/Node-v16-orange)
 
-- TODO
+- Updated plugin to be built against Nx 16.8.1
+- Updated documentation to reflect latest changes
+- App & Function generators now use the same templates as the Firebase tools SDK
+- Firebase dependencies used by generators now derived from plugin workspace & dependabot help
+  - `firebase-functions` -> 4.8.2
+  - `firebase-functions-test` -> 3.1.1
+  - `firebase-admin` -> 11.11.1
+  - `firebase` -> 10.10.0
+  - `firebase-tools` -> 12.9.1
+- Support [--projectNameAndRootFormat](https://nx.dev/nx-api/node/generators/application#projectnameandrootformat) for application and function generators
+- Support `pnpm` Nx workspaces for function deployment by adding `@google-cloud/functions-framework` to the function dependencies
 
 ## v2.2.0 ![nx](https://img.shields.io/badge/Nx-v16.6.0-blue) ![nx](https://img.shields.io/badge/Node-v16-orange)
 
