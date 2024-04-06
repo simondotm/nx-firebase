@@ -1,7 +1,7 @@
 # User Guide
 
 
-- [Migrating to new plugin versions](./nx-firebase-migrations.md)
+
 
 **Nx Firebase Generators**
 
@@ -20,7 +20,8 @@
 
 - [Nx-Firebase Sync](./nx-firebase-sync.md)
 - [Nx-Firebase Project Schemas](./nx-firebase-project-structure.md)
-
+- [Migrating to new plugin versions](./nx-firebase-migrations.md)
+  
 **Nx Workspace**
 
 - [Nx Workspace Layout Ideas](./nx-workspace-layout.md)

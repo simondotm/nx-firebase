@@ -32,6 +32,8 @@
 - Added a custom `migrate` generator to ensure workspace configurations match the latest plugin version schemas
 - Updated plugin to be built against Nx 16.6.0
 
+Read [here for plugin v2.0.0 -> v2.1.0+ migration instructions](docs/nx-firebase-migrations.md#migrating-from-plugin-v200-to-v210)
+
 ## v2.0.0 ![nx](https://img.shields.io/badge/Nx-v16.1.1-blue) ![nx](https://img.shields.io/badge/Node-v16-orange)
 
 Official v2 release
@@ -63,7 +65,7 @@ Initial beta of plugin version 2.0.
 
 This plugin was completely rewritten since V2.x to use esbuild for bundling cloud functions. For documentation of the legacy v1.x plugin version see [here](https://github.com/simondotm/nx-firebase/tree/release/v1.1.0).
 
-Users of earlier plugin versions must read [here for plugin v1 -> v2 migration instructions](docs/nx-firebase-migrations.md)
+Users of earlier plugin versions must read [here for plugin v1 -> v2 migration instructions](docs/nx-firebase-migrations.md#migration-from-plugin-v1x-to-v200)
 
 > **Please note that legacy v1 versions of the plugin are no longer supported from this point on, so only take this update if you are prepared to migrate your workspace and Firebase projects**
 
