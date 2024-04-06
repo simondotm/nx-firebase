@@ -44,7 +44,7 @@ jobs:
         working-directory: ./dist/packages/nx-firebase
 
       - name: Publish to GitHub Packages
-        run: pnpm publish
+        run: pnpm publish --no-git-checks
         working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +66,7 @@ jobs:
         run: npx nx build nx-firebase
 
       - name: Publish to NPM
-        run: pnpm publish --access=public
+        run: pnpm publish --no-git-checks --access=public 
         working-directory: ./dist/packages/nx-firebase
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
