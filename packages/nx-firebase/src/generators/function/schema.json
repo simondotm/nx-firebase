@@ -53,9 +53,8 @@
     },
     "runTime": {
       "description": "The node runtime target for this function.",
-      "type": "string",
-      "enum": ["16", "18", "20"],
-      "default": "16"
+      "enum": ["18", "20", "22"],
+      "default": "20"
     }
   },
   "additionalProperties": false,

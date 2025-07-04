@@ -17,23 +17,17 @@ import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/pr
 export async function normalizeOptions(
   host: Tree,
   options: Schema,
-  callingGenerator = '@simondotm/nx-firebase:application',
+  // callingGenerator = '@simondotm/nx-firebase:application',
 ): Promise<NormalizedSchema> {
-  const {
-    projectName: appProjectName,
-    projectRoot,
-    projectNameAndRootFormat,
-  } = await determineProjectNameAndRootOptions(host, {
-    name: options.name,
-    projectType: 'application',
-    directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
-    rootProject: options.rootProject,
-    callingGenerator,
-  })
+  const { projectName: appProjectName, projectRoot } =
+    await determineProjectNameAndRootOptions(host, {
+      name: options.name,
+      projectType: 'application',
+      directory: options.directory,
+      rootProject: options.rootProject,
+    })
 
   options.rootProject = projectRoot === '.'
-  options.projectNameAndRootFormat = projectNameAndRootFormat
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
@@ -94,7 +88,6 @@ export async function applicationGenerator(
   schema: Schema,
 ): Promise<GeneratorCallback> {
   const options = await normalizeOptions(host, {
-    projectNameAndRootFormat: 'derived',
     ...schema,
   })
   const initTask = await initGenerator(host, {})

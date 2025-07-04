@@ -21,23 +21,17 @@ import { packageVersions } from '../../__generated__/nx-firebase-versions'
 export async function normalizeOptions(
   host: Tree,
   options: Schema,
-  callingGenerator = '@simondotm/nx-firebase:function',
+  // callingGenerator = '@simondotm/nx-firebase:function',
 ): Promise<NormalizedSchema> {
-  const {
-    projectName: appProjectName,
-    projectRoot,
-    projectNameAndRootFormat,
-  } = await determineProjectNameAndRootOptions(host, {
-    name: options.name,
-    projectType: 'application',
-    directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
-    rootProject: options.rootProject,
-    callingGenerator,
-  })
+  const { projectName: appProjectName, projectRoot } =
+    await determineProjectNameAndRootOptions(host, {
+      name: options.name,
+      projectType: 'application',
+      directory: options.directory,
+      rootProject: options.rootProject,
+    })
 
   options.rootProject = projectRoot === '.'
-  options.projectNameAndRootFormat = projectNameAndRootFormat
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
@@ -103,7 +97,6 @@ export async function functionGenerator(
 
   const options = await normalizeOptions(host, {
     // set default options
-    projectNameAndRootFormat: 'derived',
     runTime: packageVersions.nodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
     // apply overrides from user
     ...schema,
@@ -130,7 +123,6 @@ export async function functionGenerator(
   const nodeApplicationTask = await nodeApplicationGenerator(host, {
     name: options.name,
     directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
     tags,
     setParserOptionsProject: options.setParserOptionsProject,
     skipFormat: options.skipFormat,
