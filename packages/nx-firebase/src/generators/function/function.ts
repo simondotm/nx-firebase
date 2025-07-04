@@ -7,78 +7,110 @@ import {
   runTasksInSerial,
   names,
   getProjects,
+  getWorkspaceLayout,
+  updateJson,
+  joinPathFragments,
 } from '@nx/devkit'
+import { isUsingTsSolutionSetup } from '@nx/js/src/utils/typescript/ts-solution-setup'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
+import type { CompilerOptions } from 'typescript'
 
 import { initGenerator } from '../init/init'
 import { getFirebaseConfigFromProject, updateTsConfig } from '../../utils'
 
 import { addFunctionConfig, createFiles, updateProject } from './lib'
-import type { Schema, NormalizedSchema } from './schema'
-import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/project-name-and-root-utils'
-import { packageVersions } from '../../__generated__/nx-firebase-versions'
+import type {
+  FunctionGeneratorSchema,
+  FunctionGeneratorNormalizedSchema,
+} from './schema'
 
-export async function normalizeOptions(
-  host: Tree,
-  options: Schema,
-  // callingGenerator = '@simondotm/nx-firebase:function',
-): Promise<NormalizedSchema> {
-  const { projectName: appProjectName, projectRoot } =
-    await determineProjectNameAndRootOptions(host, {
-      name: options.name,
-      projectType: 'application',
-      directory: options.directory,
-      rootProject: options.rootProject,
-    })
+/**
+ * Update the tsconfig.json of the project file.
+ *
+ * @param options
+ * @returns compiler options.
+ */
+function getCompilerOptions(
+  options: FunctionGeneratorNormalizedSchema,
+): Record<keyof CompilerOptions, boolean> {
+  return {
+    ...(options.strict
+      ? {
+          forceConsistentCasingInFileNames: true,
+          strict: true,
+          importHelpers: true,
+          noImplicitOverride: true,
+          noImplicitReturns: true,
+          noFallthroughCasesInSwitch: true,
+          ...(!options.isUsingTsSolutionConfig
+            ? { noPropertyAccessFromIndexSignature: true }
+            : {}),
+        }
+      : {}),
+  }
+}
 
-  options.rootProject = projectRoot === '.'
+/**
+ *
+ * @param tree
+ * @param options
+ * @returns
+ */
+function normalizeOptions(
+  tree: Tree,
+  options: FunctionGeneratorSchema,
+): FunctionGeneratorNormalizedSchema {
+  /** Ensure if using TS solution. */
+  const isUsingTsSolutionConfig = isUsingTsSolutionSetup(tree)
 
+  /**  */
+  const name = names(options.name).fileName
+  // const projectDirectory = name
+  /**
+   * By default, we use the name of the firebase application as directory,
+   * otherwise concat the directory.
+   */
+  const projectDirectory = options.directory
+    ? `${names(options.directory).fileName}/${name}`
+    : name
+
+  const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-')
+  const projectRoot = `${getWorkspaceLayout(tree).appsDir}/${projectDirectory}`
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
     : []
 
-  // const { projectName, projectRoot } = getProjectName(
-  //   host,
-  //   options.name,
-  //   options.directory,
-  // )
-
-  // get & validate the firebase app project this function will be attached to
+  /**
+   * Get & validate the firebase app project this function will be attached to.
+   */
   const firebaseApp = names(options.app).fileName
-  const projects = getProjects(host)
+  const projects = getProjects(tree)
   if (!projects.has(firebaseApp)) {
     throw new Error(
       `A firebase application project called '${firebaseApp}' was not found in this workspace.`,
     )
   }
 
-  const firebaseAppProject = readProjectConfiguration(host, firebaseApp)
-
-  // read the firebase config used by the parent app project
+  /** Read the firebase config used by the parent app project */
+  const firebaseAppProject = readProjectConfiguration(tree, firebaseApp)
   const firebaseConfigName = getFirebaseConfigFromProject(
-    host,
+    tree,
     firebaseAppProject,
   )
 
   return {
     ...options,
-    name: names(options.name).fileName,
-    projectName: appProjectName,
+    name,
+    directory: projectRoot,
+    runTime: options.runTime ?? '18',
+    format: options.format ?? 'esm',
+    projectName,
     projectRoot,
     parsedTags,
     firebaseConfigName,
     firebaseAppProject,
+    isUsingTsSolutionConfig,
   }
-
-  // return {
-  //   ...options,
-  //   runTime: options.runTime || '16',
-  //   format: options.format || 'esm',
-  //   projectRoot,
-  //   projectName,
-  //   firebaseConfigName,
-  //   firebaseAppProject,
-  // }
 }
 
 /**
@@ -90,67 +122,88 @@ export async function normalizeOptions(
  * @returns
  */
 export async function functionGenerator(
-  host: Tree,
-  schema: Schema,
+  tree: Tree,
+  options: FunctionGeneratorSchema,
 ): Promise<GeneratorCallback> {
-  const tasks: GeneratorCallback[] = []
+  const normalizedOptions: FunctionGeneratorNormalizedSchema = normalizeOptions(
+    tree,
+    options,
+  )
 
-  const options = await normalizeOptions(host, {
-    // set default options
-    runTime: packageVersions.nodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
-    // apply overrides from user
-    ...schema,
-  })
+  /** Execute the `init` generator before adding the project configuration. */
+  const initTask: GeneratorCallback = await initGenerator(tree, {})
 
-  if (!options.runTime) {
-    throw new Error('No runtime specified for the function app')
-  }
+  /**
+   * We use `@nx/node:app` to scaffold our function application, then modify as
+   * required `nx g @nx/node:app function-name --directory functions/dir
+   * --e2eTestRunner=none --framework=none --unitTestRunner=jest
+   * --bundler=esbuild --tags=firebase:firebase-app`
+   */
 
-  // const options = normalizeOptions(host, schema)
+  /** Function apps are tagged so that they can built/watched with run-many */
+  const tags = [
+    'firebase:function',
+    `firebase:name:${normalizedOptions.projectName}`,
+    `firebase:dep:${normalizedOptions.firebaseAppProject.name}`,
+    ...normalizedOptions.parsedTags,
+  ].join(',')
 
-  // initialise plugin
-  const initTask = await initGenerator(host, {})
-  tasks.push(initTask)
+  const nodeApplicationTask: GeneratorCallback = await nodeApplicationGenerator(
+    tree,
+    {
+      name: normalizedOptions.name,
+      directory: normalizedOptions.directory,
+      rootProject: normalizedOptions.rootProject,
+      tags,
+      setParserOptionsProject: normalizedOptions.setParserOptionsProject,
+      skipFormat: normalizedOptions.skipFormat,
+      e2eTestRunner: 'none',
+      /** Should work per https://github.com/nrwl/nx/issues/29664 */
+      swcJest: true,
+      bundler: 'esbuild',
+      framework: 'none',
+      unitTestRunner: 'jest',
+    },
+  )
 
-  // We use @nx/node:app to scaffold our function application, then modify as required
-  // `nx g @nx/node:app function-name --directory functions/dir --e2eTestRunner=none --framework=none --unitTestRunner=jest --bundler=esbuild --tags=firebase:firebase-app`
+  /** generate function app specific files */
+  createFiles(tree, normalizedOptions)
 
-  // Function apps are tagged so that they can built/watched with run-many
-  const tags =
-    `firebase:function,firebase:name:${options.projectName},firebase:dep:${options.firebaseAppProject.name}` +
-    (options.tags ? `,${options.tags}` : '')
+  /** Update TS config for esm or cjs */
+  updateTsConfig(
+    tree,
+    normalizedOptions.projectRoot,
+    normalizedOptions.runTime,
+    normalizedOptions.format,
+  )
 
-  const nodeApplicationTask = await nodeApplicationGenerator(host, {
-    name: options.name,
-    directory: options.directory,
-    tags,
-    setParserOptionsProject: options.setParserOptionsProject,
-    skipFormat: options.skipFormat,
-    e2eTestRunner: 'none',
-    bundler: 'esbuild',
-    framework: 'none',
-    unitTestRunner: 'jest',
-  })
-  tasks.push(nodeApplicationTask)
+  /** Update the tsconfig.json with compiler options */
+  const compilerOptionOverrides = getCompilerOptions(normalizedOptions)
 
-  // generate function app specific files
-  createFiles(host, options)
+  updateJson(
+    tree,
+    joinPathFragments(normalizedOptions.projectRoot, 'tsconfig.json'),
+    (json) => {
+      json.compilerOptions = {
+        ...json.compilerOptions,
+        ...compilerOptionOverrides,
+      }
+      return json
+    },
+  )
 
-  // update TS config for esm or cjs
-  updateTsConfig(host, options.projectRoot, options.runTime, options.format)
+  /** reconfigure the` @nx/node:app` to suit firebase functions. */
+  updateProject(tree, normalizedOptions)
 
-  // reconfigure the @nx/node:app to suit firebase functions
-  updateProject(host, options)
+  /** update firebase functions config. */
+  addFunctionConfig(tree, normalizedOptions)
 
-  // update firebase functions config
-  addFunctionConfig(host, options)
-
-  // ensures newly added files are formatted to match workspace style
+  /** ensures newly added files are formatted to match workspace style. */
   if (!options.skipFormat) {
-    await formatFiles(host)
+    await formatFiles(tree)
   }
 
-  return runTasksInSerial(...tasks)
+  return runTasksInSerial(initTask, nodeApplicationTask)
 }
 
 export default functionGenerator

@@ -24,10 +24,9 @@ export function expectedFunctionProjectTargets(
         ],
         generatePackageJson: true,
         bundle: true,
-        dependenciesFieldType: 'dependencies',
         format: ['esm'],
         thirdParty: false,
-        target: 'node16',
+        target: 'node20',
         esbuildOptions: {
           logLevel: 'info',
         },

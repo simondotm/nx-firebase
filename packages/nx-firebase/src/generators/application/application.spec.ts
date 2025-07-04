@@ -22,6 +22,7 @@ describe('application generator', () => {
     await applicationGenerator(tree, {
       name: 'myFirebaseApp',
     })
+
     const project = readProjectConfiguration(tree, 'my-firebase-app')
     expect(project.root).toEqual('apps/my-firebase-app')
     expect(project.targets).toEqual(

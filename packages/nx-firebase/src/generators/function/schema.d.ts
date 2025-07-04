@@ -1,53 +1,51 @@
 import { ProjectConfiguration } from '@nx/devkit'
 
-// export interface Schema {
-//   name: string;
-//   skipFormat?: boolean;
-//   skipPackageJson?: boolean;
-//   directory?: string;
-//   unitTestRunner?: 'jest' | 'none';
-//   e2eTestRunner?: 'jest' | 'none';
-//   linter?: Linter;
-//   tags?: string;
-//   frontendProject?: string;
-//   babelJest?: boolean;
-//   js?: boolean;
-//   pascalCaseFiles?: boolean;
-//   setParserOptionsProject?: boolean;
-//   standaloneConfig?: boolean;
-//   bundler?: 'esbuild' | 'webpack';
-//   framework?: NodeJsFrameWorks;
-//   port?: number;
-//   rootProject?: boolean;
-//   docker?: boolean;
-//   isNest?: boolean;
-// }
-
-export interface Schema {
-  // standard nx generator options
+/**
+ * For the `@nx/node:application` generator:
+ *
+ * - unitTestRunner is always jest
+ * - bundler is always esbuild
+ * - linter is always eslint
+ */
+export interface FunctionGeneratorSchema {
+  /*  --- standard @nx project generator options ---*/
+  /** The name of the functions application. */
   name: string
+  /** A directory where the application is placed. */
   directory?: string
+  /** Add tags to the project (used for linting). */
   tags?: string
+  /* --- extra options for nx-firebase:function generator --- */
   rootProject?: boolean
 
-  // subset of @nx/node:application options that we forward to node app generator
+  /* --- Subset of `@nx/node:application` options that we forward to node app generator --- */
+  /** */
   setParserOptionsProject?: boolean
+  /** */
   skipFormat?: boolean
-  // unitTestRunner is always jest
-  // bundler is always esbuild
-  // linter is always eslint
+  /** Enable TS strict compiler options. */
+  strict?: boolean
 
-  // nx-firebase:function generator specific options
+  /* --- extra options for nx-firebase:function generator --- */
+  /** */
   app: string
+  /** Supported NodeJS runtime. */
   runTime?: '18' | '20' | '22'
+  /** ESLint format. */
   format?: 'esm' | 'cjs'
 }
 
-interface NormalizedSchema extends Schema {
+interface FunctionGeneratorNormalizedSchema extends FunctionGeneratorSchema {
+  /** */
+  isUsingTsSolutionConfig: boolean
+  /** */
   projectName: string
+  /** */
   projectRoot: string
+  /** */
   parsedTags: string[]
-
+  /** */
   firebaseConfigName: string
+  /** */
   firebaseAppProject: ProjectConfiguration
 }

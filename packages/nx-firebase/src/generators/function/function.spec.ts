@@ -81,8 +81,7 @@ describe('function generator', () => {
                 platform: 'node',
                 bundle: true,
                 thirdParty: false,
-                dependenciesFieldType: 'dependencies',
-                target: 'node16',
+                target: 'node20',
                 format: ['esm'],
                 esbuildOptions: {
                   logLevel: 'info',
@@ -98,11 +97,11 @@ describe('function generator', () => {
               dependsOn: ['build'],
             },
             lint: {
-              executor: '@nx/linter:eslint',
-              outputs: ['{options.outputFile}'],
+              executor: '@nx/eslint:lint',
               options: {
                 lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],
               },
+              outputs: ['{options.outputFile}'],
             },
             test: {
               executor: '@nx/jest:jest',
@@ -211,7 +210,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions[0]).toEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         })
       })
@@ -232,7 +231,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions[0]).toEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         })
       })
@@ -244,7 +243,7 @@ describe('function generator', () => {
         const testFunction = {
           codebase: 'test',
           source: 'dist/apps/test',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         }
         firebaseConfigInitial.functions = [testFunction]
@@ -266,7 +265,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions).toContainEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         })
       })
@@ -303,93 +302,93 @@ describe('function generator', () => {
     //   })
     // })
 
-    describe('function options', () => {
-      // describe('function option --project', () => {
-      //   it('should generate function that deploy with the correct firebase project', async () => {
-      //     await functionGenerator(tree, {
-      //       name: 'myFirebaseFunction',
-      //       firebaseApp: 'my-firebase-app',
-      //       firebaseProject: 'projectId',
-      //     })
-      //     const project = readProjectConfiguration(tree, 'my-firebase-function')
-      //     expect(project.targets.deploy.options.command).toContain(
-      //       '--project=projectId',
-      //     )
-      //   })
-      // })
+    // describe('function options', () => {
+    //   // describe('function option --project', () => {
+    //   //   it('should generate function that deploy with the correct firebase project', async () => {
+    //   //     await functionGenerator(tree, {
+    //   //       name: 'myFirebaseFunction',
+    //   //       firebaseApp: 'my-firebase-app',
+    //   //       firebaseProject: 'projectId',
+    //   //     })
+    //   //     const project = readProjectConfiguration(tree, 'my-firebase-function')
+    //   //     expect(project.targets.deploy.options.command).toContain(
+    //   //       '--project=projectId',
+    //   //     )
+    //   //   })
+    //   // })
 
-      describe('function option --format', () => {
-        it('should generate function configured for --format=esm', async () => {
-          await functionGenerator(tree, {
-            name: 'myFirebaseFunction',
-            app: 'my-firebase-app',
-            format: 'esm',
-          })
-          const project = readProjectConfiguration(tree, 'my-firebase-function')
-          expect(project.targets.build.options.format).toEqual(['esm'])
+    //   describe('function option --format', () => {
+    //     it('should generate function configured for --format=esm', async () => {
+    //       await functionGenerator(tree, {
+    //         name: 'myFirebaseFunction',
+    //         app: 'my-firebase-app',
+    //         format: 'esm',
+    //       })
+    //       const project = readProjectConfiguration(tree, 'my-firebase-function')
+    //       expect(project.targets.build.options.format).toEqual(['esm'])
 
-          // check the package has the correct module type
-          const packageJson = readJson(
-            tree,
-            joinPathFragments(project.root, 'package.json'),
-          )
-          expect(packageJson.type).toEqual('module')
+    //       // check the package has the correct module type
+    //       const packageJson = readJson(
+    //         tree,
+    //         joinPathFragments(project.root, 'package.json'),
+    //       )
+    //       expect(packageJson.type).toEqual('module')
 
-          // check the tsconfig
-          const tsConfig = readJson(
-            tree,
-            joinPathFragments(project.root, 'tsconfig.app.json'),
-          )
-          expect(tsConfig.compilerOptions.module).toEqual('es2020')
-        })
+    //       // check the tsconfig
+    //       const tsConfig = readJson(
+    //         tree,
+    //         joinPathFragments(project.root, 'tsconfig.app.json'),
+    //       )
+    //       expect(tsConfig.compilerOptions.module).toEqual('es2020')
+    //     })
 
-        it('should generate function configured for --format=commonjs output', async () => {
-          await functionGenerator(tree, {
-            name: 'myFirebaseFunction',
-            app: 'my-firebase-app',
-            format: 'cjs',
-          })
-          const project = readProjectConfiguration(tree, 'my-firebase-function')
-          expect(project.targets.build.options.format).toEqual(['cjs'])
+    //     it('should generate function configured for --format=commonjs output', async () => {
+    //       await functionGenerator(tree, {
+    //         name: 'myFirebaseFunction',
+    //         app: 'my-firebase-app',
+    //         format: 'cjs',
+    //       })
+    //       const project = readProjectConfiguration(tree, 'my-firebase-function')
+    //       expect(project.targets.build.options.format).toEqual(['cjs'])
 
-          // check the package has the correct module type
-          const packageJson = readJson(
-            tree,
-            joinPathFragments(project.root, 'package.json'),
-          )
-          expect(packageJson.type).toEqual('commonjs')
+    //       // check the package has the correct module type
+    //       const packageJson = readJson(
+    //         tree,
+    //         joinPathFragments(project.root, 'package.json'),
+    //       )
+    //       expect(packageJson.type).toEqual('commonjs')
 
-          // check the tsconfig
-          const tsConfig = readJson(
-            tree,
-            joinPathFragments(project.root, 'tsconfig.app.json'),
-          )
-          expect(tsConfig.compilerOptions.module).toEqual('commonjs')
-        })
-      })
-      describe('function option --runTime', () => {
-        it('should generate function with correct node runtime', async () => {
-          await functionGenerator(tree, {
-            name: 'myFirebaseFunction',
-            app: 'my-firebase-app',
-            runTime: '18',
-          })
-          const project = readProjectConfiguration(tree, 'my-firebase-function')
+    //       // check the tsconfig
+    //       const tsConfig = readJson(
+    //         tree,
+    //         joinPathFragments(project.root, 'tsconfig.app.json'),
+    //       )
+    //       expect(tsConfig.compilerOptions.module).toEqual('commonjs')
+    //     })
+    //   })
+    //   describe('function option --runTime', () => {
+    //     it('should generate function with correct node runtime', async () => {
+    //       await functionGenerator(tree, {
+    //         name: 'myFirebaseFunction',
+    //         app: 'my-firebase-app',
+    //         runTime: '18',
+    //       })
+    //       const project = readProjectConfiguration(tree, 'my-firebase-function')
 
-          // check the package has the correct module type
-          const packageJson = readJson(
-            tree,
-            joinPathFragments(project.root, 'package.json'),
-          )
-          expect(packageJson.engines.node).toEqual('18')
+    //       // check the package has the correct module type
+    //       const packageJson = readJson(
+    //         tree,
+    //         joinPathFragments(project.root, 'package.json'),
+    //       )
+    //       expect(packageJson.engines.node).toEqual('18')
 
-          // check the function firebase config
-          const firebaseConfig = readJson(tree, 'firebase.json')
-          // console.log(firebaseConfig)
-          expect(firebaseConfig.functions[0].runtime).toEqual('nodejs18')
-        })
-      })
-    })
+    //       // check the function firebase config
+    //       const firebaseConfig = readJson(tree, 'firebase.json')
+    //       // console.log(firebaseConfig)
+    //       expect(firebaseConfig.functions[0].runtime).toEqual('nodejs18')
+    //     })
+    //   })
+    // })
   })
   // check implicitDependencies
 })

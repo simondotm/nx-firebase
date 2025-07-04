@@ -141,7 +141,6 @@ Functions use `esbuild` to compile & bundle the code.
         "platform": "node",
         "bundle": true,
         "thirdParty": false,
-        "dependenciesFieldType": "dependencies",
         "target": "node16",
         "format": ["esm"],
         "esbuildOptions": {

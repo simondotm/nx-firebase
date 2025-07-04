@@ -63,9 +63,9 @@ export function addDependencies(tree: Tree): GeneratorCallback {
         `^${packageVersions.googleCloudFunctionsFramework}`,
       )
     ) {
-      logger.info(
-        `This workspace is using pnpm, adding '@google-cloud/functions-framework' dependency for firebase functions compatibility\nSee https://github.com/firebase/firebase-tools/issues/5911#issuecomment-1730263400\n\n`,
-      )
+      // logger.info(
+      //   `This workspace is using pnpm, adding '@google-cloud/functions-framework' dependency for firebase functions compatibility\nSee https://github.com/firebase/firebase-tools/issues/5911#issuecomment-1730263400\n\n`,
+      // )
     }
   }
 

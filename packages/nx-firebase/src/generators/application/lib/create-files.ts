@@ -1,6 +1,6 @@
 import { generateFiles, joinPathFragments, Tree } from '@nx/devkit'
 
-import type { NormalizedSchema } from '../schema'
+import type { ApplicationGeneratorNormalizedSchema } from '../schema'
 
 /**
  * Generate the firebase app specific files
@@ -8,7 +8,10 @@ import type { NormalizedSchema } from '../schema'
  * @param tree
  * @param options
  */
-export function createFiles(tree: Tree, options: NormalizedSchema): void {
+export function createFiles(
+  tree: Tree,
+  options: ApplicationGeneratorNormalizedSchema,
+): void {
   const firebaseAppConfig = options.firebaseConfigName
 
   // Firebase SDK firestore.rules template has a placeholder for the date 30 days from now

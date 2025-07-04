@@ -6,7 +6,7 @@ import {
   generateFiles,
   joinPathFragments,
 } from '@nx/devkit'
-import type { NormalizedSchema } from '../schema'
+import type { FunctionGeneratorNormalizedSchema } from '../schema'
 import { packageVersions } from '../../../__generated__/nx-firebase-versions'
 
 /**
@@ -15,7 +15,10 @@ import { packageVersions } from '../../../__generated__/nx-firebase-versions'
  * @param host
  * @param options
  */
-export function createFiles(host: Tree, options: NormalizedSchema): void {
+export function createFiles(
+  host: Tree,
+  options: FunctionGeneratorNormalizedSchema,
+): void {
   const firebaseAppConfig = options.firebaseConfigName
   const firebaseAppConfigPath = joinPathFragments(
     offsetFromRoot(options.projectRoot),

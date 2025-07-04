@@ -59,10 +59,9 @@ OR
 | `--app=<app-project-name>`  | required      | the firebase app this function will be a dependency of     |
 | `--directory=dir`           | optional      | the directory this function will be located in             |
 | `--format=<'cjs' or 'esm'>` | default 'esm' | specify if esbuild should generated commonJs or ES6 output |
-| `--runTime=<node versions>`            | optional      | the nodejs runtime you wish to use for this function - 14, 16, 18, 20 |
+| `--runTime=<node versions>` | optional      | the nodejs runtime you wish to use for this function - 18, 20, 22 |
 | `--tags`                    | optional      | tags to set on the new project                         |
 | `--setParserOptionsProject` | optional      | set the parserOptions.project in the tsconfig.json file |
-| `--projectNameAndRootFormat` | optional | `derived` or `as-provided` (see Nx docs for [projectNameAndRootFormat](https://nx.dev/nx-api/node/generators/application#projectnameandrootformat)) |
 
 
 ## Building a Firebase function

@@ -49,7 +49,6 @@ const pluginPath = 'dist/packages/nx-firebase'
 const workspaceLayout = {
   appsDir: 'apps',
   libsDir: 'libs',
-  projectNameAndRootFormat: 'derived',
 }
 
 describe('nx-firebase e2e', () => {

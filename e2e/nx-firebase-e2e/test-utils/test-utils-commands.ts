@@ -113,7 +113,7 @@ export async function libGeneratorAsync(
 ) {
   testDebug(`- libGeneratorAsync ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(
-    `g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`,
+    `g @nx/js:lib ${projectData.name} --directory=${projectData.directory} ${params}`,
   )
   return result
 }

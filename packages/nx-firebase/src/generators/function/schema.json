@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/schema",
+  "$schema": "https://json-schema.org/schema",
   "$id": "NxFirebaseFunctionGenerator",
   "title": "Nx Firebase Function Options Schema",
   "description": "Nx Firebase Function Options Schema.",
@@ -20,15 +20,15 @@
       "type": "string",
       "alias": "d"
     },
+    "app": {
+      "description": "The name of the parent Nx firebase application project this function will be added to.",
+      "type": "string",
+      "x-prompt": "Which firebase Nx application project will this function be created for?"
+    },
     "tags": {
       "type": "string",
       "description": "Add tags to the project (used for linting)",
       "alias": "t"
-    },
-    "projectNameAndRootFormat": {
-      "description": "Whether to generate the project name and root directory as provided (`as-provided`) or generate them composing their values and taking the configured layout into account (`derived`).",
-      "type": "string",
-      "enum": ["as-provided", "derived"]
     },
     "setParserOptionsProject": {
       "type": "boolean",
@@ -40,16 +40,16 @@
       "type": "boolean",
       "default": false
     },
+    "strict": {
+      "type": "boolean",
+      "description": "Whether to enable tsconfig strict mode or not.",
+      "default": true
+    },
     "format": {
       "description": "The module format for this function (esm or cjs).",
       "type": "string",
       "enum": ["esm", "cjs"],
       "default": "esm"
-    },
-    "app": {
-      "description": "The name of the parent Nx firebase application project this function will be added to.",
-      "type": "string",
-      "x-prompt": "Which firebase Nx application project will this function be created for?"
     },
     "runTime": {
       "description": "The node runtime target for this function.",

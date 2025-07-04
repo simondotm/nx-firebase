@@ -3,16 +3,20 @@ import {
   readProjectConfiguration,
   updateProjectConfiguration,
 } from '@nx/devkit'
-import type { NormalizedSchema } from '../schema'
+import type { FunctionGeneratorNormalizedSchema } from '../schema'
 import type { FunctionAssetsEntry, FunctionAssetsGlob } from '../../../types'
 
-export function updateProject(host: Tree, options: NormalizedSchema): void {
+export function updateProject(
+  host: Tree,
+  options: FunctionGeneratorNormalizedSchema,
+): void {
   const project = readProjectConfiguration(host, options.projectName)
 
   const firebaseAppProject = options.firebaseAppProject
 
-  // replace the default node build target with a simplified version
-  // we dont need dev/production build configurations for firebase functions since its a confined secure environment
+  /** replace the default node build target with a simplified version we dont
+   * need dev/production build configurations for firebase functions since its a
+   * confined secure environment. */
   project.targets.build = {
     executor: '@nx/esbuild:esbuild',
     outputs: ['{options.outputPath}'],
@@ -26,9 +30,8 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
       platform: 'node',
       bundle: true,
       thirdParty: false,
-      dependenciesFieldType: 'dependencies',
-      target: 'node16',
-      format: [options.format || 'esm'], // default for esbuild is esm
+      target: 'node20',
+      format: [options.format ?? 'esm'], // default for esbuild is esm
       esbuildOptions: {
         logLevel: 'info',
       },
