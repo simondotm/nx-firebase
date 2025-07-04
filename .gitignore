@@ -42,5 +42,8 @@ Thumbs.db
 e2e.log
 
 .nx/cache
+.nx/workspace-data
 
 .nx-firebase
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
