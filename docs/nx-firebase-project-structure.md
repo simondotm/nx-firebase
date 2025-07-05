@@ -141,7 +141,7 @@ Functions use `esbuild` to compile & bundle the code.
         "platform": "node",
         "bundle": true,
         "thirdParty": false,
-        "target": "node16",
+        "target": "node18",
         "format": ["esm"],
         "esbuildOptions": {
           "logLevel": "info"
@@ -149,7 +149,7 @@ Functions use `esbuild` to compile & bundle the code.
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/your-firebase-function-project-name/**/*.ts"]
