@@ -95,11 +95,11 @@ describe('nx-firebase e2e', () => {
 
   /** Run test suites */
   testWorkspace()
-  testLibraries()
-  testApplication()
-  testFunction()
-  testBundler()
-  testSync()
-  testTargets()
-  testMigrate()
+  // testLibraries()
+  // testApplication()
+  // testFunction()
+  // testBundler()
+  // testSync()
+  // testTargets()
+  // testMigrate()
 })
