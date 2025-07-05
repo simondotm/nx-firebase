@@ -10,9 +10,24 @@
         "jestConfig": "e2e/nx-firebase-e2e/jest.config.js",
         "runInBand": true
       },
-      "dependsOn": ["nx-firebase:build"]
+      "dependsOn": [
+        "nx-firebase:build"
+      ]
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "e2e/nx-firebase-e2e/**/*.ts"
+        ]
+      }
     }
   },
   "tags": [],
-  "implicitDependencies": ["nx-firebase"]
+  "implicitDependencies": [
+    "nx-firebase"
+  ]
 }

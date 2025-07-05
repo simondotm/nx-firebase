@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   displayName: 'nx-firebase-e2e',
   preset: '../../jest.preset.js',
   globals: {},
