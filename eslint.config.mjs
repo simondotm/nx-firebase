@@ -27,6 +27,7 @@ export default [
       import: eslintPluginImport,
     },
     rules: {
+      '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-restricted-types': 'warn',
       '@typescript-eslint/no-var-requires': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn',

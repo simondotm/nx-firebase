@@ -8,7 +8,7 @@ import { detectPackageManager } from '@nx/devkit'
 //--------------------------------------------------------------------------------------------------
 export function testWorkspace() {
   describe('workspace setup', () => {
-    it('should create workspace without firebase dependencies', async () => {
+    it('should create workspace without firebase dependencies', () => {
       // test that generator adds dependencies to workspace package.json
       // should not be initially set
       const packageJson = readJson(`package.json`)
@@ -21,7 +21,7 @@ export function testWorkspace() {
       expect(packageJson.devDependencies['firebase-tools']).toBeUndefined()
     })
 
-    it('should create workspace without nx dependencies', async () => {
+    it('should create workspace without nx dependencies', () => {
       // test that generator adds dependencies to workspace package.json
       // should not be initially set
       const packageJson = readJson(`package.json`)

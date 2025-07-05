@@ -59,9 +59,8 @@ export function createFiles(
   // set dependencies for the firebase function
   const firebasePackageDependencies = {}
   if (detectPackageManager() === 'pnpm') {
-    firebasePackageDependencies[
-      '@google-cloud/functions-framework'
-    ] = `^${packageVersions.googleCloudFunctionsFramework}`
+    firebasePackageDependencies['@google-cloud/functions-framework'] =
+      `^${packageVersions.googleCloudFunctionsFramework}`
   }
 
   if (Object.keys(firebasePackageDependencies).length > 0) {

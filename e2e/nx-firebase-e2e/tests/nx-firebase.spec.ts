@@ -70,18 +70,18 @@ describe('nx-firebase e2e', () => {
       json['tasksRunnerOptions'] ??= {
         default: {
           useDaemonProcess: false,
-        }
-      };
+        },
+      }
       return JSON.stringify(json, null, 2)
     })
     /* ensure daemon is off for e2e test */
-    runNxCommandAsync('reset')
+    await runNxCommandAsync('reset')
   }, JEST_TIMEOUT)
 
-  afterAll(() => {
+  afterAll(async () => {
     // `nx reset` kills the daemon, and performs
     // some work which can help clean up e2e leftovers
-    runNxCommandAsync('reset')
+    await runNxCommandAsync('reset')
   })
 
   // test to ensure workspace setup is working
@@ -95,11 +95,11 @@ describe('nx-firebase e2e', () => {
 
   /** Run test suites */
   testWorkspace()
-  // testLibraries()
-  // testApplication()
-  // testFunction()
-  // testBundler()
-  // testSync()
-  // testTargets()
-  // testMigrate()
+  testLibraries()
+  testApplication()
+  testFunction()
+  testBundler()
+  testSync()
+  testTargets()
+  testMigrate()
 })

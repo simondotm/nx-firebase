@@ -1,6 +1,5 @@
 import {
   getProjects,
-  joinPathFragments,
   readJson,
   readProjectConfiguration,
   Tree,

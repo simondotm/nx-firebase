@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'nx-firebase',
   preset: '../../jest.preset.js',
