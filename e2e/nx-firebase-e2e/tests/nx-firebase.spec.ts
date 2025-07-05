@@ -61,16 +61,20 @@ describe('nx-firebase e2e', () => {
   beforeAll(async () => {
     ensureNxProject(pluginName, pluginPath)
 
-    // Nx 16.8.1 defaults to as-provided, lets override this for my own sanity
+    /** Nx 16.8.1 defaults to as-provided, lets override this for my own sanity */
     updateFile('nx.json', (text) => {
       const json = JSON.parse(text)
       console.debug(json)
       json.workspaceLayout = workspaceLayout
       // Disabling daemon for e2e tests as well, even though CI is enabled
-      json.tasksRunnerOptions.default.useDaemonProcess = false
+      json['tasksRunnerOptions'] ??= {
+        default: {
+          useDaemonProcess: false,
+        }
+      };
       return JSON.stringify(json, null, 2)
     })
-    // ensure daemon is off for e2e test
+    /* ensure daemon is off for e2e test */
     runNxCommandAsync('reset')
   }, JEST_TIMEOUT)
 
@@ -89,7 +93,7 @@ describe('nx-firebase e2e', () => {
     })
   })
 
-  // run test suites
+  /** Run test suites */
   testWorkspace()
   testLibraries()
   testApplication()
