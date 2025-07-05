@@ -41,10 +41,10 @@ export function expectedFunctionProjectTargets(
     },
     lint: {
       executor: '@nx/eslint:lint',
-      outputs: ['{options.outputFile}'],
-      options: {
-        lintFilePatterns: [`${functionProject.projectDir}/**/*.ts`],
-      },
+      // outputs: ['{options.outputFile}'],
+      // options: {
+      //   lintFilePatterns: [`${functionProject.projectDir}/**/*.ts`],
+      // },
     },
     test: {
       executor: '@nx/jest:jest',
@@ -53,12 +53,12 @@ export function expectedFunctionProjectTargets(
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
         passWithNoTests: true,
       },
-      configurations: {
-        ci: {
-          ci: true,
-          codeCoverage: true,
-        },
-      },
+      // configurations: {
+      //   ci: {
+      //     ci: true,
+      //     codeCoverage: true,
+      //   },
+      // },
     },
   }
 }

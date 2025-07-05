@@ -18,8 +18,8 @@ const packageLockFile =
   packageManager === 'npm'
     ? 'package-lock.json'
     : packageManager === 'pnpm'
-    ? 'pnpm-lock.yaml'
-    : 'yarn.lock'
+      ? 'pnpm-lock.yaml'
+      : 'yarn.lock'
 
 function expectedFunctionFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir

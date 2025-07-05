@@ -6,6 +6,10 @@ import { initGenerator } from './init'
 import { gitIgnoreRules, nxIgnoreRules } from './lib'
 import { workspaceNxVersion } from '../../utils'
 
+/** Silence prettier v3 warnings until Jest v30 is supported by Nx. See:
+ * https://github.com/nrwl/nx/issues/26387#issuecomment-2163682690 */
+jest.mock('prettier', () => null)
+
 describe('init generator', () => {
   let tree: Tree
 

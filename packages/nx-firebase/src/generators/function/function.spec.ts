@@ -9,6 +9,17 @@ import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { functionGenerator } from './function'
 import applicationGenerator from '../application/application'
 
+/** Silence prettier v3 warnings until Jest v30 is supported by Nx. See:
+ * https://github.com/nrwl/nx/issues/26387#issuecomment-2163682690 */
+jest.mock('prettier', () => null)
+
+/**
+ * Seems like the default `@nx/node:application` generator does not populate
+ * the `test` and `lint` executors as before. Check out the source file:
+ *
+ * https://github.com/nrwl/nx/blob/666da3eaebbb50a11cd0c7a8517f7b74c9580e11/packages/node/src/generators/application/application.ts
+ */
+
 describe('function generator', () => {
   let tree: Tree
 
@@ -90,31 +101,30 @@ describe('function generator', () => {
             deploy: {
               executor: 'nx:run-commands',
               options: {
-                // command: `firebase deploy --config=firebase.json`,
                 command: `nx run my-firebase-app:deploy --only functions:my-firebase-function`,
               },
               dependsOn: ['build'],
             },
             lint: {
               executor: '@nx/eslint:lint',
-              options: {
-                lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],
-              },
-              outputs: ['{options.outputFile}'],
+              // options: {
+              //   lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],
+              // },
+              // outputs: ['{options.outputFile}'],
             },
             test: {
-              executor: '@nx/jest:jest',
-              outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
+              // executor: '@nx/jest:jest',
+              // outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
               options: {
-                jestConfig: 'apps/my-firebase-function/jest.config.ts',
+                // jestConfig: 'apps/my-firebase-function/jest.config.ts',
                 passWithNoTests: true,
               },
-              configurations: {
-                ci: {
-                  ci: true,
-                  codeCoverage: true,
-                },
-              },
+              // configurations: {
+              //   ci: {
+              //     ci: true,
+              //     codeCoverage: true,
+              //   },
+              // },
             },
           }),
         )

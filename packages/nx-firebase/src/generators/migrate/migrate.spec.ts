@@ -6,6 +6,10 @@ import generator from './migrate'
 
 // migrate is tested in e2e.
 
+/** Silence prettier v3 warnings until Jest v30 is supported by Nx. See:
+ * https://github.com/nrwl/nx/issues/26387#issuecomment-2163682690 */
+jest.mock('prettier', () => null)
+
 describe('migrate generator', () => {
   let tree: Tree
   // const options: MigrateGeneratorSchema = {}
