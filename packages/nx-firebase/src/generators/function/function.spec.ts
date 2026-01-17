@@ -98,7 +98,7 @@ describe('function generator', () => {
               dependsOn: ['build'],
             },
             lint: {
-              executor: '@nx/linter:eslint',
+              executor: '@nx/eslint:eslint',
               outputs: ['{options.outputFile}'],
               options: {
                 lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],

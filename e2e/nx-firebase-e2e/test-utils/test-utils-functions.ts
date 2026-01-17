@@ -41,7 +41,7 @@ export function expectedFunctionProjectTargets(
       dependsOn: ['build'],
     },
     lint: {
-      executor: '@nx/linter:eslint',
+      executor: '@nx/eslint:eslint',
       outputs: ['{options.outputFile}'],
       options: {
         lintFilePatterns: [`${functionProject.projectDir}/**/*.ts`],

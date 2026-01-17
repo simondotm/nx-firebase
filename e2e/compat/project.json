@@ -13,7 +13,8 @@
         "tsConfig": "e2e/compat/tsconfig.app.json",
         "assets": ["e2e/compat/src/assets"],
         "target": "node",
-        "compiler": "tsc"
+        "compiler": "tsc",
+        "webpackConfig": "e2e/compat/webpack.config.js"
       },
       "configurations": {
         "production": {
@@ -36,18 +37,14 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["e2e/compat/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/e2e/compat"],
       "options": {
-        "jestConfig": "e2e/compat/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "e2e/compat/jest.config.ts"
       }
     }
   },

@@ -150,7 +150,7 @@ Functions use `esbuild` to compile & bundle the code.
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/your-firebase-function-project-name/**/*.ts"]

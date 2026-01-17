@@ -36,18 +36,14 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["packages/nx-firebase/**/*.ts"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/packages/nx-firebase"],
       "options": {
-        "jestConfig": "packages/nx-firebase/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "packages/nx-firebase/jest.config.ts"
       }
     }
   },
