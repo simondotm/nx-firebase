@@ -55,7 +55,7 @@
       "description": "The node runtime target for this function.",
       "type": "string",
       "enum": ["16", "18", "20"],
-      "default": "16"
+      "default": "18"
     }
   },
   "additionalProperties": false,
