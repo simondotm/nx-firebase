@@ -27,7 +27,7 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
       bundle: true,
       thirdParty: false,
       dependenciesFieldType: 'dependencies',
-      target: 'node16',
+      target: `node${options.runTime}`,
       format: [options.format || 'esm'], // default for esbuild is esm
       esbuildOptions: {
         logLevel: 'info',
