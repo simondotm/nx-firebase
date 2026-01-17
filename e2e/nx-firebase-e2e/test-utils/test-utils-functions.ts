@@ -27,7 +27,7 @@ export function expectedFunctionProjectTargets(
         dependenciesFieldType: 'dependencies',
         format: ['esm'],
         thirdParty: false,
-        target: 'node16',
+        target: 'node18',
         esbuildOptions: {
           logLevel: 'info',
         },
@@ -41,24 +41,13 @@ export function expectedFunctionProjectTargets(
       dependsOn: ['build'],
     },
     lint: {
-      executor: '@nx/eslint:eslint',
-      outputs: ['{options.outputFile}'],
-      options: {
-        lintFilePatterns: [`${functionProject.projectDir}/**/*.ts`],
-      },
+      executor: '@nx/eslint:lint',
     },
     test: {
       executor: '@nx/jest:jest',
       outputs: [`{workspaceRoot}/coverage/{projectRoot}`],
       options: {
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
-        passWithNoTests: true,
-      },
-      configurations: {
-        ci: {
-          ci: true,
-          codeCoverage: true,
-        },
       },
     },
   }
