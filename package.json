@@ -10,6 +10,7 @@
     "build": "nx run nx-firebase:build",
     "test": "nx run nx-firebase:test",
     "lint": "nx run nx-firebase:lint",
+    "pree2e": "pnpm exec nx reset && rm -rf dist/packages/nx-firebase tmp && pnpm build",
     "e2e": "nx run nx-firebase-e2e:e2e --silent=false --bail=true",
     "release": "cd packages/nx-firebase && npm version",
     "release-help": "echo `npm run version -- v1.2.3` to set package version & commit tag",
