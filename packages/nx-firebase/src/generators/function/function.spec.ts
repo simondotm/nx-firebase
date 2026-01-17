@@ -82,7 +82,7 @@ describe('function generator', () => {
                 bundle: true,
                 thirdParty: false,
                 dependenciesFieldType: 'dependencies',
-                target: 'node16',
+                target: 'node18',
                 format: ['esm'],
                 esbuildOptions: {
                   logLevel: 'info',
