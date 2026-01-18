@@ -61,10 +61,20 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
   // Instead we serve at the firebase app project
   delete project.targets.serve
 
-  // Nx 17+ no longer includes passWithNoTests in the test target by default
-  // Add it so that functions without tests don't fail when running the app's test target
-  if (project.targets.test?.options) {
-    project.targets.test.options.passWithNoTests = true
+  // In Nx 18+, lint target is inferred by @nx/eslint/plugin
+  delete project.targets.lint
+
+  // Create explicit test target with passWithNoTests so functions without tests don't fail
+  // when running the firebase app's test target. passWithNoTests is a CLI option,
+  // not a jest.config option, so we need to set it in the target.
+  // In Nx 18+, the test target may not exist (inferred by plugin), so we create it.
+  project.targets.test = {
+    executor: '@nx/jest:jest',
+    outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
+    options: {
+      jestConfig: `${options.projectRoot}/jest.config.ts`,
+      passWithNoTests: true,
+    },
   }
 
   updateProjectConfiguration(host, options.projectName, project)

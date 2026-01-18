@@ -121,6 +121,8 @@ export async function applicationGenerator(
     targets: {
       build: {
         executor: 'nx:run-commands',
+        // Build all implicit dependencies (firebase functions) first
+        dependsOn: ['^build'],
         options: {
           command: `echo Build succeeded.`,
         },

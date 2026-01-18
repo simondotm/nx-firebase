@@ -5,6 +5,7 @@ export function expectedAppProjectTargets(appProject: ProjectData) {
   return {
     build: {
       executor: 'nx:run-commands',
+      dependsOn: ['^build'],
       options: {
         command: `echo Build succeeded.`,
       },

@@ -40,12 +40,11 @@ export function expectedFunctionProjectTargets(
       },
       dependsOn: ['build'],
     },
-    lint: {
-      executor: '@nx/eslint:lint',
-    },
+    // In Nx 18+, lint is inferred by plugins, but test target is kept
+    // with passWithNoTests so functions without tests don't fail
     test: {
       executor: '@nx/jest:jest',
-      outputs: [`{workspaceRoot}/coverage/{projectRoot}`],
+      outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
       options: {
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
         passWithNoTests: true,
