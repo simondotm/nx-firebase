@@ -4,7 +4,7 @@ export default {
   preset: '../../jest.preset.js',
   globals: {},
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   transform: {
     '^.+\\.[tj]s$': [
       'ts-jest',
