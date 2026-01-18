@@ -1,6 +1,6 @@
-# @simondotm/nx-firebase ![actions](https://github.com/simondotm/nx-firebase/actions/workflows/ci.yml/badge.svg) ![nx](https://img.shields.io/badge/Nx-v16.8.1-blue) ![npm](https://img.shields.io/npm/v/@simondotm/nx-firebase) ![downloads](https://img.shields.io/npm/dw/@simondotm/nx-firebase.svg)
+# @simondotm/nx-firebase ![actions](https://github.com/simondotm/nx-firebase/actions/workflows/ci.yml/badge.svg) ![npm](https://img.shields.io/npm/v/@simondotm/nx-firebase) ![downloads](https://img.shields.io/npm/dw/@simondotm/nx-firebase.svg)
 
-A plugin for [Nx](https://nx.dev) v16.8.1+ that integrates Firebase workflows in an Nx monorepo workspace.
+A plugin for [Nx](https://nx.dev) that integrates Firebase workflows in an Nx monorepo workspace.
 
 * Easily generate Firebase applications and functions
 * Uses `esbuild` for fast Firebase function builds so you can easily create & import shared Nx libraries with the benefits of tree-shaking
