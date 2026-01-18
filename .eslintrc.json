@@ -41,7 +41,7 @@
         "@typescript-eslint/await-thenable": "error",
         "@typescript-eslint/no-namespace": "warn",
         "@typescript-eslint/no-this-alias": "warn",
-        "@typescript-eslint/no-duplicate-imports": "error",        
+        "no-duplicate-imports": "error",
         "@typescript-eslint/no-unused-vars": "off",
         "unused-imports/no-unused-imports": "warn",
         "unused-imports/no-unused-vars": [

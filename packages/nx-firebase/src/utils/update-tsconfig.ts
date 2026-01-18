@@ -1,5 +1,4 @@
-import type { Tree } from '@nx/devkit'
-import { joinPathFragments, updateJson } from '@nx/devkit'
+import { type Tree, joinPathFragments, updateJson } from '@nx/devkit'
 import { packageVersions } from '../__generated__/nx-firebase-versions'
 
 // https://stackoverflow.com/questions/59787574/typescript-tsconfig-settings-for-node-js-12
