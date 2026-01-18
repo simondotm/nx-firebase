@@ -28,6 +28,7 @@ describe('application generator', () => {
       expect.objectContaining({
         build: {
           executor: 'nx:run-commands',
+          dependsOn: ['^build'],
           options: {
             command: `echo Build succeeded.`,
           },

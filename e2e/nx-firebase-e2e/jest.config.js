@@ -2,6 +2,7 @@ module.exports = {
   displayName: 'nx-firebase-e2e',
   preset: '../../jest.preset.js',
   globals: {},
+  testEnvironment: 'node',  
   transform: {
     '^.+\\.[tj]s$': [
       'ts-jest',

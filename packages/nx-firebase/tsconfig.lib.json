@@ -10,5 +10,5 @@
     "../archived-nx-firebase/src/generators/init/generator.spec.ts",
     "src/generators/application/files/src/index.ts__template__"
   ],
-  "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["jest.config.ts", "jest.setup.ts", "**/*.spec.ts", "**/*.test.ts"]
 }
