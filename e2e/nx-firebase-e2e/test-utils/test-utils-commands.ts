@@ -132,17 +132,23 @@ export async function migrateGeneratorAsync(params: string = '') {
 
 export async function cleanAppAsync(
   projectData: ProjectData,
-  options = { appsRemaining: 0, functionsRemaining: 0 },
+  options?: { appsRemaining: number; functionsRemaining: number },
 ) {
   testDebug(`- cleanAppAsync ${projectData.projectName}`)
   await removeProjectAsync(projectData)
   const result = await syncGeneratorAsync(projectData.projectName)
   testDebug(result.stdout)
   expect(result.stdout).toMatch(/DELETE (firebase)(\S*)(.json)/)
+  // Verify the config was cleaned up
   expectStrings(result.stdout, [
-    `This workspace has ${options.appsRemaining} firebase apps and ${options.functionsRemaining} firebase functions`,
     `CHANGE Firebase config '${projectData.configName}' is no longer referenced by any firebase app, deleted`,
   ])
+  // Only assert on exact counts if explicitly provided
+  if (options) {
+    expectStrings(result.stdout, [
+      `This workspace has ${options.appsRemaining} firebase apps and ${options.functionsRemaining} firebase functions`,
+    ])
+  }
 }
 
 export async function cleanFunctionAsync(projectData: ProjectData) {

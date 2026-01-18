@@ -82,7 +82,7 @@ describe('function generator', () => {
                 bundle: true,
                 thirdParty: false,
                 dependenciesFieldType: 'dependencies',
-                target: 'node16',
+                target: 'node18',
                 format: ['esm'],
                 esbuildOptions: {
                   logLevel: 'info',
@@ -98,11 +98,7 @@ describe('function generator', () => {
               dependsOn: ['build'],
             },
             lint: {
-              executor: '@nx/linter:eslint',
-              outputs: ['{options.outputFile}'],
-              options: {
-                lintFilePatterns: ['apps/my-firebase-function/**/*.ts'],
-              },
+              executor: '@nx/eslint:lint',
             },
             test: {
               executor: '@nx/jest:jest',
@@ -110,12 +106,6 @@ describe('function generator', () => {
               options: {
                 jestConfig: 'apps/my-firebase-function/jest.config.ts',
                 passWithNoTests: true,
-              },
-              configurations: {
-                ci: {
-                  ci: true,
-                  codeCoverage: true,
-                },
               },
             },
           }),
@@ -211,7 +201,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions[0]).toEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         })
       })
@@ -232,7 +222,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions[0]).toEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         })
       })
@@ -244,7 +234,7 @@ describe('function generator', () => {
         const testFunction = {
           codebase: 'test',
           source: 'dist/apps/test',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         }
         firebaseConfigInitial.functions = [testFunction]
@@ -266,7 +256,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions).toContainEqual({
           codebase: 'my-firebase-function',
           source: 'dist/apps/my-firebase-function',
-          runtime: `nodejs16`,
+          runtime: `nodejs18`,
           ignore: ['*.local'],
         })
       })

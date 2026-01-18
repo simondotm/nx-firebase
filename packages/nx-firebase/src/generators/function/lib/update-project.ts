@@ -27,7 +27,7 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
       bundle: true,
       thirdParty: false,
       dependenciesFieldType: 'dependencies',
-      target: 'node16',
+      target: `node${options.runTime}`,
       format: [options.format || 'esm'], // default for esbuild is esm
       esbuildOptions: {
         logLevel: 'info',
@@ -60,6 +60,12 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
   // No serve target for functions, since we may have multiple functions in a firebase project
   // Instead we serve at the firebase app project
   delete project.targets.serve
+
+  // Nx 17+ no longer includes passWithNoTests in the test target by default
+  // Add it so that functions without tests don't fail when running the app's test target
+  if (project.targets.test?.options) {
+    project.targets.test.options.passWithNoTests = true
+  }
 
   updateProjectConfiguration(host, options.projectName, project)
 
