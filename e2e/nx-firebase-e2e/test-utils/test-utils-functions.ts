@@ -48,6 +48,7 @@ export function expectedFunctionProjectTargets(
       outputs: [`{workspaceRoot}/coverage/{projectRoot}`],
       options: {
         jestConfig: `${functionProject.projectDir}/jest.config.ts`,
+        passWithNoTests: true,
       },
     },
   }

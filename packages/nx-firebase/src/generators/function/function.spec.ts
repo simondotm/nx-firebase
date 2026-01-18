@@ -105,6 +105,7 @@ describe('function generator', () => {
               outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
               options: {
                 jestConfig: 'apps/my-firebase-function/jest.config.ts',
+                passWithNoTests: true,
               },
             },
           }),

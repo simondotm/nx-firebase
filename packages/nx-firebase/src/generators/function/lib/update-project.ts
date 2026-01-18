@@ -61,6 +61,12 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
   // Instead we serve at the firebase app project
   delete project.targets.serve
 
+  // Nx 17+ no longer includes passWithNoTests in the test target by default
+  // Add it so that functions without tests don't fail when running the app's test target
+  if (project.targets.test?.options) {
+    project.targets.test.options.passWithNoTests = true
+  }
+
   updateProjectConfiguration(host, options.projectName, project)
 
   // Add function project as implicit dep of firebase app project
