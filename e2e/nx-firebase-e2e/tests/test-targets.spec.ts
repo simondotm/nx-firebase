@@ -18,6 +18,10 @@ beforeAll(() => {
   process.env['NX_DAEMON'] = 'false'
 })
 
+// Since targets is the last e2e test suite to run, we can disable cleanup here to leave the e2e
+// tmp workspace intact for inspection if needed.
+const ENABLE_CLEANUP = false
+
 //--------------------------------------------------------------------------------------------------
 // Test app targets
 //--------------------------------------------------------------------------------------------------
@@ -27,36 +31,39 @@ describe('nx-firebase app targets', () => {
   let currentFunctionData: ProjectData | null = null
   let currentFunctionData2: ProjectData | null = null
 
-  // Always run cleanup after each test, even on failure
-  afterEach(async () => {
-    // Clean up functions first (they depend on apps)
-    if (currentFunctionData2) {
-      try {
-        await cleanFunctionAsync(currentFunctionData2)
-      } catch (e) {
-        testDebug(`Function2 cleanup warning: ${(e as Error).message}`)
+  // Only cleanup if enabled
+  if (ENABLE_CLEANUP) {
+    // Always run cleanup after each test, even on failure
+    afterEach(async () => {
+      // Clean up functions first (they depend on apps)
+      if (currentFunctionData2) {
+        try {
+          await cleanFunctionAsync(currentFunctionData2)
+        } catch (e) {
+          testDebug(`Function2 cleanup warning: ${(e as Error).message}`)
+        }
+        currentFunctionData2 = null
       }
-      currentFunctionData2 = null
-    }
-    if (currentFunctionData) {
-      try {
-        await cleanFunctionAsync(currentFunctionData)
-      } catch (e) {
-        testDebug(`Function cleanup warning: ${(e as Error).message}`)
+      if (currentFunctionData) {
+        try {
+          await cleanFunctionAsync(currentFunctionData)
+        } catch (e) {
+          testDebug(`Function cleanup warning: ${(e as Error).message}`)
+        }
+        currentFunctionData = null
       }
-      currentFunctionData = null
-    }
-    // Then clean up app
-    if (currentAppData) {
-      try {
-        await cleanAppAsync(currentAppData)
-      } catch (e) {
-        testDebug(`App cleanup warning: ${(e as Error).message}`)
+      // Then clean up app
+      if (currentAppData) {
+        try {
+          await cleanAppAsync(currentAppData)
+        } catch (e) {
+          testDebug(`App cleanup warning: ${(e as Error).message}`)
+        }
+        currentAppData = null
       }
-      currentAppData = null
-    }
-  })
-
+    
+    })
+  }
   it('should run lint target for app', async () => {
     currentAppData = getProjectData('apps', uniq('firebaseTargetsApp'))
     currentFunctionData = getProjectData('apps', uniq('firebaseTargetsFunction'))
