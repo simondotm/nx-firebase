@@ -19,8 +19,8 @@ class CustomSequencer extends Sequencer {
       'test-function.spec.ts',
       'test-bundler.spec.ts',
       'test-sync.spec.ts',
-      'test-targets.spec.ts',
       'test-migrate.spec.ts',
+      'test-targets.spec.ts',
     ]
 
     const getOrder = (test) => {
