@@ -61,9 +61,6 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
   // Instead we serve at the firebase app project
   delete project.targets.serve
 
-  // In Nx 18+, lint target is inferred by @nx/eslint/plugin
-  delete project.targets.lint
-
   // Create explicit test target with passWithNoTests so functions without tests don't fail
   // when running the firebase app's test target. passWithNoTests is a CLI option,
   // not a jest.config option, so we need to set it in the target.
