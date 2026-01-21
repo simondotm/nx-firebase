@@ -85,6 +85,7 @@ describe('function generator', () => {
                 target: 'node18',
                 format: ['esm'],
                 esbuildOptions: {
+                  sourcemap: true,
                   logLevel: 'info',
                 },
               },
