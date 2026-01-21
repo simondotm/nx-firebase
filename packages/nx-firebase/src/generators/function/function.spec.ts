@@ -110,7 +110,9 @@ describe('function generator', () => {
           }),
         )
         expect(project.targets.serve).toBeUndefined()
-        expect(project.targets.lint).toBeUndefined()
+        expect(project.targets.lint).toEqual({
+          executor: '@nx/eslint:lint',
+        })
       })
 
       it('should update tags', async () => {
