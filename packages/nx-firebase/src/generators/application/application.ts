@@ -4,7 +4,6 @@ import {
   convertNxGenerator,
   runTasksInSerial,
   addProjectConfiguration,
-  names,
 } from '@nx/devkit'
 
 import { createFiles } from './lib'
@@ -17,23 +16,16 @@ import { determineProjectNameAndRootOptions } from '@nx/devkit/src/generators/pr
 export async function normalizeOptions(
   host: Tree,
   options: Schema,
-  callingGenerator = '@simondotm/nx-firebase:application',
 ): Promise<NormalizedSchema> {
-  const {
-    projectName: appProjectName,
-    projectRoot,
-    projectNameAndRootFormat,
-  } = await determineProjectNameAndRootOptions(host, {
-    name: options.name,
-    projectType: 'application',
-    directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
-    rootProject: options.rootProject,
-    callingGenerator,
-  })
+  // In Nx 20+, directory is required. If not provided, use name as directory.
+  const directory = options.directory ?? options.name
 
-  options.rootProject = projectRoot === '.'
-  options.projectNameAndRootFormat = projectNameAndRootFormat
+  const { projectName: appProjectName, projectRoot } =
+    await determineProjectNameAndRootOptions(host, {
+      name: options.name,
+      projectType: 'application',
+      directory,
+    })
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
@@ -67,7 +59,6 @@ export async function normalizeOptions(
 
   return {
     ...options,
-    name: names(options.name).fileName,
     projectName: appProjectName,
     projectRoot,
     parsedTags,
@@ -93,10 +84,7 @@ export async function applicationGenerator(
   host: Tree,
   schema: Schema,
 ): Promise<GeneratorCallback> {
-  const options = await normalizeOptions(host, {
-    projectNameAndRootFormat: 'derived',
-    ...schema,
-  })
+  const options = await normalizeOptions(host, schema)
   const initTask = await initGenerator(host, {})
 
   const firebaseCliProject = options.project
