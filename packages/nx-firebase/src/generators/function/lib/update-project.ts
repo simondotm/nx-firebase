@@ -61,8 +61,11 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
   // Instead we serve at the firebase app project
   delete project.targets.serve
 
-  // In Nx 18+, lint target is inferred by @nx/eslint/plugin
-  delete project.targets.lint
+  // Create explicit lint target to ensure consistent behavior regardless of
+  // workspace inference settings or @nx/eslint/plugin configuration
+  project.targets.lint = {
+    executor: '@nx/eslint:lint',
+  }
 
   // Create explicit test target with passWithNoTests so functions without tests don't fail
   // when running the firebase app's test target. passWithNoTests is a CLI option,

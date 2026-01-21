@@ -42,5 +42,6 @@ Thumbs.db
 e2e.log
 
 .nx/cache
+.nx/workspace-data
 
 .nx-firebase
