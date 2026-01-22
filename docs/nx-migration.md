@@ -10,11 +10,6 @@ From here, you can simply `nx build` and `nx deploy` your firebase application &
 
 ## Firebase SDK versions
 
-Which version of the Firebase CLI + SDK's you use will depend on your particular project requirements, and although generally the latest SDK's are widely compatible, you may need to experiment to find specific compatible versions:
+Which version of the Firebase CLI + SDK's you use will depend on your particular project requirements, and this plugin is not opinionated to any particular Firebase SDK.
 
-- If you are using Angular/AngularFire libraries, depending on your version of Angular
-- If you are using older runtimes than Node 16
-- If you are using ES modules or commonjs.
-- Use of at least Node 16 functions runtime is required for this plugin
-
-The `nx-firebase` plugin will install Firebase dependencies in the workspace if they are not already present, but it does not require, enforce or change a specific version beyond that initial setup, so you are free to `npm install` whichever versions of the firebase SDK packages you need.
+The `nx-firebase` plugin app generator will install Firebase dependencies in the workspace if they are not already present, but it does not require, enforce or change a specific version beyond that initial setup, so you are free to install whichever versions of the firebase SDK packages you need.
