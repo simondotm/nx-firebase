@@ -8,8 +8,8 @@ export const packageVersions = {
   firebaseAdmin: '13.6.0',
   firebaseFunctions: '7.0.3',
   firebaseFunctionsTest: '3.4.1',
-  firebaseTools: '13.35.1',
+  firebaseTools: '15.3.1',
   killPort: '2.0.1',
-  nodeEngine: '18',
+  nodeEngine: '20',
   googleCloudFunctionsFramework: '3.3.0',
 }
