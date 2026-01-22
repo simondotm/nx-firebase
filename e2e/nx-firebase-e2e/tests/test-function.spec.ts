@@ -218,7 +218,7 @@ describe('nx-firebase function', () => {
     expect(result.stdout).not.toContain('Mb')
 
     const distPackageFile = `${currentFunctionData.distDir}/package.json`
-    expect(exists(distPackageFile))
+    expect(() => checkFilesExist(distPackageFile)).not.toThrow() 
 
     const distPackage = readJson(distPackageFile)
     const deps = distPackage['dependencies']
