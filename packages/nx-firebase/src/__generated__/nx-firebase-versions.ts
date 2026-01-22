@@ -4,11 +4,11 @@
 //------------------------------------------------------------------------------
 export const packageVersions = {
   nx: '20.8.4',
-  firebase: '10.10.0',
-  firebaseAdmin: '11.11.1',
-  firebaseFunctions: '4.8.2',
-  firebaseFunctionsTest: '3.1.1',
-  firebaseTools: '12.9.1',
+  firebase: '12.8.0',
+  firebaseAdmin: '13.6.0',
+  firebaseFunctions: '7.0.3',
+  firebaseFunctionsTest: '3.4.1',
+  firebaseTools: '13.35.1',
   killPort: '2.0.1',
   nodeEngine: '18',
   googleCloudFunctionsFramework: '3.3.0',
