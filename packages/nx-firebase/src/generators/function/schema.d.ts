@@ -15,7 +15,7 @@ export interface Schema {
 
   // nx-firebase:function generator specific options
   app: string
-  runTime?: '18' | '20' | '22'
+  runTime?: '20' | '22' | '24'
   format?: 'esm' | 'cjs'
 }
 

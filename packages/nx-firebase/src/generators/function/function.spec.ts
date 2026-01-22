@@ -80,7 +80,7 @@ describe('function generator', () => {
                 bundle: true,
                 thirdParty: false,
                 dependenciesFieldType: 'dependencies',
-                target: 'node18',
+                target: 'node20',
                 format: ['esm'],
                 esbuildOptions: {
                   logLevel: 'info',
@@ -195,7 +195,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions[0]).toEqual({
           codebase: 'myFirebaseFunction',
           source: 'dist/myFirebaseFunction',
-          runtime: `nodejs18`,
+          runtime: `nodejs20`,
           ignore: ['*.local'],
         })
       })
@@ -215,7 +215,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions[0]).toEqual({
           codebase: 'myFirebaseFunction',
           source: 'dist/myFirebaseFunction',
-          runtime: `nodejs18`,
+          runtime: `nodejs20`,
           ignore: ['*.local'],
         })
       })
@@ -225,7 +225,7 @@ describe('function generator', () => {
         const testFunction = {
           codebase: 'test',
           source: 'dist/apps/test',
-          runtime: `nodejs18`,
+          runtime: `nodejs20`,
           ignore: ['*.local'],
         }
         firebaseConfigInitial.functions = [testFunction]
@@ -241,7 +241,7 @@ describe('function generator', () => {
         expect(firebaseConfig.functions).toContainEqual({
           codebase: 'myFirebaseFunction',
           source: 'dist/myFirebaseFunction',
-          runtime: `nodejs18`,
+          runtime: `nodejs20`,
           ignore: ['*.local'],
         })
       })
@@ -302,7 +302,7 @@ describe('function generator', () => {
           await functionGenerator(tree, {
             name: 'myFirebaseFunction',
             app: 'myFirebaseApp',
-            runTime: '18',
+            runTime: '22',
           })
           const project = readProjectConfiguration(tree, 'myFirebaseFunction')
 
@@ -311,11 +311,11 @@ describe('function generator', () => {
             tree,
             joinPathFragments(project.root, 'package.json'),
           )
-          expect(packageJson.engines.node).toEqual('18')
+          expect(packageJson.engines.node).toEqual('22')
 
           // check the function firebase config
           const firebaseConfig = readJson(tree, 'firebase.json')
-          expect(firebaseConfig.functions[0].runtime).toEqual('nodejs18')
+          expect(firebaseConfig.functions[0].runtime).toEqual('nodejs22')
         })
       })
     })
