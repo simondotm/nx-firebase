@@ -71,11 +71,15 @@ export function updateProject(host: Tree, options: NormalizedSchema): void {
   // when running the firebase app's test target. passWithNoTests is a CLI option,
   // not a jest.config option, so we need to set it in the target.
   // In Nx 18+, the test target may not exist (inferred by plugin), so we create it.
+  // Nx 22+ creates jest.config.cts for ESM projects, so we check which file exists
+  const jestConfigFile = host.exists(`${options.projectRoot}/jest.config.cts`)
+    ? 'jest.config.cts'
+    : 'jest.config.ts'
   project.targets.test = {
     executor: '@nx/jest:jest',
     outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
     options: {
-      jestConfig: `${options.projectRoot}/jest.config.ts`,
+      jestConfig: `${options.projectRoot}/${jestConfigFile}`,
       passWithNoTests: true,
     },
   }

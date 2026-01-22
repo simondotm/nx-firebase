@@ -98,7 +98,9 @@ describe('function generator', () => {
               executor: '@nx/jest:jest',
               outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
               options: {
-                jestConfig: 'myFirebaseFunction/jest.config.ts',
+                jestConfig: expect.stringMatching(
+                  /^myFirebaseFunction\/jest\.config\.c?ts$/,
+                ),
                 passWithNoTests: true,
               },
             },

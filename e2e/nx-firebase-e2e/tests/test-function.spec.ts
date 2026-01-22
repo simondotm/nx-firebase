@@ -33,7 +33,6 @@ function expectedFunctionFiles(projectData: ProjectData) {
   const projectPath = projectData.projectDir
   return [
     `${projectPath}/src/main.ts`,
-    `${projectPath}/jest.config.ts`,
     `${projectPath}/package.json`,
     `${projectPath}/project.json`,
     `${projectPath}/readme.md`,
