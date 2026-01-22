@@ -27,7 +27,7 @@ export function expectedFunctionProjectTargets(
         dependenciesFieldType: 'dependencies',
         format: ['esm'],
         thirdParty: false,
-        target: 'node18',
+        target: 'node20',
         esbuildOptions: {
           logLevel: 'info',
         },

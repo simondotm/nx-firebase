@@ -10,8 +10,8 @@ const nxMajorVersion = parseInt(nxVersion.split('.')[0])
 // const nodeVersion = nvmVersion.trim().split('.')[0]
 
 // default firebase node version is to be derived from Nx version for now
-// Nx 17+ offically suports Node 18, so may as well use that pattern
-const nodeVersion = nxMajorVersion >= 17 ? '18' : '16'
+// Nx 21+ officially supports Node 20+, Nx 17-20 supports Node 18+
+const nodeVersion = nxMajorVersion >= 21 ? '20' : nxMajorVersion >= 17 ? '18' : '16'
 
 function ensureDirectoryExistence(filePath) {
   const dirname = path.dirname(filePath)
