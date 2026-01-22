@@ -15,9 +15,8 @@ OR
 | Options           | Type     | Description                                                        |
 | ----------------- | -------- | ------------------------------------------------------------------ |
 | `name`            | required | the project name for your firebase app                             |
-| `--directory=dir` | optional | the directory this app will be located in                          |
+| `--directory=dir` | optional | the full path where this app will be located (e.g., `apps/my-app`) |
 | `--project=proj`  | optional | the `--project` option that will be used for firebase CLI commands |
-| `--projectNameAndRootFormat` | optional | `derived` or `as-provided` see [projectNameAndRootFormat](https://nx.dev/nx-api/node/generators/application#projectnameandrootformat) |
 
 ## About Firebase Apps
 
