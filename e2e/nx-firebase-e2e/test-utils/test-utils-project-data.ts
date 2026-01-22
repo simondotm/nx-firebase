@@ -1,10 +1,10 @@
-import { joinPathFragments, names } from '@nx/devkit'
+import { joinPathFragments } from '@nx/devkit'
 
 const NPM_SCOPE = '@proj'
 
 export interface ProjectData {
   name: string
-  directory: string // from Nx 16.8.0 this is the apps/libs prefix
+  directory: string // the --directory option value for generators
   projectName: string
   projectDir: string
   srcDir: string
@@ -16,10 +16,23 @@ export interface ProjectData {
 
 /**
  * Generate test project data
+ *
+ * Nx 20+ uses "as-provided" naming only:
+ * - projectName = name (exactly as provided)
+ * - projectRoot = directory (exactly as provided)
+ *
+ * To maintain backwards compatibility with the original e2e test behavior:
+ * - The `type` parameter ('apps' or 'libs') is used as the directory prefix
+ * - If `dir` option is provided, projects are nested under it: type/dir/name
+ * - Project names must be unique (tests use uniq() for this)
+ * - This ensures projectRoot (e.g., 'apps/my-app') differs from projectName (e.g., 'my-app')
+ *   which is important because @nx/workspace:move does string replacement of project roots
+ *
  * Note: call this function AFTER initial app firebase.json has been created in order to have a
  *  correct configName
- * @param name - project name (cannot be camel case)
- * @param dir - project dir
+ * @param type - 'libs' or 'apps' - used as directory prefix to match original test behavior
+ * @param name - project name (must be unique, tests use uniq() for this)
+ * @param options - optional directory and customConfig settings
  * @returns - asset locations for this project
  */
 export function getProjectData(
@@ -27,37 +40,27 @@ export function getProjectData(
   name: string,
   options?: { dir?: string; customConfig?: boolean },
 ): ProjectData {
-  // Nx16.8.0+ no longer adds the 'apps' or 'libs' prefix in the project name
-  // --directory=${projectData.projectDir} is used instead
-  // see https://nx.dev/deprecated/as-provided-vs-derived
+  // Project name is exactly as provided (must be unique across workspace)
+  const projectName = name
 
-  // we want to maintain the kebab-case name for the project/dir
-  // but we need to ensure the 'apps' or 'libs' prefix is added to the --directory
+  // Use the type ('apps' or 'libs') as the base directory prefix
+  // If additional dir is provided, nest under that as well
+  // This maintains the original e2e test folder structure
+  const directory = options?.dir
+    ? joinPathFragments(type, options.dir, name)
+    : joinPathFragments(type, name)
 
-  // EDIT: Actually this isn't true, it defaults to derived, for now, but the e2e project
-  // setup doesnt seem to set a layout, or a derived default, so thats why we have to consider
-  // that here, because without apps/libs layout we get different project names in the e2e tests.
-  // See projectNameAndRootFormat option
-
-  // const dir = options?.dir ? `${names(options.dir).fileName}` : ''
-  const d = options?.dir ? `${names(options.dir).fileName}` : ''
-  const dir = joinPathFragments(type, d)
-
-  // project name is kebab case dir + name
-  const n = names(name).fileName
-  const prefix = options?.dir ? `${d}-` : ''
-  const projectName = `${prefix}${n}`
-
-  const projectDir = joinPathFragments(dir, n)
+  // Project directory is exactly the directory (which is the full project root)
+  const projectDir = directory
 
   const srcDir = joinPathFragments(projectDir, 'src')
   const mainTsPath = joinPathFragments(srcDir, 'main.ts')
   const distDir = joinPathFragments('dist', projectDir)
 
   return {
-    name, // name passed to generator
-    directory: dir, // --directory option required for generators
-    projectName, // project name
+    name: projectName, // name passed to generator
+    directory, // --directory option for generators (full project root path)
+    projectName, // project name (must be unique)
     projectDir,
     srcDir,
     distDir,
