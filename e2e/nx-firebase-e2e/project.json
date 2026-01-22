@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "e2e/nx-firebase-e2e/src",
+  "tags": [],
+  "implicitDependencies": ["nx-firebase"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
@@ -14,7 +16,5 @@
       },
       "dependsOn": ["nx-firebase:build"]
     }
-  },
-  "tags": [],
-  "implicitDependencies": ["nx-firebase"]
+  }
 }
