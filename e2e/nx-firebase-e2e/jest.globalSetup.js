@@ -14,7 +14,6 @@ const pluginPath = 'dist/packages/nx-firebase'
 const workspaceLayout = {
   appsDir: 'apps',
   libsDir: 'libs',
-  projectNameAndRootFormat: 'derived',
 }
 
 module.exports = async function globalSetup() {

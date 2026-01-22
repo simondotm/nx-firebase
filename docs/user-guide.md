@@ -25,12 +25,6 @@
 - [Using Nx Libraries with Firebase Functions](./nx-libraries.md)
 - [Migrating an existing Firebase project to Nx](./nx-migration.md)
 
-**Version information**
-
-- [Firebase Versions](./firebase-versions.md)
-
-_Note: Some of these may not always be upto date - it's hard work keeping track of external releases and compatibilities!_
-
 **Notes**
 
 - [Plugin Development Notes](./nx-plugin-commands.md)
