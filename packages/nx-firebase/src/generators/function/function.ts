@@ -5,7 +5,6 @@ import {
   convertNxGenerator,
   formatFiles,
   runTasksInSerial,
-  names,
   getProjects,
 } from '@nx/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
@@ -21,23 +20,16 @@ import { packageVersions } from '../../__generated__/nx-firebase-versions'
 export async function normalizeOptions(
   host: Tree,
   options: Schema,
-  callingGenerator = '@simondotm/nx-firebase:function',
 ): Promise<NormalizedSchema> {
-  const {
-    projectName: appProjectName,
-    projectRoot,
-    projectNameAndRootFormat,
-  } = await determineProjectNameAndRootOptions(host, {
-    name: options.name,
-    projectType: 'application',
-    directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
-    rootProject: options.rootProject,
-    callingGenerator,
-  })
+  // In Nx 20+, directory is required. If not provided, use name as directory.
+  const directory = options.directory ?? options.name
 
-  options.rootProject = projectRoot === '.'
-  options.projectNameAndRootFormat = projectNameAndRootFormat
+  const { projectName: appProjectName, projectRoot } =
+    await determineProjectNameAndRootOptions(host, {
+      name: options.name,
+      projectType: 'application',
+      directory,
+    })
 
   const parsedTags = options.tags
     ? options.tags.split(',').map((s) => s.trim())
@@ -50,15 +42,14 @@ export async function normalizeOptions(
   // )
 
   // get & validate the firebase app project this function will be attached to
-  const firebaseApp = names(options.app).fileName
   const projects = getProjects(host)
-  if (!projects.has(firebaseApp)) {
+  if (!projects.has(options.app)) {
     throw new Error(
-      `A firebase application project called '${firebaseApp}' was not found in this workspace.`,
+      `A firebase application project called '${options.app}' was not found in this workspace.`,
     )
   }
 
-  const firebaseAppProject = readProjectConfiguration(host, firebaseApp)
+  const firebaseAppProject = readProjectConfiguration(host, options.app)
 
   // read the firebase config used by the parent app project
   const firebaseConfigName = getFirebaseConfigFromProject(
@@ -68,7 +59,6 @@ export async function normalizeOptions(
 
   return {
     ...options,
-    name: names(options.name).fileName,
     projectName: appProjectName,
     projectRoot,
     parsedTags,
@@ -103,7 +93,6 @@ export async function functionGenerator(
 
   const options = await normalizeOptions(host, {
     // set default options
-    projectNameAndRootFormat: 'derived',
     runTime: packageVersions.nodeEngine as typeof schema.runTime, // we can be sure that our firebaseNodeEngine value satisfies the type
     // apply overrides from user
     ...schema,
@@ -129,8 +118,7 @@ export async function functionGenerator(
 
   const nodeApplicationTask = await nodeApplicationGenerator(host, {
     name: options.name,
-    directory: options.directory,
-    projectNameAndRootFormat: options.projectNameAndRootFormat,
+    directory: options.projectRoot,
     tags,
     setParserOptionsProject: options.setParserOptionsProject,
     skipFormat: options.skipFormat,

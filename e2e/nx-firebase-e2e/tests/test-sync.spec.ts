@@ -1,4 +1,4 @@
-import { readJson, uniq, exists } from '@nx/plugin/testing'
+import { readJson, uniq, exists, checkFilesExist } from '@nx/plugin/testing'
 
 import {
   ProjectData,
@@ -110,7 +110,7 @@ describe('nx-firebase sync', () => {
       )
       expectStrings(result.stdout, [
         `CHANGE setting firebase target --project for '${currentAppData.projectName}' to '--project=test'`,
-        `UPDATE apps/${currentAppData.projectName}/project.json`,
+        `UPDATE ${currentAppData.projectDir}/project.json`,
       ])
       expect(
         readJson(`${currentAppData.projectDir}/project.json`).targets.firebase
@@ -131,7 +131,7 @@ describe('nx-firebase sync', () => {
       )
       expectStrings(result.stdout, [
         `CHANGE updating firebase target --project for '${currentAppData.projectName}' to '--project=test2'`,
-        `UPDATE apps/${currentAppData.projectName}/project.json`,
+        `UPDATE ${currentAppData.projectDir}/project.json`,
       ])
       expect(
         readJson(`${currentAppData.projectDir}/project.json`).targets.firebase
@@ -230,7 +230,7 @@ describe('nx-firebase sync', () => {
         `CHANGE Firebase function '${originalFunctionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
         `CHANGE Firebase function '${originalFunctionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${currentAppData.configName}'`,
         `CHANGE Firebase function '${originalFunctionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
-        `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+        `UPDATE ${renamedFunctionData.projectDir}/project.json`,
         `UPDATE ${currentAppData.configName}`,
       ])
 
@@ -281,9 +281,9 @@ describe('nx-firebase sync', () => {
         `CHANGE Firebase app '${originalAppData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${currentFunctionData.projectName}'`,
         `CHANGE Firebase app '${originalAppData.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${currentFunctionData2.projectName}'`,
         `UPDATE ${renamedAppData.configName}`,
-        `UPDATE apps/${renamedAppData.projectName}/project.json`,
-        `UPDATE apps/${currentFunctionData.projectName}/project.json`,
-        `UPDATE apps/${currentFunctionData2.projectName}/project.json`,
+        `UPDATE ${renamedAppData.projectDir}/project.json`,
+        `UPDATE ${currentFunctionData.projectDir}/project.json`,
+        `UPDATE ${currentFunctionData2.projectDir}/project.json`,
       ])
 
       expectStrings(result.stderr, [
@@ -353,8 +353,8 @@ describe('nx-firebase sync', () => {
         `CHANGE Firebase function '${originalFunctionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated firebase:name tag`,
         `CHANGE Firebase function '${originalFunctionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated deploy target to '--only=functions:${renamedFunctionData.projectName}'`,
         `CHANGE Firebase function '${originalFunctionData.projectName}' was renamed to '${renamedFunctionData.projectName}', updated codebase in '${renamedAppData.configName}'`,
-        `UPDATE apps/${renamedAppData.projectName}/project.json`,
-        `UPDATE apps/${renamedFunctionData.projectName}/project.json`,
+        `UPDATE ${renamedAppData.projectDir}/project.json`,
+        `UPDATE ${renamedFunctionData.projectDir}/project.json`,
       ])
 
       expectStrings(result.stderr, [
@@ -387,8 +387,10 @@ describe('nx-firebase sync', () => {
     })
 
     it('should rename configs for renamed firebase apps when multiple apps in workspace', async () => {
-      expect(!exists('firebase.json'))
-
+      // Nx 20 exists() function does not use the e2e tmpPath (bug?) so we need to use checkFilesExist instead
+      // expect(exists('firebase.json')).toBe(false)
+      expect(() => checkFilesExist('firebase.json')).toThrow() 
+      
       // create first project that will have the primary firebase.json config
       currentAppData = getProjectData('apps', uniq('firebaseSyncApp'))
       currentFunctionData = getProjectData('apps', uniq('firebaseSyncFunction'))
@@ -399,7 +401,9 @@ describe('nx-firebase sync', () => {
         readJson(`${currentAppData.projectDir}/project.json`).targets.firebase
           .options.command,
       ).toContain(`--config=firebase.json`)
-      expect(exists('firebase.json'))
+
+      // expect(exists('firebase.json')).toBe(true)
+      expect(() => checkFilesExist('firebase.json')).not.toThrow() 
 
       // generate second app after first app is generated so that first config is detected
       currentAppData2 = getProjectData('apps', uniq('firebaseSyncApp'), {
@@ -442,8 +446,8 @@ describe('nx-firebase sync', () => {
         `CHANGE Firebase app '${originalAppData2.projectName}' was renamed to '${renamedAppData.projectName}', updated firestore indexes in '${renamedAppData.configName}'`,
         `CHANGE Firebase app '${originalAppData2.projectName}' was renamed to '${renamedAppData.projectName}', updated storage rules in '${renamedAppData.configName}'`,
         `CHANGE Firebase app '${originalAppData2.projectName}' was renamed to '${renamedAppData.projectName}', updated firebase deploy command in firebase function '${currentFunctionData.projectName}'`,
-        `UPDATE apps/${renamedAppData.projectName}/project.json`,
-        `UPDATE apps/${currentFunctionData.projectName}/project.json`,
+        `UPDATE ${renamedAppData.projectDir}/project.json`,
+        `UPDATE ${currentFunctionData.projectDir}/project.json`,
         `DELETE ${originalAppData2.configName}`,
         `CREATE ${renamedAppData.configName}`,
       ])

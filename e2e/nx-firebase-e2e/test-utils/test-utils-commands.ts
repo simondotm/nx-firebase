@@ -73,14 +73,17 @@ export async function renameProjectAsync(
   projectData: ProjectData,
   renameProjectData: ProjectData,
 ) {
-  //TODO: this wont work if destination project is in a subdir
+  // In Nx 20, @nx/workspace:move requires:
+  // --project: the current project name
+  // --destination: the new directory path (also becomes the new project name by default)
+  // --newProjectName: explicitly set the new project name (optional, defaults to last segment of destination)
   const result = await safeRunNxCommandAsync(
-    `g @nx/workspace:move --project=${projectData.projectName} --destination=${renameProjectData.projectName}`,
+    `g @nx/workspace:move --projectName=${projectData.projectName} --destination=${renameProjectData.projectDir} --newProjectName=${renameProjectData.projectName}`,
   )
   expectStrings(result.stdout, [
-    `DELETE apps/${projectData.projectName}/project.json`,
-    `DELETE apps/${projectData.projectName}`,
-    `CREATE apps/${renameProjectData.projectName}/project.json`,
+    `DELETE ${projectData.projectDir}/project.json`,
+    `DELETE ${projectData.projectDir}`,
+    `CREATE ${renameProjectData.projectDir}/project.json`,
   ])
   return result
 }
@@ -113,7 +116,7 @@ export async function libGeneratorAsync(
 ) {
   testDebug(`- libGeneratorAsync ${projectData.projectName}`)
   const result = await safeRunNxCommandAsync(
-    `g @nx/js:lib ${projectData.name} --directory=${projectData.directory} --projectNameAndRootFormat=derived ${params}`,
+    `g @nx/js:lib ${projectData.name} --directory=${projectData.directory} ${params}`,
   )
   return result
 }
