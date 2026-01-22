@@ -19,8 +19,10 @@
   },
   "private": true,
   "devDependencies": {
+    "@eslint/eslintrc": "^2.1.1",
     "@google-cloud/functions-framework": "^3.3.0",
     "@nx/devkit": "20.8.4",
+    "@nx/eslint": "20.8.4",
     "@nx/eslint-plugin": "20.8.4",
     "@nx/jest": "20.8.4",
     "@nx/js": "20.8.4",
@@ -31,12 +33,10 @@
     "@types/jest": "29.5.14",
     "@types/node": "18.19.99",
     "@types/semver": "^7.3.13",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
-    "eslint": "8.57.1",
+    "eslint": "^9.8.0",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unused-imports": "^3.2.0",
+    "eslint-plugin-prettier": "^5.x",
+    "eslint-plugin-unused-imports": "^4.x",
     "firebase": "10.10.0",
     "firebase-admin": "11.11.1",
     "firebase-functions": "4.8.2",
@@ -47,14 +47,15 @@
     "kill-port": "2.0.1",
     "nx": "20.8.4",
     "only-allow": "^1.2.1",
-    "prettier": "2.8.8",
+    "prettier": "^3.x",
     "semver": "^7.6.0",
     "ts-jest": "29.1.0",
     "tslib": "^2.0.0",
     "typescript": "5.8.3",
-    "@nx/eslint": "20.8.4"
+    "typescript-eslint": "^8.19.0"
   },
   "dependencies": {
+    "ts-node": "^10.9.2",
     "tslib": "^2.0.0"
   }
 }
