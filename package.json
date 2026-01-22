@@ -28,8 +28,6 @@
     "@nx/plugin": "20.8.4",
     "@nx/webpack": "20.8.4",
     "@nx/workspace": "20.8.4",
-    "@swc-node/register": "1.9.2",
-    "@swc/core": "1.5.7",
     "@types/jest": "29.5.14",
     "@types/node": "18.19.99",
     "@types/semver": "^7.3.13",
