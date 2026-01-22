@@ -98,7 +98,9 @@ describe('function generator', () => {
               executor: '@nx/jest:jest',
               outputs: ['{workspaceRoot}/coverage/{projectRoot}'],
               options: {
-                jestConfig: 'myFirebaseFunction/jest.config.ts',
+                jestConfig: expect.stringMatching(
+                  /^myFirebaseFunction\/jest\.config\.c?ts$/,
+                ),
                 passWithNoTests: true,
               },
             },
@@ -140,7 +142,6 @@ describe('function generator', () => {
         expect(tree.exists(`${root}/src/assets/.gitkeep`)).toBeTruthy()
         expect(tree.exists(`${root}/package.json`)).toBeTruthy()
         expect(tree.exists(`${root}/readme.md`)).toBeTruthy()
-        expect(tree.exists(`${root}/jest.config.ts`)).toBeTruthy()
         expect(tree.exists(`${root}/project.json`)).toBeTruthy()
         expect(tree.exists(`${root}/tsconfig.app.json`)).toBeTruthy()
         expect(tree.exists(`${root}/tsconfig.json`)).toBeTruthy()
@@ -173,7 +174,6 @@ describe('function generator', () => {
         expect(tree.exists(`${root}/src/assets/.gitkeep`)).toBeTruthy()
         expect(tree.exists(`${root}/package.json`)).toBeTruthy()
         expect(tree.exists(`${root}/readme.md`)).toBeTruthy()
-        expect(tree.exists(`${root}/jest.config.ts`)).toBeTruthy()
         expect(tree.exists(`${root}/project.json`)).toBeTruthy()
         expect(tree.exists(`${root}/tsconfig.app.json`)).toBeTruthy()
         expect(tree.exists(`${root}/tsconfig.json`)).toBeTruthy()

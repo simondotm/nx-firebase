@@ -1,6 +1,6 @@
 {
   "name": "@simondotm/nx-firebase",
-  "version": "21.6.10",
+  "version": "22.3.3",
   "description": "A Firebase plugin for Nx monorepo workspaces.",
   "author": "Simon Morris",
   "license": "MIT",
@@ -21,9 +21,9 @@
   "generators": "./generators.json",
   "executors": "./executors.json",
   "peerDependencies": {
-    "@nx/devkit": ">= 21.6.10",
-    "@nx/workspace": ">= 21.6.10",
-    "nx": ">= 21.6.10"
+    "@nx/devkit": ">= 22.3.3",
+    "@nx/workspace": ">= 22.3.3",
+    "nx": ">= 22.3.3"
   },
   "dependencies": {}
 }
