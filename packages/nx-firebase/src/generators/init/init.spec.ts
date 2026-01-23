@@ -80,9 +80,6 @@ describe('init generator', () => {
       `^${packageVersions.firebaseFunctions}`,
     )
 
-    expect(packageJson.devDependencies['firebase-functions-test']).toBe(
-      `^${packageVersions.firebaseFunctionsTest}`,
-    )
     expect(packageJson.devDependencies['firebase-tools']).toBe(
       `^${packageVersions.firebaseTools}`,
     )
@@ -115,7 +112,6 @@ describe('init generator', () => {
 
     packageJsonDefault.devDependencies['firebase-tools'] = testVersion
     packageJsonDefault.devDependencies['kill-port'] = testVersion
-    packageJsonDefault.devDependencies['firebase-functions-test'] = testVersion
 
     devkit.writeJson(tree, 'package.json', packageJsonDefault)
 
@@ -126,9 +122,6 @@ describe('init generator', () => {
     expect(packageJson.dependencies['firebase']).toBe(testVersion)
     expect(packageJson.dependencies['firebase-admin']).toBe(testVersion)
     expect(packageJson.dependencies['firebase-functions']).toBe(testVersion)
-    expect(packageJson.devDependencies['firebase-functions-test']).toBe(
-      testVersion,
-    )
     expect(packageJson.devDependencies['firebase-tools']).toBe(testVersion)
     expect(packageJson.devDependencies['kill-port']).toBe(testVersion)
 

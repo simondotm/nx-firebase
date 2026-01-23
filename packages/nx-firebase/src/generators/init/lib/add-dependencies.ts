@@ -74,10 +74,6 @@ export function addDependencies(tree: Tree): GeneratorCallback {
     'firebase-tools',
     `^${packageVersions.firebaseTools}`,
   )
-  addDevDependencyIfNotPresent(
-    'firebase-functions-test',
-    `^${packageVersions.firebaseFunctionsTest}`,
-  )
 
   // kill-port is used by the emulate target to ensure clean emulator startup
   // since Nx doesn't kill processes cleanly atm

@@ -9,7 +9,6 @@ import {
 } from '@nx/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 
-import { initGenerator } from '../init/init'
 import { getFirebaseConfigFromProject, updateTsConfig } from '../../utils'
 
 import { addFunctionConfig, createFiles, updateProject } from './lib'
@@ -103,10 +102,6 @@ export async function functionGenerator(
   }
 
   // const options = normalizeOptions(host, schema)
-
-  // initialise plugin
-  const initTask = await initGenerator(host, {})
-  tasks.push(initTask)
 
   // We use @nx/node:app to scaffold our function application, then modify as required
   // `nx g @nx/node:app function-name --directory functions/dir --e2eTestRunner=none --framework=none --unitTestRunner=jest --bundler=esbuild --tags=firebase:firebase-app`

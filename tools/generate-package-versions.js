@@ -63,7 +63,6 @@ export const packageVersions = {
   firebase: '${packageJson.devDependencies['firebase']}',
   firebaseAdmin: '${packageJson.devDependencies['firebase-admin']}',
   firebaseFunctions: '${packageJson.devDependencies['firebase-functions']}',
-  firebaseFunctionsTest: '${packageJson.devDependencies['firebase-functions-test']}',
   firebaseTools: '${packageJson.devDependencies['firebase-tools']}',
   killPort: '${packageJson.devDependencies['kill-port']}',
   nodeEngine: '${nodeVersion}',

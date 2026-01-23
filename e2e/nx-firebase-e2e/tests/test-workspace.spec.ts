@@ -43,7 +43,7 @@ describe('workspace setup', () => {
     expect(packageJson.dependencies['firebase-functions']).toBeDefined()
     expect(
       packageJson.devDependencies['firebase-functions-test'],
-    ).toBeDefined()
+    ).toBeUndefined()
 
     // check that plugin init generator adds @google-cloud/functions-framework if pnpm is being used
     // Use tmpProjPath() to detect the package manager in the e2e workspace, not the main project
