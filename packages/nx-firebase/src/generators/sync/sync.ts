@@ -4,7 +4,6 @@ import {
   joinPathFragments,
   logger,
   readProjectConfiguration,
-  runTasksInSerial,
   Tree,
   updateProjectConfiguration,
   writeJson,
@@ -12,7 +11,6 @@ import {
 
 import { SyncGeneratorSchema } from './schema'
 import { setFirebaseConfigFromCommand } from '../../utils'
-import initGenerator from '../init/init'
 
 import {
   debugInfo,
@@ -35,13 +33,7 @@ export async function syncGenerator(
   tree: Tree,
   options: SyncGeneratorSchema,
 ): Promise<GeneratorCallback> {
-  const tasks: GeneratorCallback[] = []
-
-  // initialise plugin
-  const initTask = await initGenerator(tree, {})
-  tasks.push(initTask)
-
-  // otherwise, sync the workspace.
+  // sync the workspace.
   // build lists of firebase apps & functions that have been deleted or renamed
   debugInfo('- Syncing workspace')
 
@@ -407,7 +399,9 @@ export async function syncGenerator(
     )
   }
 
-  return runTasksInSerial(...tasks)
+  return () => {
+    // noop - no install tasks needed
+  }
 }
 
 export default syncGenerator
