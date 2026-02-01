@@ -20,7 +20,7 @@
   "private": true,
   "devDependencies": {
     "@eslint/eslintrc": "^2.1.1",
-    "@google-cloud/functions-framework": "^3.3.0",
+    "@google-cloud/functions-framework": "^5.0.0",
     "@nx/devkit": "22.3.3",
     "@nx/eslint": "22.3.3",
     "@nx/eslint-plugin": "22.3.3",
